@@ -1,4 +1,4 @@
-# 🚀 Krishi Setu: Bridging Farmers and AI Technology
+# 🚀 Nila Shoshsho: The soil's bounty, for your dedication
 
 > Empowering Indian farmers with AI-driven, localized, multilingual agricultural support.
 
@@ -17,22 +17,6 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 - Deliver **personalized crop, weather, and market advice** to farmers in **regional languages**.
 - **Simplify access** to **government schemes**, **fertilizer recommendations**, and **post-harvest planning**.
 - Use **Groq’s LLMs** for **natural language advisory**, **smart recommendations**, and **document summarization**.
-
----
-
-## 🧠 Team & Approach
-
-### Team Name:
-`Hashcode`
-
-### Team Members
-
-| Name              | GitHub Profile                                                                 | Role                 |
-|-------------------|--------------------------------------------------------------------------------|----------------------|
-| M.Kaif Qureshi    | [Mkaif-Qureshi](https://github.com/Mkaif-Qureshi)                               | Team Leader          |
-| Yash Chhaproo     | [yashcode77](https://github.com/yashcode77)                                     | Frontend Developer   |
-| Sarvesh Dongare   | [Sarveshdongare2705](https://github.com/Sarveshdongare2705)                     | Backend Developer    |
-| Mohit Patil       | [Mohitpatil344](https://github.com/Mohitpatil344)                               | Documentation        |
 
 ---
 
@@ -73,7 +57,7 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 
 ---
 
-- 🎥 **Demo Video Link:** [Watch Here](https://youtu.be/sP0VQ7D3QhQ)
+- 🎥 **Demo Video Link:** [Watch Here]()
 
 ---
 
@@ -119,7 +103,7 @@ Here's the updated local setup instructions with the corrected folder structure 
 ## Clone the repository
 
 ```bash
-git clone https://github.com/Mkaif-Qureshi/agriculture
+git clone https://github.com/msrishav-28/nila-shoshsho
 ```
 
 ## Install dependencies and run the applications
@@ -193,8 +177,7 @@ flask run
 
 ## 🏁 Final Words
 
-At **Hashcode**, we believe technology should not be a privilege but a bridge for empowerment.  
-**Krishi Setu** stands for every farmer, helping them thrive using the power of AI, Groq, and community-driven innovation.
+**Nila Shoshsho** stands for every farmer, helping them thrive using the power of AI, Groq, and community-driven innovation.
 
 Let's sow the seeds of a smarter tomorrow, together! 🌱🚀
 
