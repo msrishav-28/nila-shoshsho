@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "PM-Kisan Samman Nidhi",
+    "desc": "Income support to all farmer families.",
+    "link": "https://pmkisan.gov.in/"
+  },
+  {
+    "id": 2,
+    "name": "Pradhan Mantri Fasal Bima Yojana",
+    "desc": "Crop insurance for farmers.",
+    "link": "https://pmfby.gov.in/"
+  },
+  {
+    "id": 3,
+    "name": "Soil Health Card Scheme",
+    "desc": "Promotes soil testing and balanced fertilization.",
+    "link": "https://soilhealth.dac.gov.in/"
+  },
+  {
+    "id": 4,
+    "name": "Kisan Credit Card",
+    "desc": "Short-term credit to farmers.",
+    "link": "https://pmkisan.gov.in/Documents/KCC.pdf"
+  }
+]
