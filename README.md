@@ -1,13 +1,13 @@
-# 🚀 Nila Shoshsho: The soil's bounty, for your dedication
+# Nila Shoshsho: The soil's bounty, for your dedication
 
-> Empowering Indian farmers with AI-driven, localized, multilingual agricultural support.
+> Empowering Indian farmers with AI-driven, localized, multilingual agricultural companion.
 
 ---
 
-## 📌 Problem Statement
+## 📌 Our Mission
 
 Agriculture forms the backbone of India’s economy, yet smallholder farmers lack access to localized, real-time farming advice, government schemes, and smart market insights.  
-**Krishi Setu** addresses this gap with AI-powered, voice-enabled solutions tailored to empower every Indian farmer.
+**Nila Shoshsho** addresses this gap with AI-powered, voice-enabled solutions tailored to empower every Indian farmer.
 
 ---
 
@@ -16,7 +16,7 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 **Goal:**  
 - Deliver **personalized crop, weather, and market advice** to farmers in **regional languages**.
 - **Simplify access** to **government schemes**, **fertilizer recommendations**, and **post-harvest planning**.
-- Use **Groq’s LLMs** for **natural language advisory**, **smart recommendations**, and **document summarization**.
+- Using **powerful AI** for **natural language advisory, smart recommendations, and document summarization**.
 
 ---
 
@@ -34,26 +34,43 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 
 ### Core Technologies:
 
-- **Frontend:** React Native, Tailwind CSS
-- **Backend:** Python, Flask, Node.js, LangChain
-- **Database:** MongoDB
-- **Authentication:** OAuth 2.0
-- **APIs:** Open Meteo, Data.gov.in, ISRIC Data
-- **Hosting:**  Render
+-   **Frontend:** React Native, React Navigation
+-   **Backend:** Python, Flask, Node.js
+-   **AI Engine:** Google Generative AI (Gemini), LangChain
+-   **Database:** MongoDB
+-   **Authentication:** OAuth 2.0
+-   **APIs:** Open Meteo, Data.gov.in, ISRIC Data
+-   **Hosting:** Render
 
 ---
 
 ## ✨ Key Features
 
-- ✅ **Agentic RAG Advisory Chatbot** for farming queries.
-- ✅ **Crop Disease Detection** from plant images.
-- ✅ **Personalized Fertilizer Recommendations**.
-- ✅ **Post-Harvest Planning** with Google Calendar sync.
-- ✅ **Smart Market Analysis** (current prices, best selling options).
-- ✅ **Week-wise Crop Calendar**.
-- ✅ **Multilingual Voice Navigation**.
-- ✅ **Government Schemes Summarizer**.
-- ✅ **Real-time Weather Forecasts**.
+-  **Modern & Intuitive UI:** A clean, vibrant interface with beautiful **glassmorphic** elements and **engaging animations** that make the app easy and delightful to use.
+-  **Agentic RAG Advisory Chatbot:** Get answers to your farming queries through a smart, conversational AI.
+-  **Crop Disease Detection:** Upload an image of your crop to get instant disease detection and health analysis.
+-  **Personalized Fertilizer Recommendations:** Receive tailored fertilizer suggestions based on your crop and soil data.
+-  **Post-Harvest Planning** with Google Calendar sync.
+-  **Smart Market Analysis:** Access real-time market prices, trend predictions, and AI-driven analysis.
+-  **Dynamic Crop Calendar:** Generate detailed, week-by-week action plans for your chosen crops.
+-  **Multilingual Voice Navigation:** Navigate the app and access information using your voice in your preferred language.
+-  **Government Schemes Summarizer:** Understand complex government schemes through simple, clear summaries.
+-  **Real-time Weather Forecasts:** Stay updated with the latest weather information for your location.
+
+---
+
+## 🗣️ Supported Languages
+
+Nila Shoshsho supports **8 languages**:
+
+-   English
+-   Hindi (हिंदी)
+-   Marathi (मराठी)
+-   Tamil (தமிழ்)
+-   Bengali (বাংলা)
+-   Kannada (ಕನ್ನಡ)
+-   Telugu (తెలుగు)
+-   Malayalam (മലയാളം)
 
 ---
 
@@ -92,7 +109,7 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 - Python 3.11.0
 - MongoDB Atlas or Local
 - Groq API Key
-- .env configuration file (example provided)
+- An `.env` configuration file (see `.env.example`).
 
 Here's the updated local setup instructions with the corrected folder structure and descriptions for your project:
 
@@ -103,7 +120,7 @@ Here's the updated local setup instructions with the corrected folder structure 
 ## Clone the repository
 
 ```bash
-git clone https://github.com/msrishav-28/nila-shoshsho
+git clone [https://github.com/msrishav-28/nila-shoshsho](https://github.com/msrishav-28/nila-shoshsho)
 ```
 
 ## Install dependencies and run the applications
@@ -157,11 +174,13 @@ flask run
 
 ## 🧬 Future Scope
 
-- 🌾 Satellite-driven soil moisture and crop stress analysis.
-- 🌍 Expansion to Bangladesh, Nepal, Sri Lanka (regional adaptations).
-- 🔒 Advanced privacy for farmer data via blockchain (future vision).
-- 📱 Offline mode support with periodic syncing.
-
+- **Satellite Integration:** Satellite-driven analysis for soil moisture and crop stress.
+- Expansion to Bangladesh, Nepal, Sri Lanka (regional adaptations).
+- **Blockchain for Data Privacy:** A long-term vision to secure farmer data.
+- **Offline Support:** Access critical information even without an active internet connection through periodic syncing.
+- **Push Notifications:** Receive timely alerts for market price changes, weather warnings, and crop calendar reminders.
+- **Enhanced Personalization:** A user profile section to tailor content based on your specific crops and preferences.
+- **Improved Accessibility (a11y):** Full support for screen readers and other assistive technologies.
 ---
 
 ## 📎 Resources / Credits
@@ -170,6 +189,7 @@ flask run
 - ISRIC Soil Data
 - Data.gov.in Market API
 - Groq LLM Models
+- Google Generative AI
 - Canva for Workflow Diagrams
 
 
@@ -179,7 +199,7 @@ flask run
 
 **Nila Shoshsho** stands for every farmer, helping them thrive using the power of AI, Groq, and community-driven innovation.
 
-Let's sow the seeds of a smarter tomorrow, together! 🌱🚀
+Let's sow the seeds of a smarter tomorrow, together! 🌱
 
 ---
 
