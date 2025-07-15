@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "nila-shoshsho-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend API for Nila Shoshsho - AI-driven agricultural companion for Indian farmers",
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js"

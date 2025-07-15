@@ -37,7 +37,7 @@ export const uploadDoc = async (req, res) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             resource_type: 'raw',
-            folder: 'krishisetu/documents',
+            folder: 'nila-shoshsho/documents',
             public_id: `${userId}/${req.file.originalname}-${Date.now()}`,
           },
           (error, result) => {

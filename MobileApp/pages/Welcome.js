@@ -26,7 +26,7 @@ const Welcome = () => {
         </View>
 
         <View style={styles.contentContainer}>
-          <Text style={styles.appName}>Krishi Setu</Text>
+          <Text style={styles.appName}>Nila Shoshsho</Text>
           <Text style={styles.description}>{desc}</Text>
 
           <TouchableOpacity

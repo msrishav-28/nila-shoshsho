@@ -613,7 +613,7 @@ const Home = () => {
                 fontSize: 60,
                 marginTop: 100,
               }}>
-              {'Krishi'}
+              {t('HomePage.branding.nilaName')}
             </Text>
             <Text
               style={{
@@ -622,7 +622,7 @@ const Home = () => {
                 fontSize: 60,
                 marginTop: -40,
               }}>
-              {'Setu'}
+              {t('HomePage.branding.shoshshoName')}
             </Text>
             <Text
               style={{
