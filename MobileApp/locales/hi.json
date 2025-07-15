@@ -30,7 +30,11 @@
     "english": "अंग्रेजी",
     "hindi": "हिंदी",
     "marathi": "मराठी",
-    "tamil": "तमिल"
+    "tamil": "तमिल",
+    "bengali": "बंगाली",
+    "kannada": "कन्नड़",
+    "telugu": "तेलुगु",
+    "malayalam": "मलयालम"
   },
   "UpPage": {
   "title": "प्रोफ़ाइल अपडेट करें",

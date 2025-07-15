@@ -1,0 +1,168 @@
+{
+    "settings": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು",
+    "profile_complete": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ {{progress}}% ಪೂರ್ಣಗೊಂಡಿದೆ. ಉತ್ತಮ ಅನುಭವಕ್ಕಾಗಿ ವಿವರಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸೋಣ.",
+    "update_profile": "ಪ್ರೊಫೈಲ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ",
+    "document": "ದಾಖಲೆಗಳು",
+    "change_language": "ಭಾಷೆ ಬದಲಾಯಿಸಿ",
+    "change_password": "ಪಾಸ್‌ವರ್ಡ್ ಬದಲಾಯಿಸಿ",
+    "logout": "ಲಾಗ್‌ಔಟ್",
+  
+    "langPage": {
+      "title": "ಭಾಷೆ ಬದಲಾಯಿಸಿ",
+      "desc": "ನಿಮ್ಮ ಆಪ್ ಭಾಷೆಯನ್ನು ಆರಿಸಿ. ನಿಮ್ಮ ಮಾತನಾಡುವ ಭಾಷೆಗಳನ್ನು ಕೆಳಗೆ ತೋರಿಸಲಾಗಿದೆ.",
+      "select": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
+      "current": "ಪ್ರಸ್ತುತ: {{lang}}",
+      "btn": "ಭಾಷೆ ಬದಲಾಯಿಸಿ",
+      "no_select_title": "ಯಾವುದೇ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಲಾಗಿಲ್ಲ",
+      "no_select_msg": "ದಯವಿಟ್ಟು ಒಂದು ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+      "success_title": "ಭಾಷೆ ಬದಲಾಯಿಸಲಾಗಿದೆ",
+      "success_msg": "ಆಪ್ ಭಾಷೆಯನ್ನು {{lang}} ಗೆ ಸೆಟ್ ಮಾಡಲಾಗಿದೆ",
+      "success" : "ಯಶಸ್ವಿ",
+      "err_title": "ದೋಷ",
+      "err_lang" : "ಭಾಷೆ ಲೋಡ್ ಮಾಡುವಲ್ಲಿ ದೋಷ",
+      "err_msg": "ಭಾಷೆ ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ",
+      "spoken_title": "ಮಾತನಾಡುವ ಭಾಷೆಗಳು",
+      "no_spoken": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಯಾವುದೇ ಮಾತನಾಡುವ ಭಾಷೆಗಳನ್ನು ಸೇರಿಸಲಾಗಿಲ್ಲ",
+      "fail" : "ಭಾಷೆ ಬದಲಾಯಿಸುವಲ್ಲಿ ವಿಫಲವಾಗಿದೆ"
+    },
+
+    "lang" :{
+        "english" : "ಇಂಗ್ಲಿಷ್",
+        "hindi" : "ಹಿಂದಿ",
+        "marathi" : "ಮರಾಠಿ",
+        "tamil" : "ತಮಿಳು",
+        "bengali" : "ಬಂಗಾಳಿ",
+        "kannada" : "ಕನ್ನಡ",
+        "telugu" : "ತೆಲುಗು",
+        "malayalam" : "ಮಲಯಾಳಂ"
+    },
+
+        "UpPage": {
+          "title": "ಪ್ರೊಫೈಲ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಿ",
+          "desc": "ನಿಮ್ಮ ಮಾಹಿತಿಯನ್ನು ನವೀಕೃತವಾಗಿಡಲು ಪ್ರೊಫೈಲ್ ವಿವರಗಳನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ.",
+          "username_placeholder": "ಬಳಕೆದಾರರ ಹೆಸರು*",
+          "bio_placeholder": "ಜೀವನಚರಿತ್ರೆ",
+          "languages_spoken_label": "ಮಾತನಾಡುವ ಭಾಷೆಗಳು",
+          "language_picker_placeholder": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
+          "no_languages_added": "ಯಾವುದೇ ಭಾಷೆಗಳನ್ನು ಸೇರಿಸಲಾಗಿಲ್ಲ",
+          "address_placeholder": "ವಿಳಾಸ",
+          "city_placeholder": "ನಗರ",
+          "state_placeholder": "ರಾಜ್ಯ",
+          "country_placeholder": "ದೇಶ",
+          "pincode_placeholder": "ಪಿನ್‌ಕೋಡ್",
+          "facebook_placeholder": "ಫೇಸ್‌ಬುಕ್ URL",
+          "instagram_placeholder": "ಇನ್‌ಸ್ಟಾಗ್ರಾಮ್ URL",
+          "twitter_placeholder": "ಟ್ವಿಟ್ಟರ್ URL",
+          "linkedIn_placeholder": "ಲಿಂಕ್ಡ್‌ಇನ್ URL",
+          "save_btn": "ಉಳಿಸಿ",
+          "cancel_btn": "ರದ್ದುಮಾಡಿ",
+          "profile_pic_btn": "ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಿ",
+          "language_added_title": "ಭಾಷೆ ಸೇರಿಸಲಾಗಿದೆ",
+          "language_added_msg": "ಭಾಷೆಯನ್ನು ಪ್ರೊಫೈಲ್‌ಗೆ ಸೇರಿಸಲಾಗಿದೆ.",
+          "language_remove_msg": "ಭಾಷೆಯನ್ನು ತೆಗೆದುಹಾಕಿ",
+          "remove_language_title": "ಭಾಷೆ ತೆಗೆದುಹಾಕಿ",
+          "remove_language_msg": "ನೀವು ಈ ಭಾಷೆಯನ್ನು ತೆಗೆದುಹಾಕಲು ಖಚಿತವಾಗಿದ್ದೀರಾ?",
+          "yes": "ಹೌದು",
+          "no": "ಇಲ್ಲ",
+          "language_removed_msg": "ಭಾಷೆ ತೆಗೆದುಹಾಕಲಾಗಿದೆ",
+          "error_title": "ದೋಷ",
+          "success_title": "ಯಶಸ್ವಿ",
+          "validation_title": "ಮೌಲ್ಯೀಕರಣ ದೋಷ",
+          "validation_msg": "ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಅಗತ್ಯ ಕ್ಷೇತ್ರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+          "profile_updated_msg": "ಪ್ರೊಫೈಲ್ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ.",
+          "profile_update_err": "ಪ್ರೊಫೈಲ್ ಅಪ್‌ಡೇಟ್ ಮಾಡುವಲ್ಲಿ ದೋಷ.",
+          "image_upload_error": "ಚಿತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡುವಲ್ಲಿ ದೋಷ.",
+          "profile_pic_updated": "ಪ್ರೊಫೈಲ್ ಚಿತ್ರ ಅಪ್‌ಡೇಟ್ ಆಗಿದೆ."
+        },
+
+    "crop_suggestion": {
+      "title": "ಬೆಳೆ ಸಲಹೆ",
+      "subtitle": "ನಿಮ್ಮ ಮಣ್ಣು ಮತ್ತು ಹವಾಮಾನ ಪರಿಸ್ಥಿತಿಗೆ ಉತ್ತಮ ಬೆಳೆಗಳನ್ನು ಹುಡುಕಿ",
+      "form": {
+        "nitrogen": "ಸಾರಜನಕ (N)",
+        "phosphorus": "ರಂಜಕ (P)",
+        "potassium": "ಪೊಟ್ಯಾಸಿಯಮ್ (K)", 
+        "temperature": "ತಾಪಮಾನ (°C)",
+        "humidity": "ಆರ್ದ್ರತೆ (%)",
+        "ph": "pH ಮೌಲ್ಯ",
+        "rainfall": "ಮಳೆ (mm)",
+        "get_suggestions": "ಸಲಹೆಗಳನ್ನು ಪಡೆಯಿರಿ",
+        "placeholders": {
+          "nitrogen": "ಸಾರಜನಕದ ಪ್ರಮಾಣವನ್ನು ನಮೂದಿಸಿ",
+          "phosphorus": "ರಂಜಕದ ಪ್ರಮಾಣವನ್ನು ನಮೂದಿಸಿ",
+          "potassium": "ಪೊಟ್ಯಾಸಿಯಮ್ ಪ್ರಮಾಣವನ್ನು ನಮೂದಿಸಿ",
+          "temperature": "ತಾಪಮಾನವನ್ನು ನಮೂದಿಸಿ",
+          "humidity": "ಆರ್ದ್ರತೆಯ ಪ್ರಮಾಣವನ್ನು ನಮೂದಿಸಿ",
+          "ph": "pH ಮೌಲ್ಯವನ್ನು ನಮೂದಿಸಿ",
+          "rainfall": "ಮಳೆಯ ಪ್ರಮಾಣವನ್ನು ನಮೂದಿಸಿ"
+        }
+      },
+      "validation": {
+        "required": "ಈ ಕ್ಷೇತ್ರ ಅಗತ್ಯವಿದೆ",
+        "min_value": "ಕನಿಷ್ಠ ಮೌಲ್ಯ {{min}}",
+        "max_value": "ಗರಿಷ್ಠ ಮೌಲ್ಯ {{max}}",
+        "invalid_number": "ದಯವಿಟ್ಟು ಮಾನ್ಯ ಸಂಖ್ಯೆಯನ್ನು ನಮೂದಿಸಿ"
+      },
+      "results": {
+        "recommended_crops": "ಶಿಫಾರಸು ಮಾಡಿದ ಬೆಳೆಗಳು",
+        "confidence": "ವಿಶ್ವಾಸ: {{confidence}}%",
+        "no_results": "ನಿಮ್ಮ ಮಾನದಂಡಗಳಿಗೆ ಯಾವುದೇ ಬೆಳೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
+        "loading": "ಸಲಹೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."
+      },
+      "error": {
+        "title": "ದೋಷ",
+        "message": "ಬೆಳೆ ಸಲಹೆಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+        "network": "ನೆಟ್‌ವರ್ಕ್ ದೋಷ. ನಿಮ್ಮ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕವನ್ನು ಪರಿಶೀಲಿಸಿ."
+      }
+    },
+
+    "home": {
+      "greeting": "ನಮಸ್ಕಾರ",
+      "welcome_back": "ಮತ್ತೆ ಸ್ವಾಗತ",
+      "weather": {
+        "title": "ಇಂದಿನ ಹವಾಮಾನ",
+        "temperature": "ತಾಪಮಾನ",
+        "humidity": "ಆರ್ದ್ರತೆ", 
+        "wind_speed": "ಗಾಳಿಯ ವೇಗ",
+        "description": "ವಿವರಣೆ"
+      },
+      "quick_actions": {
+        "title": "ತ್ವರಿತ ಕ್ರಿಯೆಗಳು",
+        "crop_care": "ಬೆಳೆ ಆರೈಕೆ",
+        "market_prices": "ಮಾರುಕಟ್ಟೆ ದರಗಳು",
+        "weather_forecast": "ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ",
+        "schemes": "ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು"
+      },
+      "recent_activities": {
+        "title": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆಗಳು",
+        "no_activities": "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆಗಳೇನೂ ಇಲ್ಲ"
+      }
+    },
+
+    "common": {
+      "ok": "ಸರಿ",
+      "cancel": "ರದ್ದುಮಾಡಿ", 
+      "save": "ಉಳಿಸಿ",
+      "edit": "ಸಂಪಾದಿಸಿ",
+      "delete": "ಅಳಿಸಿ",
+      "back": "ಹಿಂದೆ",
+      "next": "ಮುಂದೆ",
+      "previous": "ಹಿಂದಿನ",
+      "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+      "retry": "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+      "search": "ಹುಡುಕಿ",
+      "filter": "ಫಿಲ್ಟರ್",
+      "sort": "ವಿಂಗಡಿಸಿ",
+      "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+      "share": "ಹಂಚಿಕೊಳ್ಳಿ",
+      "download": "ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ",
+      "upload": "ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+      "submit": "ಸಲ್ಲಿಸಿ",
+      "reset": "ಮರುಹೊಂದಿಸಿ",
+      "clear": "ತೆರವುಗೊಳಿಸಿ",
+      "select": "ಆಯ್ಕೆಮಾಡಿ",
+      "confirm": "ದೃಢೀಕರಿಸಿ",
+      "yes": "ಹೌದು",
+      "no": "ಇಲ್ಲ"
+    }
+}

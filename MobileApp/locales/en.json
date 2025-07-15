@@ -30,7 +30,11 @@
         "english" : "English",
         "hindi" : "Hindi",
         "marathi" : "Marathi",
-        "tamil" : "Tamil"
+        "tamil" : "Tamil",
+        "bengali" : "Bengali",
+        "kannada" : "Kannada",
+        "telugu" : "Telugu",
+        "malayalam" : "Malayalam"
     },
 
         "UpPage": {

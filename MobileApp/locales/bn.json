@@ -1,0 +1,168 @@
+{
+    "settings": "সেটিংস",
+    "profile_complete": "আপনার প্রোফাইল {{progress}}% সম্পূর্ণ। আরও ভালো অভিজ্ঞতার জন্য বিস্তারিত তথ্য দিয়ে শেষ করে ফেলুন।",
+    "update_profile": "প্রোফাইল আপডেট করুন",
+    "document": "নথিপত্র",
+    "change_language": "ভাষা পরিবর্তন করুন",
+    "change_password": "পাসওয়ার্ড পরিবর্তন করুন",
+    "logout": "লগআউট",
+  
+    "langPage": {
+      "title": "ভাষা পরিবর্তন করুন",
+      "desc": "আপনার অ্যাপের ভাষা বেছে নিন। আপনার কথ্য ভাষাগুলি নিচে দেখানো হয়েছে।",
+      "select": "ভাষা নির্বাচন করুন",
+      "current": "বর্তমান: {{lang}}",
+      "btn": "ভাষা পরিবর্তন করুন",
+      "no_select_title": "কোনো ভাষা নির্বাচিত নয়",
+      "no_select_msg": "দয়া করে একটি ভাষা নির্বাচন করুন",
+      "success_title": "ভাষা পরিবর্তিত হয়েছে",
+      "success_msg": "অ্যাপের ভাষা {{lang}} এ সেট করা হয়েছে",
+      "success" : "সফল",
+      "err_title": "ত্রুটি",
+      "err_lang" : "ভাষা লোড করতে ত্রুটি",
+      "err_msg": "ভাষা পরিবর্তন করা যায়নি",
+      "spoken_title": "কথ্য ভাষা",
+      "no_spoken": "আপনার প্রোফাইলে কোনো কথ্য ভাষা যোগ করা হয়নি",
+      "fail" : "ভাষা পরিবর্তনে ব্যর্থ"
+    },
+
+    "lang" :{
+        "english" : "ইংরেজি",
+        "hindi" : "হিন্দি",
+        "marathi" : "মারাঠি",
+        "tamil" : "তামিল",
+        "bengali" : "বাংলা",
+        "kannada" : "কন্নড",
+        "telugu" : "তেলুগু",
+        "malayalam" : "মালয়ালম"
+    },
+
+        "UpPage": {
+          "title": "প্রোফাইল আপডেট করুন",
+          "desc": "আপনার তথ্য আপডেট রাখতে প্রোফাইলের বিস্তারিত আপডেট করুন।",
+          "username_placeholder": "ব্যবহারকারীর নাম*",
+          "bio_placeholder": "জীবনী",
+          "languages_spoken_label": "কথ্য ভাষা",
+          "language_picker_placeholder": "ভাষা নির্বাচন করুন",
+          "no_languages_added": "কোনো ভাষা যোগ করা হয়নি",
+          "address_placeholder": "ঠিকানা",
+          "city_placeholder": "শহর",
+          "state_placeholder": "রাজ্য",
+          "country_placeholder": "দেশ",
+          "pincode_placeholder": "পিনকোড",
+          "facebook_placeholder": "ফেসবুক URL",
+          "instagram_placeholder": "ইনস্টাগ্রাম URL",
+          "twitter_placeholder": "টুইটার URL",
+          "linkedIn_placeholder": "লিংকডইন URL",
+          "save_btn": "সংরক্ষণ করুন",
+          "cancel_btn": "বাতিল",
+          "profile_pic_btn": "প্রোফাইল ছবি আপডেট করুন",
+          "language_added_title": "ভাষা যোগ করা হয়েছে",
+          "language_added_msg": "ভাষা প্রোফাইলে যোগ করা হয়েছে।",
+          "language_remove_msg": "ভাষা মুছে ফেলুন",
+          "remove_language_title": "ভাষা মুছে ফেলুন",
+          "remove_language_msg": "আপনি কি নিশ্চিত যে এই ভাষাটি মুছে ফেলতে চান?",
+          "yes": "হ্যাঁ",
+          "no": "না",
+          "language_removed_msg": "ভাষা সরানো হয়েছে",
+          "error_title": "ত্রুটি",
+          "success_title": "সফল",
+          "validation_title": "বৈধতা ত্রুটি",
+          "validation_msg": "দয়া করে সব প্রয়োজনীয় ক্ষেত্র পূরণ করুন।",
+          "profile_updated_msg": "প্রোফাইল সফলভাবে আপডেট হয়েছে।",
+          "profile_update_err": "প্রোফাইল আপডেট করতে ত্রুটি।",
+          "image_upload_error": "ছবি আপলোড করতে ত্রুটি।",
+          "profile_pic_updated": "প্রোফাইল ছবি আপডেট হয়েছে।"
+        },
+
+    "crop_suggestion": {
+      "title": "ফসল সুপারিশ",
+      "subtitle": "আপনার মাটি এবং জলবায়ু অবস্থার জন্য সেরা ফসল খুঁজুন",
+      "form": {
+        "nitrogen": "নাইট্রোজেন (N)",
+        "phosphorus": "ফসফরাস (P)",
+        "potassium": "পটাসিয়াম (K)", 
+        "temperature": "তাপমাত্রা (°C)",
+        "humidity": "আর্দ্রতা (%)",
+        "ph": "পিএইচ মান",
+        "rainfall": "বৃষ্টিপাত (mm)",
+        "get_suggestions": "সুপারিশ পান",
+        "placeholders": {
+          "nitrogen": "নাইট্রোজেনের পরিমাণ দিন",
+          "phosphorus": "ফসফরাসের পরিমাণ দিন",
+          "potassium": "পটাসিয়ামের পরিমাণ দিন",
+          "temperature": "তাপমাত্রা দিন",
+          "humidity": "আর্দ্রতার পরিমাণ দিন",
+          "ph": "পিএইচ মান দিন",
+          "rainfall": "বৃষ্টিপাতের পরিমাণ দিন"
+        }
+      },
+      "validation": {
+        "required": "এই ক্ষেত্রটি প্রয়োজনীয়",
+        "min_value": "ন্যূনতম মান {{min}}",
+        "max_value": "সর্বোচ্চ মান {{max}}",
+        "invalid_number": "দয়া করে একটি বৈধ সংখ্যা দিন"
+      },
+      "results": {
+        "recommended_crops": "প্রস্তাবিত ফসল",
+        "confidence": "আত্মবিশ্বাস: {{confidence}}%",
+        "no_results": "আপনার মানদণ্ডের জন্য কোনো ফসল পাওয়া যায়নি",
+        "loading": "সুপারিশ লোড হচ্ছে..."
+      },
+      "error": {
+        "title": "ত্রুটি",
+        "message": "ফসলের সুপারিশ আনতে ব্যর্থ। দয়া করে আবার চেষ্টা করুন।",
+        "network": "নেটওয়ার্ক ত্রুটি। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন।"
+      }
+    },
+
+    "home": {
+      "greeting": "নমস্কার",
+      "welcome_back": "আবার স্বাগতম",
+      "weather": {
+        "title": "আজকের আবহাওয়া",
+        "temperature": "তাপমাত্রা",
+        "humidity": "আর্দ্রতা", 
+        "wind_speed": "বাতাসের গতি",
+        "description": "বর্ণনা"
+      },
+      "quick_actions": {
+        "title": "দ্রুত ক্রিয়া",
+        "crop_care": "ফসলের যত্ন",
+        "market_prices": "বাজার দাম",
+        "weather_forecast": "আবহাওয়ার পূর্বাভাস",
+        "schemes": "সরকারি স্কিম"
+      },
+      "recent_activities": {
+        "title": "সাম্প্রতিক কার্যক্রম",
+        "no_activities": "কোনো সাম্প্রতিক কার্যক্রম নেই"
+      }
+    },
+
+    "common": {
+      "ok": "ঠিক আছে",
+      "cancel": "বাতিল", 
+      "save": "সংরক্ষণ করুন",
+      "edit": "সম্পাদনা",
+      "delete": "মুছে ফেলুন",
+      "back": "পিছনে",
+      "next": "পরবর্তী",
+      "previous": "পূর্ববর্তী",
+      "loading": "লোড হচ্ছে...",
+      "retry": "আবার চেষ্টা করুন",
+      "search": "অনুসন্ধান",
+      "filter": "ফিল্টার",
+      "sort": "সাজান",
+      "refresh": "রিফ্রেশ করুন",
+      "share": "শেয়ার করুন",
+      "download": "ডাউনলোড করুন",
+      "upload": "আপলোড করুন",
+      "submit": "জমা দিন",
+      "reset": "রিসেট করুন",
+      "clear": "পরিষ্কার করুন",
+      "select": "নির্বাচন করুন",
+      "confirm": "নিশ্চিত করুন",
+      "yes": "হ্যাঁ",
+      "no": "না"
+    }
+}

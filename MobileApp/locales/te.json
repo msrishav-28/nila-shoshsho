@@ -1,0 +1,168 @@
+{
+    "settings": "సెట్టింగులు",
+    "profile_complete": "మీ ప్రొఫైల్ {{progress}}% పూర్తయింది. మెరుగైన అనుభవం కోసం వివరాలను పూర్తి చేద్దాం.",
+    "update_profile": "ప్రొఫైల్ అప్‌డేట్ చేయండి",
+    "document": "పత్రాలు",
+    "change_language": "భాష మార్చండి",
+    "change_password": "పాస్‌వర్డ్ మార్చండి",
+    "logout": "లాగ్‌అవుట్",
+  
+    "langPage": {
+      "title": "భాష మార్చండి",
+      "desc": "మీ యాప్ భాషను ఎంచుకోండి. మీ మాట్లాడే భాషలు క్రింద చూపించబడ్డాయి.",
+      "select": "భాష ఎంచుకోండి",
+      "current": "ప్రస్తుత: {{lang}}",
+      "btn": "భాష మార్చండి",
+      "no_select_title": "ఏ భాష ఎంచుకోలేదు",
+      "no_select_msg": "దయచేసి ఒక భాష ఎంచుకోండి",
+      "success_title": "భాష మార్చబడింది",
+      "success_msg": "యాప్ భాష {{lang}} కు సెట్ చేయబడింది",
+      "success" : "విజయవంతం",
+      "err_title": "లోపం",
+      "err_lang" : "భాష లోడ్ చేయడంలో లోపం",
+      "err_msg": "భాష మార్చలేకపోయింది",
+      "spoken_title": "మాట్లాడే భాషలు",
+      "no_spoken": "మీ ప్రొఫైల్‌లో మాట్లాడే భాషలు ఏవీ జోడించబడలేదు",
+      "fail" : "భాష మార్చడంలో విఫలమైంది"
+    },
+
+    "lang" :{
+        "english" : "ఇంగ్లీష్",
+        "hindi" : "హిందీ",
+        "marathi" : "మరాఠీ",
+        "tamil" : "తమిళం",
+        "bengali" : "బెంగాలీ",
+        "kannada" : "కన్నడ",
+        "telugu" : "తెలుగు",
+        "malayalam" : "మలయాళం"
+    },
+
+        "UpPage": {
+          "title": "ప్రొఫైల్ అప్‌డేట్ చేయండి",
+          "desc": "మీ సమాచారాన్ని అప్‌టుడేట్‌గా ఉంచడానికి ప్రొఫైల్ వివరాలను అప్‌డేట్ చేయండి.",
+          "username_placeholder": "వాడుకరి పేరు*",
+          "bio_placeholder": "జీవన చరిత్ర",
+          "languages_spoken_label": "మాట్లాడే భాషలు",
+          "language_picker_placeholder": "భాష ఎంచుకోండి",
+          "no_languages_added": "ఏ భాషలు జోడించబడలేదు",
+          "address_placeholder": "చిరునామా",
+          "city_placeholder": "నగరం",
+          "state_placeholder": "రాష్ట్రం",
+          "country_placeholder": "దేశం",
+          "pincode_placeholder": "పిన్‌కోడ్",
+          "facebook_placeholder": "ఫేస్‌బుక్ URL",
+          "instagram_placeholder": "ఇన్‌స్టాగ్రామ్ URL",
+          "twitter_placeholder": "ట్విట్టర్ URL",
+          "linkedIn_placeholder": "లింక్డ్‌ఇన్ URL",
+          "save_btn": "సేవ్ చేయండి",
+          "cancel_btn": "రద్దు చేయండి",
+          "profile_pic_btn": "ప్రొఫైల్ చిత్రాన్ని అప్‌డేట్ చేయండి",
+          "language_added_title": "భాష జోడించబడింది",
+          "language_added_msg": "భాష ప్రొఫైల్‌కు జోడించబడింది.",
+          "language_remove_msg": "భాష తొలగించండి",
+          "remove_language_title": "భాష తొలగించండి",
+          "remove_language_msg": "మీరు ఈ భాషను తొలగించాలని అనుకుంటున్నారా?",
+          "yes": "అవును",
+          "no": "లేదు",
+          "language_removed_msg": "భాష తొలగించబడింది",
+          "error_title": "లోపం",
+          "success_title": "విజయవంతం",
+          "validation_title": "ధృవీకరణ లోపం",
+          "validation_msg": "దయచేసి అన్ని అవసరమైన ఫీల్డులను పూరించండి.",
+          "profile_updated_msg": "ప్రొఫైల్ విజయవంతంగా అప్‌డేట్ చేయబడింది.",
+          "profile_update_err": "ప్రొఫైల్ అప్‌డేట్ చేయడంలో లోపం.",
+          "image_upload_error": "చిత్రం అప్‌లోడ్ చేయడంలో లోపం.",
+          "profile_pic_updated": "ప్రొఫైల్ చిత్రం అప్‌డేట్ చేయబడింది."
+        },
+
+    "crop_suggestion": {
+      "title": "పంట సూచనలు",
+      "subtitle": "మీ మట్టి మరియు వాతావరణ పరిస్థితులకు అనుకూలమైన పంటలను కనుగొనండి",
+      "form": {
+        "nitrogen": "నైట్రోజన్ (N)",
+        "phosphorus": "ఫాస్ఫరస్ (P)",
+        "potassium": "పొటాషియం (K)", 
+        "temperature": "ఉష్ణోగ్రత (°C)",
+        "humidity": "తేమ (%)",
+        "ph": "pH విలువ",
+        "rainfall": "వర్షపాతం (mm)",
+        "get_suggestions": "సూచనలు పొందండి",
+        "placeholders": {
+          "nitrogen": "నైట్రోజన్ పరిమాణం నమోదు చేయండి",
+          "phosphorus": "ఫాస్ఫరస్ పరిమాణం నమోదు చేయండి",
+          "potassium": "పొటాషియం పరిమాణం నమోదు చేయండి",
+          "temperature": "ఉష్ణోగ్రత నమోదు చేయండి",
+          "humidity": "తేమ పరిమాణం నమోదు చేయండి",
+          "ph": "pH విలువ నమోదు చేయండి",
+          "rainfall": "వర్షపాతం పరిమాణం నమోదు చేయండి"
+        }
+      },
+      "validation": {
+        "required": "ఈ ఫీల్డ్ అవసరం",
+        "min_value": "కనిష్ట విలువ {{min}}",
+        "max_value": "గరిష్ట విలువ {{max}}",
+        "invalid_number": "దయచేసి చెల్లుబాటు అయ్యే సంఖ్యను నమోదు చేయండి"
+      },
+      "results": {
+        "recommended_crops": "సిఫార్సు చేయబడిన పంటలు",
+        "confidence": "విశ్వాసం: {{confidence}}%",
+        "no_results": "మీ ప్రమాణాలకు ఏ పంటలు కనుగొనబడలేదు",
+        "loading": "సూచనలు లోడ్ అవుతున్నాయి..."
+      },
+      "error": {
+        "title": "లోపం",
+        "message": "పంట సూచనలను పొందడంలో విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+        "network": "నెట్‌వర్క్ లోపం. మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేయండి."
+      }
+    },
+
+    "home": {
+      "greeting": "నమస్కారం",
+      "welcome_back": "మళ్లీ స్వాగతం",
+      "weather": {
+        "title": "నేటి వాతావరణం",
+        "temperature": "ఉష్ణోగ్రత",
+        "humidity": "తేమ", 
+        "wind_speed": "గాలి వేగం",
+        "description": "వివరణ"
+      },
+      "quick_actions": {
+        "title": "త్వరిత చర్యలు",
+        "crop_care": "పంట సంరక్షణ",
+        "market_prices": "మార్కెట్ ధరలు",
+        "weather_forecast": "వాతావరణ అంచనా",
+        "schemes": "ప్రభుత్వ పథకాలు"
+      },
+      "recent_activities": {
+        "title": "ఇటీవలి కార్యకలాపాలు",
+        "no_activities": "ఇటీవలి కార్యకలాపాలు లేవు"
+      }
+    },
+
+    "common": {
+      "ok": "సరే",
+      "cancel": "రద్దు చేయండి", 
+      "save": "సేవ్ చేయండి",
+      "edit": "సవరించండి",
+      "delete": "తొలగించండి",
+      "back": "వెనుకకు",
+      "next": "తదుపరి",
+      "previous": "మునుపటి",
+      "loading": "లోడ్ అవుతోంది...",
+      "retry": "మళ్లీ ప్రయత్నించండి",
+      "search": "వెతకండి",
+      "filter": "ఫిల్టర్",
+      "sort": "క్రమబద్ధీకరించండి",
+      "refresh": "రిఫ్రెష్ చేయండి",
+      "share": "పంచుకోండి",
+      "download": "డౌన్‌లోడ్ చేయండి",
+      "upload": "అప్‌లోడ్ చేయండి",
+      "submit": "సమర్పించండి",
+      "reset": "రీసెట్ చేయండి",
+      "clear": "క్లియర్ చేయండి",
+      "select": "ఎంచుకోండి",
+      "confirm": "నిర్ధారించండి",
+      "yes": "అవును",
+      "no": "లేదు"
+    }
+}
