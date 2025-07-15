@@ -7,7 +7,7 @@ import os
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 from langchain.chains import RetrievalQA
-from langchain.llms import OpenAI  # Dummy wrapper just to satisfy RetrievalQA
+from langchain_google_genai import ChatGoogleGenerativeAI  # Gemini LLM wrapper
 from langchain.schema import BaseRetriever
 
 govscheme_bp = Blueprint('govscheme', __name__)

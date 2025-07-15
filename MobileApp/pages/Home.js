@@ -26,6 +26,11 @@ import {ScrollView} from 'react-native';
 import SearchBar from '../components/SearchBar';
 import {useTranslation} from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
+// New components for glassmorphism and animations
+import GlassmorphicCard from '../components/GlassmorphicCard';
+import AnimatedFadeInView from '../components/AnimatedFadeInView';
+import AnimatedButton from '../components/AnimatedButton';
+import StaggeredView from '../components/StaggeredView';
 const schemesData = require('../assets/schemes.json');
 
 const featureCards = [
@@ -227,29 +232,57 @@ const Home = () => {
     return firstPart.length > 12 ? firstPart.slice(0, 12) + '…' : firstPart;
   };
 
-  const renderFeatureCard = ({item}) => (
-    <TouchableOpacity
-      style={[styles.featureCard, {backgroundColor: item.color}]}
-      onPress={() => navigation.navigate(item.nav)}
-      activeOpacity={0.85}>
-      <Image source={item.icon} style={styles.featureCardIcon} />
-      <Text style={styles.featureCardText}>
-        {t(`HomePage.${item.titleKey}`)}
-      </Text>
-    </TouchableOpacity>
+  const renderFeatureCard = ({item, index}) => (
+    <StaggeredView 
+      index={index} 
+      animationType="slideUp" 
+      staggerDelay={100}
+    >
+      <TouchableOpacity
+        onPress={() => navigation.navigate(item.nav)}
+        activeOpacity={1}>
+        <GlassmorphicCard 
+          style={[styles.featureCard, {backgroundColor: item.color + '40'}]} // Adding transparency
+          blurAmount={15}
+          blurType="light"
+        >
+          <AnimatedFadeInView 
+            delay={200 + (index * 100)} 
+            animationType="scale"
+            style={styles.featureCardContent}
+          >
+            <Image source={item.icon} style={styles.featureCardIcon} />
+            <Text style={styles.featureCardText}>
+              {t(`HomePage.${item.titleKey}`)}
+            </Text>
+          </AnimatedFadeInView>
+        </GlassmorphicCard>
+      </TouchableOpacity>
+    </StaggeredView>
   );
 
-  const renderSchemeCard = ({ item }) => (
-    <TouchableOpacity
-      style={styles.schemeCard}
-      onPress={() => item.link && Linking.openURL(item.link)}
-      activeOpacity={0.9}>
-      <Text style={styles.schemeCardTitle}>{item.name}</Text>
-      <Text style={styles.schemeCardDesc}>{item.desc}</Text>
-      <Text style={styles.schemeCardLink}>
-        {t('HomePage.sections.learnMore')}
-      </Text>
-    </TouchableOpacity>
+  const renderSchemeCard = ({ item, index }) => (
+    <StaggeredView 
+      index={index} 
+      animationType="slideLeft" 
+      staggerDelay={80}
+    >
+      <TouchableOpacity
+        onPress={() => item.link && Linking.openURL(item.link)}
+        activeOpacity={1}>
+        <GlassmorphicCard 
+          style={styles.schemeCard}
+          blurAmount={12}
+          blurType="light"
+        >
+          <Text style={styles.schemeCardTitle}>{item.name}</Text>
+          <Text style={styles.schemeCardDesc}>{item.desc}</Text>
+          <Text style={styles.schemeCardLink}>
+            {t('HomePage.sections.learnMore')}
+          </Text>
+        </GlassmorphicCard>
+      </TouchableOpacity>
+    </StaggeredView>
   );
 
   if (user) {
@@ -429,136 +462,143 @@ const Home = () => {
           </View>
 
           {/* Features Section */}
-          <View style={styles.sectionContainer}>
+          <AnimatedFadeInView delay={400} animationType="slideUp">
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>
+                {t('HomePage.sections.farmServices')}
+              </Text>
+              <View style={styles.sectionBox}>
+                <FlatList
+                  data={featureCards}
+                  renderItem={renderFeatureCard}
+                  keyExtractor={item => item.key}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{paddingHorizontal: 10, gap: 14}}
+                />
+              </View>
+            </View>
+          </AnimatedFadeInView>
+
+          <AnimatedFadeInView delay={500} animationType="slideUp">
             <Text style={styles.sectionTitle}>
-              {t('HomePage.sections.farmServices')}
+              {t('HomePage.sections.govSchemes')}
             </Text>
             <View style={styles.sectionBox}>
               <FlatList
-                data={featureCards}
-                renderItem={renderFeatureCard}
-                keyExtractor={item => item.key}
+                data={schemesData}
+                renderItem={renderSchemeCard}
+                keyExtractor={item => String(item.id)}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{paddingHorizontal: 10, gap: 14}}
               />
             </View>
-          </View>
+          </AnimatedFadeInView>
 
-          <Text style={styles.sectionTitle}>
-            {t('HomePage.sections.govSchemes')}
-          </Text>
-          <View style={styles.sectionBox}>
-            <FlatList
-              data={schemesData}
-              renderItem={renderSchemeCard}
-              keyExtractor={item => String(item.id)}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{paddingHorizontal: 10, gap: 14}}
-            />
-          </View>
-
-          <View
+          <AnimatedFadeInView 
+            delay={600} 
+            animationType="slideUp"
             style={{
               width: '98%',
-              backgroundColor: theme.darkBrown,
-              flexDirection: 'row',
-              alignItems: 'center',
-              borderRadius: theme.r3,
-              elevation: 2,
               marginHorizontal: '1%',
-              paddingVertical: 20,
-              paddingHorizontal: 15,
-              gap: 20,
               marginTop: 20,
-            }}>
-            <Image
-              source={require('../assets/icons/grow.png')}
-              style={{width: 66, height: 66}}
-            />
-            <View
+            }}
+          >
+            <GlassmorphicCard 
               style={{
-                width: '69%',
+                backgroundColor: theme.darkBrown + '90', // Semi-transparent
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingVertical: 20,
+                paddingHorizontal: 15,
+                gap: 20,
+              }}
+              blurAmount={8}
+            >
+              <Image
+                source={require('../assets/icons/grow.png')}
+                style={{width: 66, height: 66}}
+              />
+              <View
+                style={{
+                  width: '69%',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                }}>
+                <Text
+                  style={{
+                    fontSize: theme.fs6,
+                    color: 'white',
+                    fontFamily: theme.font.regular,
+                    textAlign: 'center',
+                  }}>
+                  {t('HomePage.suggestion.title')}
+                </Text>
+                <AnimatedButton
+                  variant="outline"
+                  size="medium"
+                  style={{
+                    marginVertical: 10,
+                    width: '100%',
+                    backgroundColor: 'white',
+                    borderColor: 'white',
+                  }}
+                  textStyle={{
+                    color: 'black',
+                    fontSize: 12,
+                  }}
+                  onPress={() => navigation.navigate('CropSuggestion')}>
+                  {t('HomePage.suggestion.btn')}
+                </AnimatedButton>
+              </View>
+            </GlassmorphicCard>
+          </AnimatedFadeInView>
+          <AnimatedFadeInView 
+            delay={700} 
+            animationType="slideUp"
+            style={{
+              width: '98%',
+              marginHorizontal: '1%',
+              marginVertical: 20,
+            }}
+          >
+            <GlassmorphicCard 
+              style={{
+                backgroundColor: theme.blue + '70', // Semi-transparent
                 flexDirection: 'column',
                 alignItems: 'center',
-              }}>
+                justifyContent: 'center',
+                paddingVertical: 20,
+              }}
+              blurAmount={8}
+            >
               <Text
                 style={{
                   fontSize: theme.fs6,
-                  color: 'white',
+                  color: theme.textInverse,
                   fontFamily: theme.font.regular,
                   textAlign: 'center',
                 }}>
-                {t('HomePage.suggestion.title')}
+                {t('HomePage.chatbot.needHelp')}
               </Text>
-              <TouchableOpacity
+              <AnimatedButton
+                variant="secondary"
+                size="medium"
                 style={{
                   marginVertical: 10,
-                  width: '100%',
-                  height: 45,
+                  width: '88%',
                   backgroundColor: 'white',
-                  borderRadius: 3,
-                  alignItems: 'center',
-                  justifyContent: 'center',
                 }}
-                onPress={() => navigation.navigate('CropSuggestion')}>
-                <Text
-                  style={{
-                    fontFamily: theme.font.bold,
-                    color: 'black',
-                    fontSize: 12,
-                    marginTop: 3,
-                  }}>
-                  {t('HomePage.suggestion.btn')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View
-            style={{
-              width: '98%',
-              backgroundColor: theme.blue,
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginVertical: 20,
-              borderRadius: theme.r3,
-              elevation: 2,
-              marginHorizontal: '1%',
-              paddingVertical: 20,
-            }}>
-            <Text
-              style={{
-                fontSize: theme.fs6,
-                color: theme.text,
-                fontFamily: theme.font.regular,
-                textAlign: 'center',
-              }}>
-              {t('HomePage.chatbot.needHelp')}
-            </Text>
-            <TouchableOpacity
-              style={{
-                marginVertical: 10,
-                width: '88%',
-                height: 45,
-                backgroundColor: 'white',
-                borderRadius: theme.r3,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onPress={() => navigation.navigate('Chatbot')}>
-              <Text
-                style={{
-                  fontFamily: theme.font.bold,
+                textStyle={{
                   color: theme.text2,
                   fontSize: 12,
-                  marginTop: 3,
-                }}>
+                }}
+                onPress={() => navigation.navigate('Chatbot')}>
                 {t('HomePage.chatbot.chatButton')}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              </AnimatedButton>
+            </GlassmorphicCard>
+          </AnimatedFadeInView>
           <View
             style={{
               flexDirection: 'column',
@@ -795,13 +835,26 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     height: 120,
-    borderRadius: 7,
+    borderRadius: theme.r2,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     paddingHorizontal: 20,
     minWidth: 120,
+    // Enhanced shadow for glassmorphism
+    shadowColor: theme.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  featureCardContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   featureCardIcon: {
     width: 42,
@@ -822,11 +875,20 @@ const styles = StyleSheet.create({
   },
   schemeCard: {
     width: 190,
-    backgroundColor: theme.card,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: theme.r3,
     padding: 14,
     borderWidth: 1,
-    borderColor: theme.border,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    // Enhanced shadow for glassmorphism
+    shadowColor: theme.shadow,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
   schemeCardTitle: {
     fontSize: theme.fs6,
