@@ -4,14 +4,14 @@
 
 ---
 
-## 📌 Our Mission
+##  Our Mission
 
 Agriculture forms the backbone of India’s economy, yet smallholder farmers lack access to localized, real-time farming advice, government schemes, and smart market insights.  
 **Nila Shoshsho** addresses this gap with AI-powered, voice-enabled solutions tailored to empower every Indian farmer.
 
 ---
 
-## 🎯 Objective
+##  Objective
 
 **Goal:**  
 - Deliver **personalized crop, weather, and market advice** to farmers in **regional languages**.
@@ -30,7 +30,7 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 ### Core Technologies:
 
@@ -44,7 +44,7 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
 -  **Modern & Intuitive UI:** A clean, vibrant interface with beautiful **glassmorphic** elements and **engaging animations** that make the app easy and delightful to use.
 -  **Agentic RAG Advisory Chatbot:** Get answers to your farming queries through a smart, conversational AI.
@@ -59,7 +59,7 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 
 ---
 
-## 🗣️ Supported Languages
+##  Supported Languages
 
 Nila Shoshsho supports **8 languages**:
 
@@ -74,34 +74,13 @@ Nila Shoshsho supports **8 languages**:
 
 ---
 
-- 🎥 **Demo Video Link:** [Watch Here]()
+-  **Demo Video Link:** [Watch Here]()
 
 ---
 
-## 📱 App Screenshots
-
-
-<div style="display: flex; justify-content: space-around;">
-  <img src="./README_assets/home.jpg" alt="Home Screen" width="30%" />
-  <img src="./README_assets/cropcare1.jpg" alt="Crop Disease Detection" width="30%" />
-  <img src="./README_assets/cropcare2.jpg" alt="Crop Disease Detection" width="30%" />
-</div>
-<br />
-<div style="display: flex; justify-content: space-around;">
-  <img src="./README_assets/market1.jpg" alt="market" width="30%" />
-  <img src="./README_assets/water1.jpg" alt="market" width="30%" />
-  <img src="./README_assets/water2.jpg" alt="market" width="30%" />
-</div>
-<br />
-<div style="display: flex; justify-content: space-around;">
-  <img src="./README_assets/news.jpg" alt="news" width="30%" />
-  <img src="./README_assets/market2.jpg" alt="market" width="30%" />
-  <img src="./README_assets/market3.jpg" alt="market" width="30%" />
-</div>
-
 ---
 
-## 🧪 How to Run the Project
+##  How to Run the Project
 
 ### Requirements:
 
@@ -172,7 +151,7 @@ flask run
 
 ---
 
-## 🧬 Future Scope
+##  Future Scope
 
 - **Satellite Integration:** Satellite-driven analysis for soil moisture and crop stress.
 - Expansion to Bangladesh, Nepal, Sri Lanka (regional adaptations).
@@ -183,7 +162,7 @@ flask run
 - **Improved Accessibility (a11y):** Full support for screen readers and other assistive technologies.
 ---
 
-## 📎 Resources / Credits
+##  Resources / Credits
 
 - Open Meteo API (weather)
 - ISRIC Soil Data
@@ -195,12 +174,10 @@ flask run
 
 ---
 
-## 🏁 Final Words
+##  Final Words
 
 **Nila Shoshsho** stands for every farmer, helping them thrive using the power of AI, Groq, and community-driven innovation.
 
-Let's sow the seeds of a smarter tomorrow, together! 🌱
+Let's sow the seeds of a smarter tomorrow, together! 
 
 ---
-
-# ✨ Thank you! ✨
