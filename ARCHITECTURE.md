@@ -148,10 +148,11 @@ Not in this launch slice (and not required for the honesty pass): satellite mois
 
 | File | Role |
 | --- | --- |
-| `README.md` | How to run, languages, public checklist |
+| `README.md` | How to run, languages, public checklist, screenshots |
 | `ARCHITECTURE.md` | This file. Current boxes and arrows |
-| `FRONTEND.md` | Phone ↔ server contract |
-| `DESIGN.md` | Visual system |
-| `MobileApp/README.md` | Phone app notes |
+| `FRONTEND.md` | Phone ↔ server HTTP contract (kept in the repo; not listed on the public README) |
+| `DESIGN.md` | Visual system. Not a live-screen report |
+| `MobileApp/README.md` | How to run the phone app. No secrets |
+| `MobileApp/components/README.md` | UI pieces that are actually wired |
 | `AGENTIC_AI_STRATEGY_2027.md` | Future strategy. Do not treat as the live system |
 | `BACKEND_ELEVATION_PLAN.md` | Future backend elevation. Do not treat as the live system |
