@@ -366,13 +366,13 @@ WhatsApp geometry, ChatGPT intelligence. Wired to `POST /chatbot/ask` `{ questio
 
 ### 6.11 Scheme results
 `POST /govscheme` `{ query }` returns `{ query, schemes, source, link }`.
-- `schemes` is the myScheme payload. Render titles and links from it. Do not treat `assets/schemes.json` as truth.
+- `schemes` is the myScheme payload. Render titles and links from it. Do not add a bundled schemes file as truth.
 - **503:** show `error` and a Primary that opens `link` (`https://www.myscheme.gov.in`).
 - Listen reads a short spoken list of titles via `/voice/tts`, never invented subsidy amounts.
 - Chat geometry on the Schemes tab (composer + thread). Optional later “Browse” segment. Do not delete the ask composer.
 
 ### 6.12 Weather brief
-`GET /weather?lat=&lon=` (advice server, Bearer). Do not call Open-Meteo from the phone; `utils/weather.js` is legacy.
+`GET /weather?lat=&lon=` (advice server, Bearer). Do not call Open-Meteo from the phone.
 - Location row with Monsoon pin (profile city/state, or “Set location” if lat/lon are 0).
 - Temp `temp` from `open_meteo.current.temperature` + humidity / wind meta.
 - If `imd` is present, a Monsoon chip with `today_forecast` / station. If `imd` is null, omit it. Fail only on 502 (both feeds missing).
@@ -424,7 +424,7 @@ Username, email, password + show/hide, role dropdown (Farmer | Logistics), gende
 5. Tools grid **2×3** (seven tiles wrap), not a horizontal FlatList of 7 pastels. Destinations stay: PostHarvest, WaterManagement, Crop Care, Fertilizers, Market, Scheme, News.
 6. Mandi snapshot: one crop from `GET /api/market-prices` using profile state. Cash App number + source/asOf. Empty if 503/no rows.
 7. Ask Nila — field lookalike that opens Chatbot + focuses composer. Mic starts Voice Seed STT.
-8. Schemes teaser: **one** card “Ask about a scheme” → Scheme tab. Do not carousel `assets/schemes.json`.
+8. Schemes teaser: **one** card “Ask about a scheme” → Scheme tab. Do not carousel a bundled schemes file.
 9. Wordmark moment only after content, smaller than the current 60pt double stack, or drop it.
 10. On focus: optional `POST /api/notifications/weather-check` if location exists; do not fake local alerts.
 

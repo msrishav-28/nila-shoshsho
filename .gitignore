@@ -50,3 +50,6 @@ MobileApp/android/fastlane/report.xml
 *.tmp
 .DS_Store
 Thumbs.db
+*.stackdump
+__pycache__/
+*.pyc

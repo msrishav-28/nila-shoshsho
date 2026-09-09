@@ -382,7 +382,7 @@ Do not fall back to a second TTS vendor.
 
 `POST /govscheme` `{ query }`.
 
-Success: `{ query, schemes, source: "myScheme.gov.in", link: "https://www.myscheme.gov.in" }`. `schemes` is the myScheme payload; parse titles and links from it into cards. Do not read a `response` field. Do not ship a bundled `schemes.json` as truth.
+Success: `{ query, schemes, source: "myScheme.gov.in", link: "https://www.myscheme.gov.in" }`. `schemes` is the myScheme payload; parse titles and links from it into cards. Do not read a `response` field. Do not add a bundled `schemes.json` as truth.
 
 **503** `{ error, link, source }` when the key is missing or refused. Show the error and a button that opens `link` (`https://www.myscheme.gov.in`).
 
