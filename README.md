@@ -71,24 +71,65 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 
 ## Screenshots
 These pictures are older. The live screens may look different. They stay here for now so people can see the product at a glance.
-### Home
-![Home](./README_assets/home.jpg)
-### Crop care
-![Crop care 1](./README_assets/cropcare1.jpg)
-![Crop care 2](./README_assets/cropcare2.jpg)
-### Post harvest
-![Harvest 1](./README_assets/harvest1.jpg)
-![Harvest 2](./README_assets/harvest2.jpg)
-![Harvest 3](./README_assets/harvest3.jpg)
-### Market
-![Market 1](./README_assets/market1.jpg)
-![Market 2](./README_assets/market2.jpg)
-![Market 3](./README_assets/market3.jpg)
-### Water
-![Water 1](./README_assets/water1.jpg)
-![Water 2](./README_assets/water2.jpg)
-### News
-![News](./README_assets/news.jpg)
+<table>
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/home.jpg" alt="Home" width="100%" />
+      <br />Home — weather and farm tools
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/cropcare1.jpg" alt="Crop care camera" width="100%" />
+      <br />Crop care — photograph a leaf
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/cropcare2.jpg" alt="Crop care result" width="100%" />
+      <br />Crop care — health result
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/harvest1.jpg" alt="Post harvest form" width="100%" />
+      <br />Post harvest — crop and date
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/harvest2.jpg" alt="Post harvest advice" width="100%" />
+      <br />Post harvest — handling advice
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/harvest3.jpg" alt="Post harvest weather" width="100%" />
+      <br />Post harvest — weather overlay
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/market1.jpg" alt="Mandi prices" width="100%" />
+      <br />Market — live mandi prices
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/market2.jpg" alt="Nearby stores" width="100%" />
+      <br />Market — nearby stores
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/market3.jpg" alt="Price compare" width="100%" />
+      <br />Market — compare two states
+    </td>
+  </tr>
+  <tr>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/water1.jpg" alt="Water plan form" width="100%" />
+      <br />Water — irrigation plan
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/water2.jpg" alt="Water advice" width="100%" />
+      <br />Water — weather plus advice
+    </td>
+    <td align="center" valign="top" width="33%">
+      <img src="./README_assets/news.jpg" alt="Agriculture news" width="100%" />
+      <br />News — farm headlines
+    </td>
+  </tr>
+</table>
+
 ---
 
 ##  Supported Languages
