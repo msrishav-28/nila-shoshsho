@@ -9,8 +9,6 @@
 - [Current architecture](./ARCHITECTURE.md) — boxes, arrows, and what is left to launch
 - [Frontend contract](./FRONTEND.md) — live HTTP paths for the phone
 - [Design system](./DESIGN.md)
-- [Mobile App Documentation](./MobileApp/README.md)
-- [Mobile Components Documentation](./MobileApp/components/README.md)
 - [Agentic AI Strategy 2027](./AGENTIC_AI_STRATEGY_2027.md) — future notes, not the live system
 - [Backend Elevation Plan](./BACKEND_ELEVATION_PLAN.md) — future notes, not the live system
 
@@ -69,6 +67,28 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 -  **Weather** from Open-Meteo and IMD (`GET /weather`) when IMD is reachable.
 -  **News** through the advice server (requires a SerpAPI key on that server).
 
+---
+
+## Screenshots
+These pictures are older. The live screens may look different. They stay here for now so people can see the product at a glance.
+### Home
+![Home](./README_assets/home.jpg)
+### Crop care
+![Crop care 1](./README_assets/cropcare1.jpg)
+![Crop care 2](./README_assets/cropcare2.jpg)
+### Post harvest
+![Harvest 1](./README_assets/harvest1.jpg)
+![Harvest 2](./README_assets/harvest2.jpg)
+![Harvest 3](./README_assets/harvest3.jpg)
+### Market
+![Market 1](./README_assets/market1.jpg)
+![Market 2](./README_assets/market2.jpg)
+![Market 3](./README_assets/market3.jpg)
+### Water
+![Water 1](./README_assets/water1.jpg)
+![Water 2](./README_assets/water2.jpg)
+### News
+![News](./README_assets/news.jpg)
 ---
 
 ##  Supported Languages
