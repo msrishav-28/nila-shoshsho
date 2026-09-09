@@ -26,10 +26,14 @@ const LanguageChange = () => {
   const [currentLanguage, setCurrentLanguage] = useState(null);
 
   const languageItems = [
-    {label: "English", value: 'en'},
-    {label: "Hindi", value: 'hi'},
-    {label: "Marathi", value: 'mr'},
-    {label: "Tamil", value: 'ta'},
+    {label: 'English', value: 'en'},
+    {label: 'हिन्दी', value: 'hi'},
+    {label: 'मराठी', value: 'mr'},
+    {label: 'தமிழ்', value: 'ta'},
+    {label: 'বাংলা', value: 'bn'},
+    {label: 'ಕನ್ನಡ', value: 'kn'},
+    {label: 'తెలుగు', value: 'te'},
+    {label: 'മലയാളം', value: 'ml'},
   ];
 
   useEffect(() => {
@@ -77,7 +81,7 @@ const LanguageChange = () => {
         navigation.goBack();
       }, 2000);
     } catch (err) {
-      console.error('Error saving language:', err);
+      console.error(t('langPage.err_lang'), err);
       Toast.show({
         type: 'error',
         text1: t("langPage.err_title"),
@@ -109,7 +113,7 @@ const LanguageChange = () => {
             items={languageItems}
             setOpen={setOpenLanguage}
             setValue={setSelectedLanguage}
-            placeholder="Select Language"
+            placeholder={t('langPage.select')}
             style={styles.dropdown}
             textStyle={styles.dropdownText}
             dropDownContainerStyle={styles.dropdownContainer}
@@ -118,11 +122,11 @@ const LanguageChange = () => {
         </View>
 
         <Text style={styles.currentLanguage}>
-          Current Language: {currentLanguage || 'Not set'}
+          {t('langPage.current', {lang: currentLanguage || t('profile.status.notAvailable')})}
         </Text>
 
         <TouchableOpacity
-          style={styles.changeButton}
+          style={[styles.changeButton, {backgroundColor: theme.paddy, borderRadius: 14, minHeight: 52, justifyContent: 'center'}]}
           onPress={changeLanguage}
           disabled={!selectedLanguage}>
           <Text style={styles.changeButtonText}>{t("langPage.btn")}</Text>

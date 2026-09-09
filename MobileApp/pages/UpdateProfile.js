@@ -106,7 +106,6 @@ const UpdateProfile = () => {
           }
         }
       } catch (err) {
-        console.log('Permission Error:', err);
         Toast.show({
           type: 'error',
           text1: 'Permission Error',
@@ -122,7 +121,6 @@ const UpdateProfile = () => {
           setLocation({lat: latitude, lon: longitude});
         },
         error => {
-          console.log('Geolocation Error:', error);
           Toast.show({
             type: 'error',
             text1: 'Location Error',
@@ -176,18 +174,15 @@ const UpdateProfile = () => {
         },
         async response => {
           if (response.didCancel) {
-            console.log('User cancelled image picker');
+            return;
           } else if (response.errorCode) {
-            console.log('ImagePicker Error: ', response.errorCode);
             Toast.show({
               type: 'error',
               text1: t('UpPage.edit_profile_pic_error'),
               text2: t('UpPage.image_picker_error_msg'),
             });
           } else {
-            const {uri, base64} = response.assets[0];
-            console.log('Image URI:', uri);
-
+            const {base64} = response.assets[0];
             const dataURI = `data:image/jpeg;base64,${base64}`;
             const updateResult = await updateProfilePic(dataURI);
 
@@ -210,7 +205,6 @@ const UpdateProfile = () => {
         },
       );
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: t('UpPage.edit_profile_pic_error'),

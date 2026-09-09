@@ -31,9 +31,9 @@ const AnimatedButton = ({
   });
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95, {
-      damping: 15,
-      stiffness: 300,
+    scale.value = withSpring(0.97, {
+      damping: 18,
+      stiffness: 220,
     });
     opacity.value = withTiming(0.8, { duration: 100 });
   };

@@ -14,57 +14,55 @@ import Toast from 'react-native-toast-message';
 import {theme} from '../theme.config';
 import {UserContext} from '../context/UserContext';
 import {ActivityIndicator} from 'react-native-paper';
+import {useTranslation} from 'react-i18next';
 
 const Signup = () => {
-  //context
+  const {t} = useTranslation();
   const {signup, loading} = useContext(UserContext);
 
   const navigation = useNavigation();
-  const desc = 'Sign up to connect, manage crops, and access trade insights.';
 
   const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const [role, setRole] = useState('');
   const [gender, setGender] = useState('');
-  const [countryCode, setCountryCode] = useState('+91');
 
   const [openRole, setOpenRole] = useState(false);
   const [openGender, setOpenGender] = useState(false);
-  const [openCountry, setOpenCountry] = useState(false);
 
   const [roleItems, setRoleItems] = useState([
-    {label: 'Farmer', value: 'Farmer'},
-    {label: 'Logistics', value: 'Logistics'},
+    {label: t('signup.roleFarmer'), value: 'Farmer'},
+    {label: t('signup.roleLogistics'), value: 'Logistics'},
   ]);
   const [genderItems, setGenderItems] = useState([
-    {label: 'Male', value: 'Male'},
-    {label: 'Female', value: 'Female'},
-    {label: 'Other', value: 'Other'},
-  ]);
-  const [countryItems, setCountryItems] = useState([
-    {label: '+91', value: '+91'},
-    {label: '+1', value: '+1'},
-    {label: '+44', value: '+44'},
+    {label: t('signup.genderMale'), value: 'Male'},
+    {label: t('signup.genderFemale'), value: 'Female'},
+    {label: t('signup.genderOther'), value: 'Other'},
   ]);
 
   const handleSignup = async () => {
-    const fullPhone = `${countryCode}${phone}`;
-    if (phone.length != 10) {
+    if (!username.trim() || !email.trim() || !password || !role || !gender) {
       Toast.show({
         type: 'error',
-        text1: 'Phone number should be valid',
-        text2: 'Please enter a 10 digit valid phone number',
+        text1: t('signup.requiredTitle'),
+        text2: t('signup.requiredMsg'),
+      });
+      return;
+    }
+    if (password.length < 8) {
+      Toast.show({
+        type: 'error',
+        text1: t('signup.passwordTitle'),
+        text2: t('signup.passwordMsg'),
       });
       return;
     }
     const userData = {
-      username,
-      phoneNo: fullPhone,
-      email,
+      username: username.trim(),
+      email: email.trim(),
       password,
       role,
       gender,
@@ -76,7 +74,7 @@ const Signup = () => {
         Toast.show({
           type: 'success',
           text1: result.message,
-          text2: 'User has successfully been signed up',
+          text2: t('signup.successMsg'),
         });
         navigation.reset({
           index: 0,
@@ -85,15 +83,15 @@ const Signup = () => {
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Signup Failed',
-          text2: result.message || 'An error occurred during signup',
+          text1: t('signup.failedTitle'),
+          text2: result.message || t('signup.failedMsg'),
         });
       }
     } catch (err) {
       Toast.show({
         type: 'error',
-        text1: 'Signup Failed',
-        text2: err.message || 'An error occurred during signup',
+        text1: t('signup.failedTitle'),
+        text2: err.message || t('signup.failedMsg'),
       });
     }
   };
@@ -109,57 +107,33 @@ const Signup = () => {
             style={{width: 25, height: 25}}
           />
         </TouchableOpacity>
-        <Text style={styles.appName}>Sign Up</Text>
+        <Text style={styles.appName}>{t('signup.title')}</Text>
       </View>
 
-      {/* Scrollable Form */}
       <ScrollView
         contentContainerStyle={[styles.form, {paddingHorizontal: 24}]}>
-        <Text style={styles.description}>{desc}</Text>
+        <Text style={styles.description}>{t('signup.desc')}</Text>
 
         <TextInput
-          placeholder="Username*"
+          placeholder={t('signup.usernamePlaceholder')}
           placeholderTextColor={theme.text3}
           style={styles.input}
           value={username}
           onChangeText={setUsername}
         />
-        <View style={styles.phoneRow}>
-          <View style={{width: 90, zIndex: openCountry ? 999 : 1}}>
-            <DropDownPicker
-              open={openCountry}
-              value={countryCode}
-              items={countryItems}
-              setOpen={setOpenCountry}
-              setValue={setCountryCode}
-              setItems={setCountryItems}
-              style={styles.dropdown}
-              textStyle={styles.dropdownText}
-              dropDownContainerStyle={styles.dropdownContainer}
-            />
-          </View>
-          <TextInput
-            placeholder="Phone Number*"
-            placeholderTextColor={theme.text3}
-            keyboardType="phone-pad"
-            style={[styles.input, {flex: 1}]}
-            value={phone}
-            onChangeText={setPhone}
-            maxLength={10}
-          />
-        </View>
 
         <TextInput
-          placeholder="Email"
+          placeholder={t('signup.emailPlaceholder')}
           placeholderTextColor={theme.text3}
           keyboardType="email-address"
+          autoCapitalize="none"
           style={styles.input}
           value={email}
           onChangeText={setEmail}
         />
 
         <TextInput
-          placeholder="Password*"
+          placeholder={t('signup.passwordPlaceholder')}
           placeholderTextColor={theme.text3}
           secureTextEntry={!showPassword}
           style={styles.input}
@@ -176,7 +150,7 @@ const Signup = () => {
               fontFamily: theme.font.bold,
               fontSize: theme.fs6,
             }}>
-            {showPassword ? 'Hide' : 'Show'} Password
+            {showPassword ? t('signup.hidePassword') : t('signup.showPassword')}
           </Text>
         </TouchableOpacity>
 
@@ -193,7 +167,7 @@ const Signup = () => {
               setOpen={setOpenRole}
               setValue={setRole}
               setItems={setRoleItems}
-              placeholder="Select Role*"
+              placeholder={t('signup.rolePlaceholder')}
               style={styles.dropdown}
               textStyle={styles.dropdownText}
               dropDownContainerStyle={styles.dropdownContainer}
@@ -207,7 +181,7 @@ const Signup = () => {
               setOpen={setOpenGender}
               setValue={setGender}
               setItems={setGenderItems}
-              placeholder="Select Gender*"
+              placeholder={t('signup.genderPlaceholder')}
               style={styles.dropdown}
               textStyle={styles.dropdownText}
               dropDownContainerStyle={styles.dropdownContainer}
@@ -221,15 +195,15 @@ const Signup = () => {
           {loading ? (
             <ActivityIndicator color='white' />
           ) : (
-            <Text style={styles.signupText}>Sign Up</Text>
+            <Text style={styles.signupText}>{t('signup.submit')}</Text>
           )}
         </TouchableOpacity>
         <View style={styles.loginLink}>
-          <Text style={styles.footer}>{'Already have an Account?'}</Text>
+          <Text style={styles.footer}>{t('signup.hasAccount')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text style={[styles.footer, {color: theme.darkBrown}]}>
               {' '}
-              Login
+              {t('signup.goLogin')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -319,13 +293,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: theme.fs5,
     fontFamily: theme.font.bold,
-  },
-  phoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginVertical: 8,
-    zIndex: 10,
   },
   loginLink: {
     width: '100%',

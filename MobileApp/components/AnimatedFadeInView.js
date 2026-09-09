@@ -10,7 +10,7 @@ import Animated, {
 const AnimatedFadeInView = ({ 
   children, 
   style, 
-  duration = 600, 
+  duration = 260, 
   delay = 0,
   animationType = 'fade' // 'fade', 'slideUp', 'slideDown', 'scale'
 }) => {

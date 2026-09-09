@@ -6,81 +6,82 @@
   "change_language": "भाषा बदला",
   "change_password": "पासवर्ड बदला",
   "logout": "लॉगआउट",
-
-    "langPage": {
-      "title": "भाषा बदला",
-      "desc": "तुम्ही अपसाठी भाषा निवडा. तुमच्या बोलल्या जाणार्या भाषांचा तपशील खाली दिला आहे.",
-      "select": "भाषा निवडा",
-      "current": "चालू: {{lang}}",
-      "btn": "भाषा बदला",
-      "no_select_title": "कोणतीही भाषा निवडलेली नाही",
-      "no_select_msg": "कृपया एक भाषा निवडा",
-      "success_title": "भाषा बदलली",
-      "success_msg": "अॅप भाषा {{lang}} वर सेट केली",
-      "success": "यशस्वी",
-      "err_title": "त्रुटी",
-      "err_lang": "भाषा लोड करताना त्रुटी",
-      "err_msg": "भाषा बदलता आली नाही",
-      "spoken_title": "बोललेल्या भाषांबद्दल",
-      "no_spoken": "तुमच्या प्रोफाइलमध्ये बोललेल्या भाषांची नोंद नाही",
-      "fail": "भाषा बदलण्यात अयशस्वी"
-    },
-  
+  "langPage": {
+    "title": "भाषा बदला",
+    "desc": "तुम्ही अपसाठी भाषा निवडा. तुमच्या बोलल्या जाणार्या भाषांचा तपशील खाली दिला आहे.",
+    "select": "भाषा निवडा",
+    "current": "चालू: {{lang}}",
+    "btn": "भाषा बदला",
+    "no_select_title": "कोणतीही भाषा निवडलेली नाही",
+    "no_select_msg": "कृपया एक भाषा निवडा",
+    "success_title": "भाषा बदलली",
+    "success_msg": "अॅप भाषा {{lang}} वर सेट केली",
+    "success": "यशस्वी",
+    "err_title": "त्रुटी",
+    "err_lang": "भाषा लोड करताना त्रुटी",
+    "err_msg": "भाषा बदलता आली नाही",
+    "spoken_title": "बोललेल्या भाषांबद्दल",
+    "no_spoken": "तुमच्या प्रोफाइलमध्ये बोललेल्या भाषांची नोंद नाही",
+    "fail": "भाषा बदलण्यात अयशस्वी"
+  },
   "lang": {
-  "english": "इंग्रजी",
-  "hindi": "हिंदी",
-  "marathi": "मराठी",
-   "tamil": "तमिल",
-   "bengali": "बंगाली",
-   "kannada": "कन्नड",
-   "telugu": "तेलुगु",
-   "malayalam": "मलयालम"
-},
-"UpPage": {
-  "title": "प्रोफाइल अपडेट करा",
-  "desc": "तुमची माहिती अद्ययावत ठेवा.",
-  "username_placeholder": "वापरकर्ता नाव*",
-  "bio_placeholder": "बायो",
-  "languages_spoken_label": "बोलल्या जाणाऱ्या भाषा",
-  "language_picker_placeholder": "भाषा निवडा",
-  "no_languages_added": "कोणतीही भाषा जोडलेली नाही",
-  "address_placeholder": "पत्ता",
-  "city_placeholder": "शहर",
-  "state_placeholder": "राज्य",
-  "country_placeholder": "देश",
-  "pincode_placeholder": "पिनकोड",
-  "facebook_placeholder": "Facebook URL",
-  "instagram_placeholder": "Instagram URL",
-  "gov_id_name_placeholder": "सरकारी ओळखपत्र नाव (उदा. आधार)",
-  "gov_id_value_placeholder": "सरकारी ओळखपत्र क्रमांक",
-  "change_picture_text": "फोटो बदला",
-  "edit_profile_pic_error": "प्रतिमा निवड त्रुटी",
-  "image_picker_error_msg": "प्रतिमा निवडताना काहीतरी चुकले.",
-  "profile_pic_updated": "प्रोफाइल फोटो अपडेट झाला!",
-  "update_failed": "अपडेट अयशस्वी",
-  "update_profile_button": "प्रोफाइल अपडेट करा",
-  "loading_text": "अपडेट करत आहे...",
-  "profile_updated_success_msg": "प्रोफाइल यशस्वीपणे अपडेट झाले",
-  "profile_updated_error_msg": "प्रोफाइल अपडेट दरम्यान त्रुटी आली",
-  "language_added_msg": "भाषा प्रोफाइलमध्ये जोडली गेली.",
-  "language_remove_msg": "भाषा काढा",
-  "mr": "जोडा"
-},
+    "english": "इंग्रजी",
+    "hindi": "हिंदी",
+    "marathi": "मराठी",
+    "tamil": "तमिल",
+    "bengali": "बंगाली",
+    "kannada": "कन्नड",
+    "telugu": "तेलुगु",
+    "malayalam": "मलयालम"
+  },
+  "UpPage": {
+    "title": "प्रोफाइल अपडेट करा",
+    "desc": "तुमची माहिती अद्ययावत ठेवा.",
+    "username_placeholder": "वापरकर्ता नाव*",
+    "bio_placeholder": "बायो",
+    "languages_spoken_label": "बोलल्या जाणाऱ्या भाषा",
+    "language_picker_placeholder": "भाषा निवडा",
+    "no_languages_added": "कोणतीही भाषा जोडलेली नाही",
+    "address_placeholder": "पत्ता",
+    "city_placeholder": "शहर",
+    "state_placeholder": "राज्य",
+    "country_placeholder": "देश",
+    "pincode_placeholder": "पिनकोड",
+    "facebook_placeholder": "Facebook URL",
+    "instagram_placeholder": "Instagram URL",
+    "gov_id_name_placeholder": "सरकारी ओळखपत्र नाव (उदा. आधार)",
+    "gov_id_value_placeholder": "सरकारी ओळखपत्र क्रमांक",
+    "change_picture_text": "फोटो बदला",
+    "edit_profile_pic_error": "प्रतिमा निवड त्रुटी",
+    "image_picker_error_msg": "प्रतिमा निवडताना काहीतरी चुकले.",
+    "profile_pic_updated": "प्रोफाइल फोटो अपडेट झाला!",
+    "update_failed": "अपडेट अयशस्वी",
+    "update_profile_button": "प्रोफाइल अपडेट करा",
+    "loading_text": "अपडेट करत आहे...",
+    "profile_updated_success_msg": "प्रोफाइल यशस्वीपणे अपडेट झाले",
+    "profile_updated_error_msg": "प्रोफाइल अपडेट दरम्यान त्रुटी आली",
+    "language_added_msg": "भाषा प्रोफाइलमध्ये जोडली गेली.",
+    "language_remove_msg": "भाषा काढा",
+    "add": "Add",
+    "mr": "जोडा"
+  },
   "HomePage": {
     "greetings": {
-  "morning": "शुभ सकाळ",
-  "afternoon": "शुभ दुपार",
-  "evening": "शुभ संध्या",
-  "night": "शुभ रात्री"
-}
-,
+      "morning": "शुभ सकाळ",
+      "afternoon": "शुभ दुपार",
+      "evening": "शुभ संध्या",
+      "night": "शुभ रात्री"
+    },
     "searchBar": {
-      "placeholder": "तुमचा पीक साठा तपासा 🌾"
+      "placeholder": "तुमचा पीक साठा तपासा 🌾",
+      "caption": "या अॅपमधील साधनावर नेतो. ही वेब शोध नाही."
     },
     "weather": {
       "fetching": "हवामान माहिती मिळवत आहे...",
       "location": "स्थान",
       "windSpeed": "किमी/तास",
+      "openMeteo": "Open-Meteo",
+      "imdChip": "IMD",
       "forecast": {
         "title": "हवामान अंदाज"
       },
@@ -126,12 +127,13 @@
       "market": "बाजार",
       "schemes": "योजना",
       "fertilize": "खत देणे",
-      "sprinkler" : "पाणी व्यवस्थापन"
+      "news": "News",
+      "sprinkler": "पाणी व्यवस्थापन"
     },
     "suggestion": {
-    "title": "कोणती पिके घ्यावीत याबद्दल सूचना हव्या आहेत?",
-    "btn": "सूचवा"
-  },
+      "title": "कोणती पिके घ्यावीत याबद्दल सूचना हव्या आहेत?",
+      "btn": "सूचवा"
+    },
     "chatbot": {
       "needHelp": "अॅप एक्सप्लोर करण्यासाठी मदत हवी आहे? आमच्या स्मार्ट सहाय्यकाला विचारा!",
       "chatButton": "सहाय्यकाशी चॅट करा"
@@ -149,12 +151,21 @@
       "weatherFetch": "हवामान माहिती मिळवू शकलो नाही.",
       "locationError": "स्थान त्रुटी: ",
       "weatherLocationFetch": "हवामान/स्थान माहिती मिळवू शकलो नाही."
+    },
+    "forecast": {
+      "rain": "पाऊस",
+      "sky": "आकाश"
     }
   },
   "chatbot": {
     "headerTitle": "चॅटबॉट मदतनीस",
     "initialMessage": "तुम्हाला कुठे जायचे आहे?",
     "loadingMessage": "थांबा, आम्ही तुम्हाला तिथे घेऊन जात आहोत...",
+    "prompts": {
+      "schemes": "कोणत्या सरकारी योजना छोट्या शेतकऱ्याला मदत करतात?",
+      "cropCare": "आजारी पान कसे तपासावे?",
+      "market": "मंडी भाव कसे वाचावे?"
+    },
     "options": {
       "governmentSchemes": "सरकारी योजना तपासा",
       "cropCare": "पीक देखभाल आणि रोग शोध",
@@ -194,9 +205,7 @@
       "notAvailable": "उपलब्ध नाही"
     }
   },
-
-
-    "postHarvest": {
+  "postHarvest": {
     "title": "पीक काढणीनंतर",
     "description": "तुमच्या प्रदेशासाठी पीक काढणीनंतरच्या सूचना मिळवण्यासाठी पीकाचे तपशील प्रविष्ट करा.",
     "fields": {
@@ -225,18 +234,21 @@
       "humidity": "%",
       "precipitation": "मिमी",
       "windSpeed": "किमी/तास"
-    }
+    },
+    "disclaimer": "Weather plus advice, not a sensor."
   },
-  
-    "schemes": {
-      "header": "योजना",
-      "botGreeting": "नमस्कार! शेतकऱ्यांसाठी सरकारी योजनांविषयी विचार करा.",
-      "inputPlaceholder": "कोणत्याही योजनेविषयी विचारा...",
-      "send": "पाठवा",
-      "error": {
-        "network": "नेटवर्क त्रुटी. कृपया पुन्हा प्रयत्न करा.",
-        "noData": "क्षमस्व, मला कोणतीही माहिती सापडली नाही."
-      }
+  "schemes": {
+    "header": "योजना",
+    "botGreeting": "नमस्कार! शेतकऱ्यांसाठी सरकारी योजनांविषयी विचार करा.",
+    "inputPlaceholder": "कोणत्याही योजनेविषयी विचारा...",
+    "send": "पाठवा",
+    "error": {
+      "network": "नेटवर्क त्रुटी. कृपया पुन्हा प्रयत्न करा.",
+      "noData": "क्षमस्व, मला कोणतीही माहिती सापडली नाही."
+    },
+    "openMyscheme": "Open myScheme.gov.in",
+    "sourceLabel": "Source",
+    "noSchemes": "No matching schemes. You can search on myScheme."
   },
   "cropCare": {
     "header": "पीक संरक्षण",
@@ -317,10 +329,17 @@
     "scheme": "योजना",
     "cropCare": "पीक संरक्षण",
     "market": "बाजार",
-    "news" : "बातम्या"
+    "news": "बातम्या"
   },
   "offlineBanner": {
     "text": "आपण ऑफलाइन आहात"
+  },
+  "notifications": {
+    "header": "सूचनाएँ",
+    "unavailableTitle": "अलर्ट अभी उपलब्ध नहीं हैं",
+    "unavailableBody": "यह स्क्रीन अभी जुड़ी नहीं है। मौसम, योजनाएँ और बाज़ार होम से चलते हैं।",
+    "emptyTitle": "अभी कोई अलर्ट नहीं",
+    "emptyBody": "गाँव प्रोफ़ाइल पर होने के बाद मौसम चेतावनियाँ यहाँ आएंगी।"
   },
   "fertilizer": {
     "header": "खत शिफारस",
@@ -362,7 +381,10 @@
       "environmentalSafety": "पर्यावरण आणि सुरक्षा सावधगिरी",
       "additionalAmendments": "अतिरिक्त माती सुधारणा",
       "expectedOutcomes": "अपेक्षित परिणाम"
-    }
+    },
+    "soilSource": "Soil source",
+    "soilCardHelp": "Optional. Copy numbers from your Soil Health Card.",
+    "soilCardLink": "Open soilhealth.dac.gov.in"
   },
   "cropSuggestion": {
     "header": "पिक सुचवणे",
@@ -382,11 +404,12 @@
     "errors": {
       "invalidInput": "अवैध इनपुट",
       "fillAllFields": "कृपया सर्व फील्ड भरा.",
-      "landAcresInvalid " : "जमिनीचे एकर वैध धनात्मक संख्या असावे.",
+      "landAcresInvalid": "Land acres must be a valid positive number.",
       "noRecommendations": "कोणतेही पिक सुचवणे उपलब्ध नाही.",
       "noCalendarData": "निवडलेल्या पिकासाठी कोणताही कॅलेंडर डेटा उपलब्ध नाही.",
       "enterCropName": "कृपया पिकाचे नाव प्रविष्ट करा.",
-      "anErrorOccurred": "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा."
+      "anErrorOccurred": "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.",
+      "landAcresInvalid ": "जमिनीचे एकर वैध धनात्मक संख्या असावे."
     },
     "success": {
       "recommendationsGenerated": "खत सुचवणे यशस्वीरित्या तयार केले गेले",
@@ -413,7 +436,13 @@
         "yieldPerAcre": "प्रति एकर उत्पन्न",
         "risk": "जोखीम",
         "action": "कृती"
-      }
+      },
+      "seasonWindows": "Season windows",
+      "nationalTypical": "National typical, local KVK may differ",
+      "landSize": "Land size",
+      "acres": "acres",
+      "sowMonths": "Sow",
+      "harvestMonths": "Harvest"
     },
     "tabs": {
       "suggest": "पिक सुचवा",
@@ -506,66 +535,199 @@
     "sections": {
       "irrigationSchedule": "सिंचन वेळापत्रक",
       "waterSavingTips": "पाणी वाचवण्याच्या टिप्स"
-    }
+    },
+    "disclaimer": "Weather plus advice, not a sensor."
   },
   "marketPrices": {
-            "title": "बाजारातील किंमती",
-            "description": "भारतातील कृषी वस्तूंसाठी नवीनतम बाजार किंमती पहा.",
-            "filters": {
-                "allStates": "सर्व राज्ये",
-                "allDistricts": "सर्व जिल्हे",
-                "allCommodities": "सर्व वस्तू",
-                "state": "राज्य",
-                "district": "जिल्हा",
-                "commodity": "वस्तू",
-                "selectState": "राज्य निवडा",
-                "selectDistrict": "जिल्हा निवडा",
-                "selectCommodity": "वस्तू निवडा",
-                "search": "शोधा..."
-            },
-            "fields": {
-                "commodity": "वस्तू",
-                "lastUpdated": "शेवटचे अपडेट",
-                "currentPrice": "वर्तमान किंमत",
-                "minPrice": "किमान किंमत",
-                "modalPrice": "मध्यम किंमत",
-                "maxPrice": "कमाल किंमत",
-                "priceTrend": "किंमत प्रवृत्ती",
-                "aiAnalysis": "एआय बाजार विश्लेषण",
-                "tips": "टिपा"
-            },
-            "status": {
-                "notAvailable": "उपलब्ध नाही",
-                "noData": "कोणताही डेटा उपलब्ध नाही",
-                "updatedOn": "अपडेट केलेले",
-                "commodity": "वस्तू",
-                "loading": "बाजार डेटा लोड होत आहे...",
-                "aiLoading": "एआय विश्लेषण तयार होत आहे...",
-                "noChartData": "किंमत प्रवृत्ती डेटा उपलब्ध नाही"
-            },
-            "errors": {
-                "title": "त्रुटी",
-                "message": "बाजार डेटा आणण्यात अयशस्वी. कृपया नंतर पुन्हा प्रयत्न करा.",
-                "fetchFailed": "डेटा आणण्यात अयशस्वी",
-                "noData": "निवडलेल्या फिल्टरसाठी डेटा उपलब्ध नाही.",
-                "tryChangingFilters": "आपले फिल्टर पर्याय बदला.",
-                "aiNotAvailable": "एआय विश्लेषण सध्या उपलब्ध नाही.",
-                "aiFailed": "एआय विश्लेषण तयार करण्यात अक्षम"
-            },
-            "actions": {
-                "retry": "पुन्हा प्रयत्न करा",
-                "previous": "मागील",
-                "next": "पुढील"
-            },
-            "pagination": {
-                "page": "पृष्ठ",
-                "of": "च्या"
-            },
-            "tips": {
-                "comparePrices": "चांगल्या सौद्यांसाठी वेगवेगळ्या बाजारांमधील किंमतींची तुलना करा",
-                "transportCosts": "विक्री ठिकाण ठरवण्यापूर्वी वाहतूक खर्च तपासा",
-                "storageOptions": "सध्याच्या किंमती प्रतिकूल असल्यास साठवण पर्यायांचा विचार करा",
-                "weatherForecasts": "हवामान अंदाजांसह अद्ययावत रहा कारण ते किंमतींवर परिणाम करतात"
-            }
-        }
+    "title": "बाजारातील किंमती",
+    "description": "भारतातील कृषी वस्तूंसाठी नवीनतम बाजार किंमती पहा.",
+    "filters": {
+      "allStates": "सर्व राज्ये",
+      "allDistricts": "सर्व जिल्हे",
+      "allCommodities": "सर्व वस्तू",
+      "state": "राज्य",
+      "district": "जिल्हा",
+      "commodity": "वस्तू",
+      "selectState": "राज्य निवडा",
+      "selectDistrict": "जिल्हा निवडा",
+      "selectCommodity": "वस्तू निवडा",
+      "search": "शोधा..."
+    },
+    "fields": {
+      "commodity": "वस्तू",
+      "lastUpdated": "शेवटचे अपडेट",
+      "currentPrice": "वर्तमान किंमत",
+      "minPrice": "किमान किंमत",
+      "modalPrice": "मध्यम किंमत",
+      "maxPrice": "कमाल किंमत",
+      "priceTrend": "किंमत प्रवृत्ती",
+      "aiAnalysis": "एआय बाजार विश्लेषण",
+      "tips": "टिपा",
+      "liveComment": "Comment on these live rows only"
+    },
+    "status": {
+      "notAvailable": "उपलब्ध नाही",
+      "noData": "कोणताही डेटा उपलब्ध नाही",
+      "updatedOn": "अपडेट केलेले",
+      "commodity": "वस्तू",
+      "loading": "बाजार डेटा लोड होत आहे...",
+      "aiLoading": "एआय विश्लेषण तयार होत आहे...",
+      "noChartData": "किंमत प्रवृत्ती डेटा उपलब्ध नाही"
+    },
+    "errors": {
+      "title": "त्रुटी",
+      "message": "बाजार डेटा आणण्यात अयशस्वी. कृपया नंतर पुन्हा प्रयत्न करा.",
+      "fetchFailed": "डेटा आणण्यात अयशस्वी",
+      "noData": "निवडलेल्या फिल्टरसाठी डेटा उपलब्ध नाही.",
+      "tryChangingFilters": "आपले फिल्टर पर्याय बदला.",
+      "aiNotAvailable": "एआय विश्लेषण सध्या उपलब्ध नाही.",
+      "aiFailed": "एआय विश्लेषण तयार करण्यात अक्षम"
+    },
+    "actions": {
+      "retry": "पुन्हा प्रयत्न करा",
+      "previous": "मागील",
+      "next": "पुढील"
+    },
+    "pagination": {
+      "page": "पृष्ठ",
+      "of": "च्या"
+    },
+    "tips": {
+      "comparePrices": "चांगल्या सौद्यांसाठी वेगवेगळ्या बाजारांमधील किंमतींची तुलना करा",
+      "transportCosts": "विक्री ठिकाण ठरवण्यापूर्वी वाहतूक खर्च तपासा",
+      "storageOptions": "सध्याच्या किंमती प्रतिकूल असल्यास साठवण पर्यायांचा विचार करा",
+      "weatherForecasts": "हवामान अंदाजांसह अद्ययावत रहा कारण ते किंमतींवर परिणाम करतात"
+    }
+  },
+  "logistics": {
+    "header": "काम",
+    "create": "पिकअप दर्ज करें",
+    "partnerCopy": "खुले काम और आपके स्वीकार किए काम।",
+    "crop": "फसल",
+    "quantity": "मात्रा (किलो)",
+    "city": "पिकअप शहर",
+    "state": "पिकअप राज्य",
+    "post": "काम दर्ज करें",
+    "cancel": "रद्द करें",
+    "accept": "स्वीकार करें",
+    "done": "पूरा करें",
+    "emptyTitle": "अभी कोई काम नहीं",
+    "emptyFarmer": "फसल ले जाने के लिए तैयार हो तो पिकअप दर्ज करें।",
+    "emptyPartner": "अभी कोई खुला पिकअप नहीं है।",
+    "invalid": "फसल और सही वजन किलो में लिखें।",
+    "error": "काम अपडेट नहीं हो सका।",
+    "forbidden": "यह काम लॉजिस्टिक्स साझेदारों के लिए है।"
+  },
+  "welcome": {
+    "name": "नीला शोशो",
+    "desc": "शेतकरी, खरेदीदार आणि कृषी तज्ञांसोबत जोडा.",
+    "createAccount": "खाते तयार करा",
+    "haveAccount": "माझे खाते आधीच आहे",
+    "madeInIndia": "भारतात बनवले"
+  },
+  "login": {
+    "title": "लॉगिन",
+    "desc": "ईमेल आणि पासवर्डने लॉगिन करा.",
+    "emailPlaceholder": "ईमेल",
+    "passwordPlaceholder": "पासवर्ड",
+    "showPassword": "पासवर्ड दाखवा",
+    "hidePassword": "पासवर्ड लपवा",
+    "submit": "लॉगिन",
+    "noAccount": "खाते नाही?",
+    "goSignup": "साइन अप",
+    "emailRequiredTitle": "ईमेल हवा",
+    "emailRequiredMsg": "साइन अप केलेला ईमेल लिहा.",
+    "passwordTitle": "पासवर्ड लहान आहे",
+    "passwordMsg": "पासवर्ड किमान ८ अक्षरे हवा",
+    "successMsg": "तुम्ही लॉगिन झालात",
+    "failedTitle": "लॉगिन झाले नाही",
+    "failedMsg": "पुन्हा प्रयत्न करा."
+  },
+  "signup": {
+    "title": "साइन अप",
+    "desc": "पीक आणि बाजारासाठी खाते तयार करा.",
+    "usernamePlaceholder": "वापरकर्ता नाव",
+    "emailPlaceholder": "ईमेल",
+    "passwordPlaceholder": "पासवर्ड",
+    "showPassword": "पासवर्ड दाखवा",
+    "hidePassword": "पासवर्ड लपवा",
+    "rolePlaceholder": "भूमिका निवडा",
+    "genderPlaceholder": "लिंग निवडा",
+    "roleFarmer": "शेतकरी",
+    "roleLogistics": "लॉजिस्टिक्स",
+    "genderMale": "पुरुष",
+    "genderFemale": "स्त्री",
+    "genderOther": "इतर",
+    "submit": "साइन अप",
+    "hasAccount": "खाते आधीच आहे?",
+    "goLogin": "लॉगिन",
+    "requiredTitle": "माहिती अपूर्ण",
+    "requiredMsg": "नाव, ईमेल, पासवर्ड, भूमिका आणि लिंग भरा.",
+    "passwordTitle": "पासवर्ड लहान आहे",
+    "passwordMsg": "पासवर्ड किमान ८ अक्षरे हवा",
+    "successMsg": "खाते तयार आहे",
+    "failedTitle": "साइन अप झाले नाही",
+    "failedMsg": "पुन्हा प्रयत्न करा."
+  },
+  "password": {
+    "title": "पासवर्ड बदला",
+    "copy": "सध्याचा पासवर्ड, मग नवीन लिहा.",
+    "current": "सध्याचा पासवर्ड",
+    "next": "नवीन पासवर्ड",
+    "confirm": "नवीन पासवर्ड पुन्हा",
+    "submit": "पासवर्ड अपडेट करा",
+    "needBoth": "सध्याचा आणि नवीन पासवर्ड लिहा",
+    "tooShort": "नवीन पासवर्ड ८ अक्षरे हवा",
+    "mismatch": "पासवर्ड जुळत नाहीत",
+    "success": "पासवर्ड अपडेट झाला",
+    "failed": "पासवर्ड बदलला नाही"
+  },
+  "searchMic": {
+    "listening": "ऐकत आहोत… थांबवण्यासाठी टॅप करा",
+    "unavailable": "आवाज ऐकणे उपलब्ध नाही",
+    "noSpeech": "आवाज ऐकू आला नाही"
+  },
+  "marketTabs": {
+    "prices": "सध्याचे भाव",
+    "stores": "जवळच्या दुकाने",
+    "compare": "तुलना",
+    "insights": "माहिती"
+  },
+  "marketCompare": {
+    "title": "मंडी भाव तुलना",
+    "crop": "फसल",
+    "stateA": "पहला राज्य",
+    "stateB": "दूसरा राज्य",
+    "submit": "तुलना करें",
+    "needFields": "एक फसल और दो राज्य लिखें।",
+    "unavailable": "तुलना उपलब्ध नहीं है",
+    "emptyPair": "उस जोड़ी की कोई पंक्ति नहीं।",
+    "emptyTitle": "दो राज्य, एक फसल",
+    "emptyBody": "केवल जीवित मंडी पंक्तियाँ। खाली का मतलब अनुमान नहीं।"
+  },
+  "marketInsights": {
+    "title": "मंडी जानकारी",
+    "crop": "फसल",
+    "state": "राज्य",
+    "submit": "जानकारी लाएँ",
+    "needFields": "फसल और राज्य लिखें।",
+    "unavailable": "जानकारी उपलब्ध नहीं है",
+    "emptyTitle": "केवल जीवित पंक्तियाँ",
+    "emptyBody": "जानकारी उसी फसल और राज्य की मंडी पंक्तियों से बनती है।",
+    "liveComment": "Comment on these live rows only"
+  },
+  "header": {
+    "back": "मागे जा"
+  },
+  "settingsToasts": {
+    "profileFetchTitle": "प्रोफाइल पूर्णता मिळाली नाही",
+    "logoutTitle": "लॉगआउट",
+    "logoutErrorTitle": "लॉगआउट झाले नाही"
+  },
+  "cropCareSpeak": {
+    "disease": "रोग",
+    "plant": "वनस्पती",
+    "leafHealth": "पानाचे आरोग्य",
+    "treatment": "उपचार"
+  }
 }

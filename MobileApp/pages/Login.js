@@ -8,123 +8,66 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import {ActivityIndicator, RadioButton} from 'react-native-paper';
+import {ActivityIndicator} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import DropDownPicker from 'react-native-dropdown-picker';
+import {useTranslation} from 'react-i18next';
 import {theme} from '../theme.config';
 import {UserContext} from '../context/UserContext';
 
 const Login = () => {
-  const {loginWithPhonePassword, loginWithEmailPassword, loading} =
-    useContext(UserContext);
+  const {t} = useTranslation();
+  const {loginWithEmailPassword, loading} = useContext(UserContext);
   const navigation = useNavigation();
-  const desc = 'Login to access your dashboard and manage your activities.';
-
-  const [loginType, setLoginType] = useState('phone');
-  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [countryCode, setCountryCode] = useState('+91');
-  const [openCountry, setOpenCountry] = useState(false);
-  const [countryItems, setCountryItems] = useState([
-    {label: '+91', value: '+91'},
-    {label: '+1', value: '+1'},
-    {label: '+44', value: '+44'},
-  ]);
-
   const handleLogin = async () => {
-    if (loginType === 'phone') {
-      const fullPhone = `${countryCode}${phone}`;
-      if (phone.length != 10) {
-        Toast.show({
-          type: 'error',
-          text1: 'Phone number should be valid',
-          text2: 'Please enter a 10 digit valid phone number',
-        });
-        return;
-      }
-      if (password.length < 8) {
-        Toast.show({
-          type: 'error',
-          text1: 'Password Format failed',
-          text2: 'Password cannot be less than 8 characters',
-        });
-        return;
-      }
-      const loginData = {
-        phoneNo: fullPhone,
-        password,
-      };
-      try {
-        const result = await loginWithPhonePassword(loginData);
-        if (result.success) {
-          Toast.show({
-            type: 'success',
-            text1: result.message,
-            text2: 'User has successfully been signed in',
-          });
-          // navigation.reset({
-          //   index: 0,
-          //   routes: [{name: 'MainApp'}],
-          // });
-          navigation.navigate('MainApp');
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: 'Login Failed',
-            text2: result.message || 'An error occurred during login',
-          });
-        }
-      } catch (err) {
-        Toast.show({
-          type: 'error',
-          text1: 'Login Failed',
-          text2: err.message || 'An error occurred during login',
-        });
-      }
+    if (!email.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: t('login.emailRequiredTitle'),
+        text2: t('login.emailRequiredMsg'),
+      });
+      return;
     }
-    if (loginType === 'email') {
-      if (password.length < 8) {
-        Toast.show({
-          type: 'error',
-          text1: 'Password Format failed',
-          text2: 'Password cannot be less than 8 characters',
-        });
-        return;
-      }
-      const loginData = {
-        email,
+    if (password.length < 8) {
+      Toast.show({
+        type: 'error',
+        text1: t('login.passwordTitle'),
+        text2: t('login.passwordMsg'),
+      });
+      return;
+    }
+    try {
+      const result = await loginWithEmailPassword({
+        email: email.trim(),
         password,
-      };
-      try {
-        const result = await loginWithEmailPassword(loginData);
-        if (result.success) {
-          Toast.show({
-            type: 'success',
-            text1: result.message,
-            text2: 'User has successfully been signed in',
-          });
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'MainApp'}],
-          });
-        } else {
-          Toast.show({
-            type: 'error',
-            text1: 'Login Failed',
-            text2: result.message || 'An error occurred during login',
-          });
-        }
-      } catch (err) {
+      });
+      if (result.success) {
+        Toast.show({
+          type: 'success',
+          text1: result.message,
+          text2: t('login.successMsg'),
+        });
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'MainApp'}],
+        });
+      } else {
         Toast.show({
           type: 'error',
-          text1: 'Login Failed',
-          text2: err.message || 'An error occurred during login',
+          text1: t('login.failedTitle'),
+          text2: result.message || t('login.failedMsg'),
         });
       }
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: t('login.failedTitle'),
+        text2: err.message || t('login.failedMsg'),
+      });
     }
   };
 
@@ -139,73 +82,25 @@ const Login = () => {
             style={{width: 25, height: 25}}
           />
         </TouchableOpacity>
-        <Text style={styles.appName}>Login</Text>
+        <Text style={styles.appName}>{t('login.title')}</Text>
       </View>
 
       <ScrollView
         contentContainerStyle={[styles.form, {paddingHorizontal: 24}]}>
-        <Text style={styles.description}>{desc}</Text>
-
-        {/* Radio Button Group */}
-        <View style={styles.radioGroup}>
-          <View style={styles.radioOption}>
-            <RadioButton
-              value="phone"
-              status={loginType === 'phone' ? 'checked' : 'unchecked'}
-              onPress={() => setLoginType('phone')}
-              color={theme.darkBrown}
-            />
-            <Text style={styles.radioText}>Phone</Text>
-          </View>
-          <View style={styles.radioOption}>
-            <RadioButton
-              value="email"
-              status={loginType === 'email' ? 'checked' : 'unchecked'}
-              onPress={() => setLoginType('email')}
-              color={theme.darkBrown}
-            />
-            <Text style={styles.radioText}>Email</Text>
-          </View>
-        </View>
-
-        {loginType === 'phone' ? (
-          <View style={styles.phoneRow}>
-            <View style={{width: 90, zIndex: openCountry ? 999 : 1}}>
-              <DropDownPicker
-                open={openCountry}
-                value={countryCode}
-                items={countryItems}
-                setOpen={setOpenCountry}
-                setValue={setCountryCode}
-                setItems={setCountryItems}
-                style={styles.dropdown}
-                textStyle={styles.dropdownText}
-                dropDownContainerStyle={styles.dropdownContainer}
-              />
-            </View>
-            <TextInput
-              placeholder="Phone Number"
-              placeholderTextColor={theme.text3}
-              keyboardType="phone-pad"
-              style={[styles.input, {flex: 1}]}
-              value={phone}
-              onChangeText={setPhone}
-              maxLength={10}
-            />
-          </View>
-        ) : (
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor={theme.text3}
-            keyboardType="email-address"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
-        )}
+        <Text style={styles.description}>{t('login.desc')}</Text>
 
         <TextInput
-          placeholder="Password"
+          placeholder={t('login.emailPlaceholder')}
+          placeholderTextColor={theme.text3}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <TextInput
+          placeholder={t('login.passwordPlaceholder')}
           placeholderTextColor={theme.text3}
           secureTextEntry={!showPassword}
           style={styles.input}
@@ -222,7 +117,7 @@ const Login = () => {
               fontFamily: theme.font.bold,
               fontSize: theme.fs6,
             }}>
-            {showPassword ? 'Hide' : 'Show'} Password
+            {showPassword ? t('login.hidePassword') : t('login.showPassword')}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -232,15 +127,15 @@ const Login = () => {
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text style={styles.signupText}>Login</Text>
+            <Text style={styles.signupText}>{t('login.submit')}</Text>
           )}
         </TouchableOpacity>
         <View style={styles.loginLink}>
-          <Text style={styles.footer}>Don't have an account?</Text>
+          <Text style={styles.footer}>{t('login.noAccount')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
             <Text style={[styles.footer, {color: theme.darkBrown}]}>
               {' '}
-              Sign Up
+              {t('login.goSignup')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -319,39 +214,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
     paddingTop: 10,
-  },
-  radioGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-  radioOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  radioText: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-  },
-  phoneRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    zIndex: 10,
-    gap: 10,
-  },
-  dropdown: {
-    borderColor: theme.border,
-    borderRadius: 3,
-  },
-  dropdownText: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-  },
-  dropdownContainer: {
-    borderColor: theme.border,
   },
 });
 

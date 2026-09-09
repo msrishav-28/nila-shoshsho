@@ -1,4 +1,3 @@
-// Home.js
 import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
@@ -7,906 +6,357 @@ import {
   TouchableOpacity,
   Image,
   StatusBar,
-  FlatList,
+  ScrollView,
   ActivityIndicator,
-  Platform,
-  Dimensions,
-  PermissionsAndroid,
-  Linking,
 } from 'react-native';
 import {theme} from '../theme.config';
 import {UserContext} from '../context/UserContext';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
-import Geolocation from 'react-native-geolocation-service';
-import {getWeatherByCoords, getCityName} from '../utils/weather';
-// import { ScrollView } from 'react-native-gesture-handler';
-import {ScrollView} from 'react-native';
-import SearchBar from '../components/SearchBar';
 import {useTranslation} from 'react-i18next';
-import VoicePlayer from '../components/VoicePlayer';
-// New components for glassmorphism and animations
-import GlassmorphicCard from '../components/GlassmorphicCard';
-import AnimatedFadeInView from '../components/AnimatedFadeInView';
-import AnimatedButton from '../components/AnimatedButton';
-import StaggeredView from '../components/StaggeredView';
-const schemesData = require('../assets/schemes.json');
+import SearchBar from '../components/SearchBar';
+import {adviceFetch, accountFetch} from '../utils/api';
 
-const featureCards = [
-  {
-    key: 'postharvest',
-    titleKey: 'features.postHarvest',
-    icon: require('../assets/icons/harvest.png'),
-    nav: 'PostHarvest',
-    color: '#fffde7',
-  },
-  {
-    key: 'sprinkler',
-    titleKey: 'features.sprinkler',
-    icon: require('../assets/icons/sprinkler.png'),
-    nav: 'WaterManagement',
-    color: '#effeff',
-  },
-  {
-    key: 'cropcare',
-    titleKey: 'features.cropCare',
-    icon: require('../assets/icons/crop.png'),
-    nav: 'Crop Care',
-    color: '#e1f5fe',
-  },
-  {
-    key: 'fertilize',
-    titleKey: 'features.fertilize',
-    icon: require('../assets/icons/fertilizers.png'),
-    nav: 'Fertilizers',
-    color: '#e8f5e9',
-  },
-  {
-    key: 'market',
-    titleKey: 'features.market',
-    icon: require('../assets/icons/market.png'),
-    nav: 'Market',
-    color: '#fce4ec',
-  },
-  {
-    key: 'schemes',
-    titleKey: 'features.schemes',
-    icon: require('../assets/icons/scheme.png'),
-    nav: 'Scheme',
-    color: '#e8f5e9',
-  },
-  {
-    key: 'news',
-    titleKey: 'features.news',
-    icon: require('../assets/icons/news.png'),
-    nav: 'News',
-    color: '#d8e5e9',
-  },
+const tools = [
+  {key: 'postharvest', titleKey: 'features.postHarvest', icon: require('../assets/icons/harvest.png'), nav: 'PostHarvest'},
+  {key: 'sprinkler', titleKey: 'features.sprinkler', icon: require('../assets/icons/sprinkler.png'), nav: 'WaterManagement'},
+  {key: 'cropcare', titleKey: 'features.cropCare', icon: require('../assets/icons/crop.png'), nav: 'Crop Care'},
+  {key: 'fertilize', titleKey: 'features.fertilize', icon: require('../assets/icons/fertilizers.png'), nav: 'Fertilizers'},
+  {key: 'market', titleKey: 'features.market', icon: require('../assets/icons/market.png'), nav: 'Market'},
+  {key: 'schemes', titleKey: 'features.schemes', icon: require('../assets/icons/scheme.png'), nav: 'Scheme'},
+  {key: 'news', titleKey: 'features.news', icon: require('../assets/icons/news.png'), nav: 'News'},
 ];
 
-const windowWidth = Dimensions.get('window').width;
-
-// Weather code to emoji/icon mapping (Open-Meteo)
-const weatherCodeMap = {
-  0: {icon: '☀️', descKey: 'weather.codes.0'},
-  1: {icon: '🌤️', descKey: 'weather.codes.1'},
-  2: {icon: '⛅', descKey: 'weather.codes.2'},
-  3: {icon: '☁️', descKey: 'weather.codes.3'},
-  45: {icon: '🌫️', descKey: 'weather.codes.45'},
-  48: {icon: '🌫️', descKey: 'weather.codes.48'},
-  51: {icon: '🌦️', descKey: 'weather.codes.51'},
-  53: {icon: '🌦️', descKey: 'weather.codes.53'},
-  55: {icon: '🌦️', descKey: 'weather.codes.55'},
-  56: {icon: '🌧️', descKey: 'weather.codes.56'},
-  57: {icon: '🌧️', descKey: 'weather.codes.57'},
-  61: {icon: '🌦️', descKey: 'weather.codes.61'},
-  63: {icon: '🌧️', descKey: 'weather.codes.63'},
-  65: {icon: '🌧️', descKey: 'weather.codes.65'},
-  66: {icon: '🌧️', descKey: 'weather.codes.66'},
-  67: {icon: '🌧️', descKey: 'weather.codes.67'},
-  71: {icon: '🌨️', descKey: 'weather.codes.71'},
-  73: {icon: '🌨️', descKey: 'weather.codes.73'},
-  75: {icon: '❄️', descKey: 'weather.codes.75'},
-  77: {icon: '❄️', descKey: 'weather.codes.77'},
-  80: {icon: '🌧️', descKey: 'weather.codes.80'},
-  81: {icon: '🌧️', descKey: 'weather.codes.81'},
-  82: {icon: '🌧️', descKey: 'weather.codes.82'},
-  85: {icon: '🌨️', descKey: 'weather.codes.85'},
-  86: {icon: '🌨️', descKey: 'weather.codes.86'},
-  95: {icon: '⛈️', descKey: 'weather.codes.95'},
-  96: {icon: '⛈️', descKey: 'weather.codes.96'},
-  99: {icon: '⛈️', descKey: 'weather.codes.99'},
+const getGreeting = (t) => {
+  const hour = new Date().getHours();
+  if (hour < 6) return t('HomePage.greetings.night');
+  if (hour < 12) return t('HomePage.greetings.morning');
+  if (hour < 17) return t('HomePage.greetings.afternoon');
+  if (hour < 21) return t('HomePage.greetings.evening');
+  return t('HomePage.greetings.night');
 };
-
-function getWeatherIcon(code) {
-  return weatherCodeMap[code]?.icon || '❓';
-}
-
-function getWeatherDesc(code, t) {
-  return weatherCodeMap[code]?.descKey
-    ? t(`HomePage.${weatherCodeMap[code].descKey}`)
-    : t('Unknown');
-}
-
-function formatDay(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-IN', {weekday: 'short'});
-}
 
 const Home = () => {
   const {t} = useTranslation();
   const {user} = useContext(UserContext);
   const navigation = useNavigation();
   const [weather, setWeather] = useState(null);
-  const [city, setCity] = useState('');
+  const [weatherError, setWeatherError] = useState('');
   const [loadingWeather, setLoadingWeather] = useState(true);
-  const [weatherError, setWeatherError] = useState(null);
+  const [mandi, setMandi] = useState(null);
+  const [alertKind, setAlertKind] = useState(null);
 
-  // Request location permissions (for Android)
-  const requestLocationPermission = async () => {
-    if (Platform.OS === 'ios') {
-      return true; // iOS permission is handled by info.plist
-    }
-
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: 'Location Permission',
-          message:
-            'This app needs access to your location to show local weather.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn(err);
-      return false;
-    }
-  };
+  const lat = user?.location?.lat;
+  const lon = user?.location?.lon;
+  const hasPlace = lat && lon && Number(lat) !== 0 && Number(lon) !== 0;
+  const place = user?.location?.city || user?.location?.village || user?.location?.state || '';
 
   useEffect(() => {
-    const getLocationAndWeather = async () => {
-      try {
-        const hasPermission = await requestLocationPermission();
-
-        if (!hasPermission) {
-          setWeatherError(t('HomePage.errors.weatherPermission'));
-          setLoadingWeather(false);
-          return;
-        }
-
-        Geolocation.getCurrentPosition(
-          async position => {
-            try {
-              const weatherData = await getWeatherByCoords(
-                position.coords.latitude,
-                position.coords.longitude,
-              );
-              setWeather(weatherData);
-              console.log(weatherData);
-
-              const cityName = await getCityName(
-                position.coords.latitude,
-                position.coords.longitude,
-              );
-              setCity(cityName);
-
-              setLoadingWeather(false);
-            } catch (error) {
-              setWeatherError(t('HomePage.errors.weatherFetch'));
-              setLoadingWeather(false);
-            }
-          },
-          error => {
-            setWeatherError(
-              `${t('HomePage.errors.locationError')}${error.message}`,
-            );
-            setLoadingWeather(false);
-          },
-          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
-        );
-      } catch (e) {
+    const load = async () => {
+      if (!hasPlace) {
+        setLoadingWeather(false);
         setWeatherError(t('HomePage.errors.weatherLocationFetch'));
+        return;
+      }
+      try {
+        const res = await adviceFetch(`/weather?lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        if (!res.ok) {
+          setWeatherError(data.error || t('HomePage.errors.weatherFetch'));
+        } else {
+          setWeather(data);
+        }
+      } catch (err) {
+        setWeatherError(t('HomePage.errors.weatherFetch'));
+      } finally {
         setLoadingWeather(false);
       }
     };
+    load();
+  }, [hasPlace, lat, lon, t]);
 
-    getLocationAndWeather();
-  }, [t]);
+  useEffect(() => {
+    const loadMandi = async () => {
+      const state = user?.location?.state;
+      if (!state) {
+        return;
+      }
+      try {
+        const res = await adviceFetch(
+          `/api/market-prices?state=${encodeURIComponent(state)}&limit=1`,
+        );
+        const data = await res.json();
+        if (res.ok && data.records?.[0]) {
+          setMandi(data.records[0]);
+        }
+      } catch (err) {
+        setMandi(null);
+      }
+    };
+    loadMandi();
+  }, [user?.location?.state]);
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour >= 10 && hour <= 6) return t('HomePage.greetings.night');
-    if (hour < 12) return t('HomePage.greetings.morning');
-    if (hour < 17) return t('HomePage.greetings.afternoon');
-    return t('HomePage.greetings.evening');
-  };
+  useEffect(() => {
+    const ping = async () => {
+      if (!hasPlace) {
+        return;
+      }
+      try {
+        const res = await accountFetch('/notifications/weather-check', {method: 'POST'});
+        const data = await res.json();
+        if (res.ok && data.kind && data.kind !== 'update') {
+          setAlertKind(data);
+        }
+      } catch (err) {
+        setAlertKind(null);
+      }
+    };
+    ping();
+  }, [hasPlace]);
 
-  const getFirstName = name => {
-    if (!name) return '';
-    const firstPart = name.trim().split(' ')[0];
-    return firstPart.length > 12 ? firstPart.slice(0, 12) + '…' : firstPart;
-  };
+  const current = weather?.open_meteo?.current || {};
+  const daily = weather?.open_meteo?.daily || {};
+  const days = (daily.dates || []).slice(0, 7);
 
-  const renderFeatureCard = ({item, index}) => (
-    <StaggeredView 
-      index={index} 
-      animationType="slideUp" 
-      staggerDelay={100}
-    >
-      <TouchableOpacity
-        onPress={() => navigation.navigate(item.nav)}
-        activeOpacity={1}>
-        <GlassmorphicCard 
-          style={[styles.featureCard, {backgroundColor: item.color + '40'}]} // Adding transparency
-          blurAmount={15}
-          blurType="light"
-        >
-          <AnimatedFadeInView 
-            delay={200 + (index * 100)} 
-            animationType="scale"
-            style={styles.featureCardContent}
-          >
-            <Image source={item.icon} style={styles.featureCardIcon} />
-            <Text style={styles.featureCardText}>
-              {t(`HomePage.${item.titleKey}`)}
-            </Text>
-          </AnimatedFadeInView>
-        </GlassmorphicCard>
-      </TouchableOpacity>
-    </StaggeredView>
-  );
-
-  const renderSchemeCard = ({ item, index }) => (
-    <StaggeredView 
-      index={index} 
-      animationType="slideLeft" 
-      staggerDelay={80}
-    >
-      <TouchableOpacity
-        onPress={() => item.link && Linking.openURL(item.link)}
-        activeOpacity={1}>
-        <GlassmorphicCard 
-          style={styles.schemeCard}
-          blurAmount={12}
-          blurType="light"
-        >
-          <Text style={styles.schemeCardTitle}>{item.name}</Text>
-          <Text style={styles.schemeCardDesc}>{item.desc}</Text>
-          <Text style={styles.schemeCardLink}>
-            {t('HomePage.sections.learnMore')}
-          </Text>
-        </GlassmorphicCard>
-      </TouchableOpacity>
-    </StaggeredView>
-  );
-
-  if (user) {
+  if (!user) {
     return (
-      <View style={theme.container}>
-        <StatusBar
-          translucent
-          backgroundColor={'transparent'}
-          barStyle="dark-content"
-        />
-        <View
-          style={{
-            position: 'absolute',
-            top: -140,
-            right: -140,
-            width: 250,
-            height: 250,
-            backgroundColor: 'rgba(139, 195, 74, 0.3)',
-            borderRadius : 3400
-          }}>
-          </View>
-        <View style={[styles.header]}>
-          <TouchableOpacity
-            style={styles.sec1}
-            onPress={() => navigation.navigate('Profile')}>
-            <View
-              style={{
-                borderRadius: 10,
-                backgroundColor: '#fff',
-                alignSelf: 'flex-start',
-                ...Platform.select({
-                  android: {
-                    elevation: 5,
-                  },
-                  ios: {
-                    shadowColor: '#000',
-                    shadowOffset: {width: 0, height: 2},
-                    shadowOpacity: 0.25,
-                    shadowRadius: 3.84,
-                  },
-                }),
-              }}>
-              {user.profilePic ? (
-                <Image
-                  source={{uri: user.profilePic}}
-                  style={{width: 50, height: 50, borderRadius: 10, margin: 1}}
-                />
-              ) : (
-                <Image
-                  source={
-                    user.gender === 'Male'
-                      ? require('../assets/icons/male-farmer.png')
-                      : require('../assets/icons/female-farmer.png')
-                  }
-                  style={{width: 45, height: 45, borderRadius: 10, margin: 5}}
-                />
-              )}
-            </View>
-            <View
-              style={{
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                marginLeft: -5,
-              }}>
-              <Text
-                style={{
-                  fontSize: theme.fs5,
-                  fontFamily: theme.font.regular,
-                  color: theme.text2,
-                  marginBottom: -5,
-                }}>
-                {getGreeting()}
-              </Text>
-              <Text
-                style={{
-                  fontSize: theme.fs2,
-                  fontFamily: theme.font.bold,
-                  color: theme.text,
-                }}>
-                {getFirstName(user.username)}
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <View style={styles.sec2}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Notifications')}>
-              <Image
-                source={require('../assets/icons/bell.png')}
-                style={{width: 24, height: 24}}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('LanguageChange')}>
-              <Icon name="language" size={27} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
-              <Icon name="settings" size={27} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View>
-        {/* Scrollable content below header */}
-        <ScrollView
-          contentContainerStyle={{paddingBottom: 64}}
-          showsVerticalScrollIndicator={false}>
-          <SearchBar
-            value={null}
-            onChangeText={null}
-            placeholder={t('HomePage.searchBar.placeholder')}
-            toEdit={true}
-          />
-          {/* Weather Section */}
-          <View style={styles.sectionContainer}>
-            <View style={styles.weatherSection}>
-              {loadingWeather ? (
-                <View style={styles.weatherLoading}>
-                  <ActivityIndicator size="large" color={theme.primary} />
-                  <Text style={styles.weatherLoadingText}>
-                    {t('HomePage.weather.fetching')}
-                  </Text>
-                </View>
-              ) : weatherError ? (
-                <Text style={styles.weatherError}>{weatherError}</Text>
-              ) : weather && weather.current_weather && weather.daily ? (
-                <View style={styles.weatherContent}>
-                  <View style={styles.currentWeather}>
-                    <View style={styles.weatherLocationContainer}>
-                      <Icon name="location" size={18} color={theme.primary} />
-                      <Text style={styles.cityText}>{city}</Text>
-                    </View>
-                    <View style={styles.weatherMainInfo}>
-                      <View style={{alignItems: 'center', marginRight: 16}}>
-                        <Text style={styles.tempText}>
-                          {Math.round(weather.current_weather.temperature)}°C
-                        </Text>
-                        <View style={styles.windRow}>
-                          <Text style={styles.windIcon}>🌬️</Text>
-                          <Text style={styles.windText}>
-                            {Math.round(weather.current_weather.windspeed)}{' '}
-                            {t('HomePage.weather.windSpeed')}
-                          </Text>
-                        </View>
-                      </View>
-                      <View style={styles.weatherIconContainer}>
-                        <Text style={styles.weatherIconText}>
-                          {getWeatherIcon(weather.current_weather.weathercode)}
-                        </Text>
-                        <Text style={styles.weatherDesc}>
-                          {getWeatherDesc(
-                            weather.current_weather.weathercode,
-                            t,
-                          )}
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.forecastContainer}>
-                      {weather.daily.time.slice(0, 7).map((date, idx) => (
-                        <View key={idx} style={styles.forecastCard}>
-                          <Text style={styles.forecastDay}>
-                            {formatDay(date)}
-                          </Text>
-                          <Text style={styles.forecastIcon}>
-                            {getWeatherIcon(weather.daily.weathercode[idx])}
-                          </Text>
-                          <Text style={styles.forecastTemp}>
-                            {Math.round(weather.daily.temperature_2m_max[idx])}
-                            °/
-                            {Math.round(weather.daily.temperature_2m_min[idx])}°
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                </View>
-              ) : null}
-            </View>
-          </View>
-
-          {/* Features Section */}
-          <AnimatedFadeInView delay={400} animationType="slideUp">
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>
-                {t('HomePage.sections.farmServices')}
-              </Text>
-              <View style={styles.sectionBox}>
-                <FlatList
-                  data={featureCards}
-                  renderItem={renderFeatureCard}
-                  keyExtractor={item => item.key}
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{paddingHorizontal: 10, gap: 14}}
-                />
-              </View>
-            </View>
-          </AnimatedFadeInView>
-
-          <AnimatedFadeInView delay={500} animationType="slideUp">
-            <Text style={styles.sectionTitle}>
-              {t('HomePage.sections.govSchemes')}
-            </Text>
-            <View style={styles.sectionBox}>
-              <FlatList
-                data={schemesData}
-                renderItem={renderSchemeCard}
-                keyExtractor={item => String(item.id)}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{paddingHorizontal: 10, gap: 14}}
-              />
-            </View>
-          </AnimatedFadeInView>
-
-          <AnimatedFadeInView 
-            delay={600} 
-            animationType="slideUp"
-            style={{
-              width: '98%',
-              marginHorizontal: '1%',
-              marginTop: 20,
-            }}
-          >
-            <GlassmorphicCard 
-              style={{
-                backgroundColor: theme.darkBrown + '90', // Semi-transparent
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingVertical: 20,
-                paddingHorizontal: 15,
-                gap: 20,
-              }}
-              blurAmount={8}
-            >
-              <Image
-                source={require('../assets/icons/grow.png')}
-                style={{width: 66, height: 66}}
-              />
-              <View
-                style={{
-                  width: '69%',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                }}>
-                <Text
-                  style={{
-                    fontSize: theme.fs6,
-                    color: 'white',
-                    fontFamily: theme.font.regular,
-                    textAlign: 'center',
-                  }}>
-                  {t('HomePage.suggestion.title')}
-                </Text>
-                <AnimatedButton
-                  variant="outline"
-                  size="medium"
-                  style={{
-                    marginVertical: 10,
-                    width: '100%',
-                    backgroundColor: 'white',
-                    borderColor: 'white',
-                  }}
-                  textStyle={{
-                    color: 'black',
-                    fontSize: 12,
-                  }}
-                  onPress={() => navigation.navigate('CropSuggestion')}>
-                  {t('HomePage.suggestion.btn')}
-                </AnimatedButton>
-              </View>
-            </GlassmorphicCard>
-          </AnimatedFadeInView>
-          <AnimatedFadeInView 
-            delay={700} 
-            animationType="slideUp"
-            style={{
-              width: '98%',
-              marginHorizontal: '1%',
-              marginVertical: 20,
-            }}
-          >
-            <GlassmorphicCard 
-              style={{
-                backgroundColor: theme.blue + '70', // Semi-transparent
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingVertical: 20,
-              }}
-              blurAmount={8}
-            >
-              <Text
-                style={{
-                  fontSize: theme.fs6,
-                  color: theme.textInverse,
-                  fontFamily: theme.font.regular,
-                  textAlign: 'center',
-                }}>
-                {t('HomePage.chatbot.needHelp')}
-              </Text>
-              <AnimatedButton
-                variant="secondary"
-                size="medium"
-                style={{
-                  marginVertical: 10,
-                  width: '88%',
-                  backgroundColor: 'white',
-                }}
-                textStyle={{
-                  color: theme.text2,
-                  fontSize: 12,
-                }}
-                onPress={() => navigation.navigate('Chatbot')}>
-                {t('HomePage.chatbot.chatButton')}
-              </AnimatedButton>
-            </GlassmorphicCard>
-          </AnimatedFadeInView>
-          <View
-            style={{
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              justifyContent: 'center',
-              width: '100%',
-            }}>
-            <Text
-              style={{
-                fontFamily: theme.font.bold,
-                color: theme.darkBrown,
-                fontSize: 60,
-                marginTop: 100,
-              }}>
-              {t('HomePage.branding.nilaName')}
-            </Text>
-            <Text
-              style={{
-                fontFamily: theme.font.bold,
-                color: theme.text3,
-                fontSize: 60,
-                marginTop: -40,
-              }}>
-              {t('HomePage.branding.shoshshoName')}
-            </Text>
-            <Text
-              style={{
-                fontFamily: theme.font.regular,
-                color: theme.text3,
-                fontSize: 15,
-                marginTop: -15,
-              }}>
-              {t('HomePage.branding.tagline')}
-            </Text>
-          </View>
-          <View style={{height: 200}}></View>
-        </ScrollView>
+      <View style={[theme.container, {justifyContent: 'center', alignItems: 'center'}]}>
+        <ActivityIndicator size="large" color={theme.paddy} />
       </View>
     );
   }
 
+  const firstName = (user.username || '').trim().split(' ')[0];
+
   return (
-    <View
-      style={[
-        theme.container,
-        {justifyContent: 'center', alignItems: 'center'},
-      ]}>
-      <ActivityIndicator size="large" color={theme.primary} />
-      <Text style={{marginTop: 16, color: theme.text2}}>
-        {t('HomePage.loading.userInfo')}
-      </Text>
+    <View style={theme.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.identity} onPress={() => navigation.navigate('Profile')} accessibilityRole="button" accessibilityLabel="Profile">
+          <View style={styles.avatarWrap}>
+            {user.profilePic ? (
+              <Image source={{uri: user.profilePic}} style={styles.avatar} />
+            ) : (
+              <Image
+                source={
+                  user.gender === 'Female'
+                    ? require('../assets/icons/female-farmer.png')
+                    : require('../assets/icons/male-farmer.png')
+                }
+                style={styles.avatar}
+              />
+            )}
+          </View>
+          <View style={{flex: 1}}>
+            <Text style={styles.greet}>{getGreeting(t)}</Text>
+            <Text style={styles.name} numberOfLines={1}>{firstName}</Text>
+            <Text style={styles.place} numberOfLines={1}>
+              {place || t('HomePage.errors.weatherLocationFetch')}
+            </Text>
+          </View>
+        </TouchableOpacity>
+        <View style={styles.actions}>
+          <TouchableOpacity onPress={() => navigation.navigate('Notifications')} accessibilityLabel="Notifications" style={styles.iconBtn}>
+            <Icon name="notifications-outline" size={22} color={theme.ink} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('LanguageChange')} accessibilityLabel="Language" style={styles.iconBtn}>
+            <Icon name="language-outline" size={22} color={theme.ink} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Settings')} accessibilityLabel="Settings" style={styles.iconBtn}>
+            <Icon name="settings-outline" size={22} color={theme.ink} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 120}}>
+        <SearchBar
+          placeholder={t('HomePage.searchBar.placeholder')}
+          caption={t('HomePage.searchBar.caption')}
+          toEdit
+        />
+
+        <View style={styles.card}>
+          {loadingWeather ? (
+            <ActivityIndicator color={theme.paddy} />
+          ) : weatherError && !weather ? (
+            <Text style={styles.meta}>{weatherError}</Text>
+          ) : (
+            <>
+              <View style={styles.row}>
+                <Icon name="location" size={16} color={theme.monsoon} />
+                <Text style={styles.callout}>{place || '—'}</Text>
+              </View>
+              <View style={styles.weatherHero}>
+                <Text style={styles.temp}>
+                  {current.temperature != null ? `${Math.round(current.temperature)}°` : '—'}
+                </Text>
+                <View>
+                  <Text style={styles.meta}>
+                    {current.windspeed != null ? `${Math.round(current.windspeed)} km/h` : ''}
+                    {current.humidity != null ? `  ${Math.round(current.humidity)}%` : ''}
+                  </Text>
+                  <Text style={styles.meta}>
+                    {current.source || t('HomePage.weather.openMeteo')}
+                  </Text>
+                  {weather?.imd ? (
+                    <View style={styles.imdChip}>
+                      <Text style={styles.imdChipText}>
+                        {t('HomePage.weather.imdChip')}
+                        {weather.imd.station ? ` · ${weather.imd.station}` : ''}
+                        {weather.imd.today_forecast ? ` · ${weather.imd.today_forecast}` : ''}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+              {days.length ? (
+                <View style={styles.forecast}>
+                  {days.map((date, idx) => (
+                    <View key={date} style={styles.forecastDay}>
+                      <Text style={styles.meta}>
+                        {new Date(date).toLocaleDateString('en-IN', {weekday: 'short'})}
+                      </Text>
+                      <Text style={styles.callout}>
+                        {daily.precipitation?.[idx] >= 2 ? t('HomePage.forecast.rain') : t('HomePage.forecast.sky')}
+                      </Text>
+                      <Text style={styles.meta}>
+                        {Math.round(daily.temp_max?.[idx] ?? 0)}°/{Math.round(daily.temp_min?.[idx] ?? 0)}°
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </>
+          )}
+        </View>
+
+        {alertKind?.title ? (
+          <View style={[styles.card, {backgroundColor: theme.turmericTint}]}>
+            <Text style={styles.callout}>{alertKind.title}</Text>
+            <Text style={styles.meta}>{alertKind.body}</Text>
+          </View>
+        ) : null}
+
+        <Text style={styles.section}>{t('HomePage.sections.farmServices')}</Text>
+        <View style={styles.grid}>
+          {tools.map(item => (
+            <TouchableOpacity
+              key={item.key}
+              style={styles.tile}
+              onPress={() => navigation.navigate(item.nav)}
+              accessibilityRole="button"
+              accessibilityLabel={t(`HomePage.${item.titleKey}`)}>
+              <Image source={item.icon} style={styles.tileIcon} />
+              <Text style={styles.tileLabel}>{t(`HomePage.${item.titleKey}`)}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {mandi ? (
+          <View style={styles.card}>
+            <Text style={styles.meta}>{mandi.commodity} · {mandi.market}</Text>
+            <Text style={styles.price}>{mandi.modal_price}</Text>
+            <Text style={styles.meta}>
+              Rs/quintal{mandi.source ? ` · ${mandi.source}` : ''}
+              {mandi.asOf ? ` · ${mandi.asOf}` : ''}
+            </Text>
+          </View>
+        ) : null}
+
+        <TouchableOpacity style={styles.ask} onPress={() => navigation.navigate('Chatbot')} accessibilityRole="button">
+          <Icon name="chatbubble-ellipses-outline" size={22} color={theme.paddy} />
+          <Text style={styles.askText}>{t('HomePage.chatbot.chatButton')}</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
-    width: '100%',
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  sec1: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  sec2: {
-    flexDirection: 'row',
-    gap: 16,
-    alignItems: 'center',
-  },
-  profileImageContainer: {
-    borderRadius: 5,
-    backgroundColor: '#fff',
-    padding: 4,
-    borderWidth: 1,
-    borderColor: theme.border,
-  },
-  profileImage: {
-    width: 45,
-    height: 45,
-    borderRadius: 5,
-  },
-  greetingContainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-  },
-  greetingText: {
-    fontSize: theme.fs5,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
-    marginBottom: -2,
-  },
-  usernameText: {
-    fontSize: theme.fs3,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-  },
-  headerIcon: {
-    padding: 4,
-  },
-
-  // Section container styling
-  sectionContainer: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: theme.fs5,
-    fontFamily: theme.font.bold,
-    color: 'gray',
-    marginBottom: 8,
-    paddingHorizontal: 4,
-  },
-
-  // Weather section styling
-  weatherSection: {
-    backgroundColor: theme.card,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: theme.border,
-    overflow: 'hidden',
-  },
-  weatherLoading: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  weatherLoadingText: {
-    color: theme.text2,
-    marginTop: 8,
-    fontFamily: theme.font.regular,
-  },
-  weatherError: {
-    color: theme.primary,
-    textAlign: 'center',
-    padding: 16,
-    fontFamily: theme.font.regular,
-  },
-  weatherContent: {
-    padding: 12,
-  },
-  currentWeather: {
     marginBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.border,
-    paddingBottom: 10,
+    gap: 8,
   },
-  weatherLocationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+  identity: {flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1},
+  avatarWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: theme.surface,
+    ...theme.shadow1,
   },
-  cityText: {
-    fontSize: theme.fs5,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-    marginLeft: 4,
-  },
-  weatherMainInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-  },
-  tempText: {
-    fontSize: theme.fs1,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-  },
-  weatherIconContainer: {
-    alignItems: 'center',
-  },
-  weatherIconText: {
-    fontSize: 36,
-  },
-  weatherDesc: {
-    fontSize: theme.fs6,
-    color: theme.text2,
-    fontFamily: theme.font.regular,
-    marginTop: 2,
-  },
-  windRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-    marginBottom: 2,
-  },
-  windIcon: {
-    fontSize: 18,
-    marginRight: 4,
-    color: '#90caf9',
-  },
-  windText: {
-    fontSize: theme.fs7,
-    color: theme.text2,
-    fontFamily: theme.font.bold,
-  },
-
-  // Forecast styling
-  forecastContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-  },
-  forecastCard: {
-    alignItems: 'center',
-    width: '14%', // 7 days = ~14% width each
-    padding: 4,
-  },
-  forecastDay: {
-    fontSize: theme.fs7,
-    color: theme.text2,
-    fontFamily: theme.font.bold,
-    marginBottom: 2,
-  },
-  forecastIcon: {
-    fontSize: 20,
-    marginVertical: 2,
-  },
-  forecastTemp: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text,
-    marginTop: 2,
-  },
-
-  // Feature cards styling
-  featureCardsList: {
-    paddingVertical: 8,
-    gap: 14,
-    paddingHorizontal: 4,
-  },
-  featureCard: {
-    height: 120,
-    borderRadius: theme.r2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    paddingHorizontal: 20,
-    minWidth: 120,
-    // Enhanced shadow for glassmorphism
-    shadowColor: theme.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  featureCardContent: {
+  avatar: {width: 48, height: 48},
+  greet: {...theme.type.meta},
+  name: {...theme.type.titleSm},
+  place: {...theme.type.meta, color: theme.monsoon},
+  actions: {flexDirection: 'row', gap: 4},
+  iconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.recessed,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  featureCardIcon: {
-    width: 42,
-    height: 42,
-    marginBottom: 10,
-  },
-  featureCardText: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-  },
-
-  // Scheme cards styling
-  schemeCardsList: {
-    paddingVertical: 8,
-    gap: 12,
-    paddingHorizontal: 4,
-  },
-  schemeCard: {
-    width: 190,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: theme.r3,
-    padding: 14,
+  card: {
+    backgroundColor: theme.surface,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
-    // Enhanced shadow for glassmorphism
-    shadowColor: theme.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    elevation: 4,
+    borderColor: theme.hairline,
+    padding: 16,
+    marginTop: 16,
+    ...theme.shadow1,
   },
-  schemeCardTitle: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.primary,
-    marginBottom: 4,
+  row: {flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8},
+  callout: {...theme.type.callout},
+  meta: {...theme.type.meta},
+  weatherHero: {flexDirection: 'row', alignItems: 'center', gap: 16},
+  temp: {...theme.type.temp},
+  imdChip: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    backgroundColor: theme.monsoonSoft,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
-  schemeCardDesc: {
-    fontSize: theme.fs7,
-    color: theme.text2,
-    marginBottom: 8,
-    fontFamily: theme.font.regular,
+  imdChipText: {...theme.type.meta, color: theme.monsoon},
+  forecast: {flexDirection: 'row', justifyContent: 'space-between', marginTop: 12},
+  forecastDay: {alignItems: 'center', flex: 1},
+  section: {...theme.type.callout, color: theme.inkSoft, marginTop: 24, marginBottom: 8},
+  grid: {flexDirection: 'row', flexWrap: 'wrap', gap: 12},
+  tile: {
+    width: '30%',
+    flexGrow: 1,
+    minWidth: 96,
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: theme.hairline,
+    paddingVertical: 16,
+    alignItems: 'center',
+    ...theme.shadow1,
   },
-  schemeCardLink: {
-    fontSize: theme.fs7,
-    color: theme.link,
-    fontFamily: theme.font.bold,
+  tileIcon: {width: 40, height: 40, marginBottom: 8, tintColor: theme.paddy},
+  tileLabel: {...theme.type.callout, textAlign: 'center'},
+  price: {...theme.type.price, marginVertical: 4},
+  ask: {
+    marginTop: 24,
+    backgroundColor: theme.surface,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: theme.paddy,
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
+  askText: {...theme.type.button, color: theme.paddy},
 });
 
 export default Home;

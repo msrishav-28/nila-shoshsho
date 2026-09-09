@@ -8,17 +8,111 @@ import {
   StyleSheet,
   Keyboard,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
-import axios from 'axios';
-import Markdown from 'react-native-markdown-display';
 import Header from '../components/Header';
 import {theme} from '../theme.config';
-import {AIBACKEND_URL} from '../backendConfig';
+import {adviceFetch} from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
 
-const API_URL = `${AIBACKEND_URL}/govscheme`;
+const API_PATH = '/govscheme';
+const MYSCHEME_HOME = 'https://www.myscheme.gov.in';
+
+const asList = value => {
+  if (Array.isArray(value)) {
+    return value;
+  }
+  if (value && Array.isArray(value.items)) {
+    return value.items;
+  }
+  if (value && Array.isArray(value.item)) {
+    return value.item;
+  }
+  if (value && Array.isArray(value.hits)) {
+    return value.hits;
+  }
+  return [];
+};
+
+const schemeTitle = row => {
+  if (!row || typeof row !== 'object') {
+    return '';
+  }
+  const fields = row.fields && typeof row.fields === 'object' ? row.fields : row;
+  const en = fields.en && typeof fields.en === 'object' ? fields.en : {};
+  return (
+    fields.schemeName ||
+    fields.schemeShortTitle ||
+    fields.name ||
+    fields.title ||
+    en.schemeName ||
+    en.name ||
+    en.title ||
+    row.schemeName ||
+    row.title ||
+    ''
+  );
+};
+
+const schemeLink = row => {
+  if (!row || typeof row !== 'object') {
+    return '';
+  }
+  const fields = row.fields && typeof row.fields === 'object' ? row.fields : row;
+  const url = fields.url || fields.link || row.url || row.link;
+  if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+    return url;
+  }
+  const slug = fields.slug || row.slug;
+  if (typeof slug === 'string' && slug.trim()) {
+    return `${MYSCHEME_HOME}/schemes/${slug.trim()}`;
+  }
+  return '';
+};
+
+export const extractSchemeCards = payload => {
+  const root =
+    payload && Object.prototype.hasOwnProperty.call(payload, 'schemes')
+      ? payload.schemes
+      : payload;
+  const buckets = [];
+  if (Array.isArray(root)) {
+    buckets.push(root);
+  } else if (root && typeof root === 'object') {
+    buckets.push(asList(root));
+    buckets.push(asList(root.data));
+    buckets.push(asList(root.hits));
+    buckets.push(asList(root.data && root.data.hits));
+    buckets.push(asList(root.data && root.data.hits && root.data.hits.hits));
+  }
+  const seen = new Set();
+  const cards = [];
+  buckets.forEach(list => {
+    list.forEach(row => {
+      const title = String(schemeTitle(row) || '').trim();
+      if (!title) {
+        return;
+      }
+      const link = schemeLink(row) || MYSCHEME_HOME;
+      const key = `${title}|${link}`;
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      cards.push({title, link});
+    });
+  });
+  return cards;
+};
+
+const openUrl = url => {
+  if (!url) {
+    return;
+  }
+  Linking.openURL(url);
+};
 
 const Schemes = () => {
   const [messages, setMessages] = useState([]);
@@ -31,7 +125,6 @@ const Schemes = () => {
   useEffect(() => {
     const loadLanguage = async () => {
       const storedLang = await AsyncStorage.getItem('appLanguage');
-      console.log('Schemes page', storedLang);
       if (storedLang) {
         setLang(storedLang);
         const storedLangVal = await AsyncStorage.getItem('appLanguageValue');
@@ -48,27 +141,96 @@ const Schemes = () => {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
-    const userMsg = {from: 'user', text: input};
+    const userMsg = {from: 'user', text: input.trim()};
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     Keyboard.dismiss();
     setLoading(true);
     try {
-      const currentLang = i18n.language || lang;
-      const query = `${userMsg.text} + please answer in ${currentLang}`;
-      const res = await axios.post(API_URL, {query});
-      let botText = res.data?.response || t('schemes.error.noData');
+      const res = await adviceFetch(API_PATH, {
+        method: 'POST',
+        body: JSON.stringify({query: userMsg.text}),
+      });
+      const payload = await res.json();
+      const link = payload?.link || MYSCHEME_HOME;
+      const source = payload?.source || 'myScheme.gov.in';
+      if (!res.ok) {
+        setMessages(prev => [
+          ...prev,
+          {
+            from: 'bot',
+            fromBackend: true,
+            text: payload?.error || t('schemes.error.noData'),
+            error: payload?.error || t('schemes.error.noData'),
+            link,
+            source,
+            openCatalogue: true,
+          },
+        ]);
+        return;
+      }
+      const schemes = extractSchemeCards(payload);
+      const spoken = schemes.length
+        ? schemes.map(item => item.title).join('. ')
+        : payload?.error || t('schemes.noSchemes');
       setMessages(prev => [
         ...prev,
-        {from: 'bot', text: botText, fromBackend: true},
-      ]); // Add fromBackend flag
+        {
+          from: 'bot',
+          fromBackend: true,
+          text: spoken,
+          schemes,
+          source,
+          link,
+          openCatalogue: schemes.length === 0,
+        },
+      ]);
     } catch (err) {
       setMessages(prev => [
         ...prev,
         {from: 'bot', text: t('schemes.error.network'), fromBackend: true},
       ]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const renderBotBody = msg => {
+    if (msg.from !== 'bot') {
+      return <Text style={styles.userText}>{msg.text}</Text>;
+    }
+    return (
+      <>
+        {msg.fromBackend ? <VoicePlayer text={msg.text} lang={lang} /> : null}
+        {msg.error ? <Text style={styles.errorText}>{msg.error}</Text> : null}
+        {(msg.schemes || []).map(item => (
+          <TouchableOpacity
+            key={`${item.title}-${item.link}`}
+            style={styles.schemeCard}
+            onPress={() => openUrl(item.link)}
+            accessibilityRole="link">
+            <Text style={styles.schemeTitle}>{item.title}</Text>
+            <Text style={styles.schemeLink}>{item.link}</Text>
+          </TouchableOpacity>
+        ))}
+        {!msg.error && (!msg.schemes || msg.schemes.length === 0) && msg.text ? (
+          <Text style={styles.botText}>{msg.text}</Text>
+        ) : null}
+        {msg.source ? (
+          <Text style={styles.meta}>
+            {t('schemes.sourceLabel')}: {msg.source}
+          </Text>
+        ) : null}
+        {msg.openCatalogue ? (
+          <TouchableOpacity
+            style={styles.myschemeBtn}
+            onPress={() => openUrl(msg.link || MYSCHEME_HOME)}
+            accessibilityRole="link">
+            <Text style={styles.myschemeText}>{t('schemes.openMyscheme')}</Text>
+          </TouchableOpacity>
+        ) : null}
+      </>
+    );
   };
 
   return (
@@ -85,12 +247,7 @@ const Schemes = () => {
           <View
             key={idx}
             style={msg.from === 'user' ? styles.userBubble : styles.botBubble}>
-            {msg.from === 'bot' && msg.fromBackend && (
-              <VoicePlayer text={msg.text} lang={lang}/>
-            )}
-            <Markdown style={msg.from === 'user' ? markdownUser : markdownBot}>
-              {msg.text}
-            </Markdown>
+            {renderBotBody(msg)}
           </View>
         ))}
         {loading && (
@@ -121,16 +278,14 @@ const Schemes = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#f7f7f7'},
   chat: {flex: 1},
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: '#d1f5d3',
-    borderRadius: 12,
+    backgroundColor: theme.paddySoft,
+    borderRadius: 18,
     marginBottom: 8,
     padding: 10,
     maxWidth: '85%',
-    fontFamily: theme.font.regular,
   },
   botBubble: {
     alignSelf: 'flex-start',
@@ -141,7 +296,60 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     borderColor: '#e0e0e0',
     borderWidth: 1,
+  },
+  userText: {
+    color: '#222',
+    fontSize: 12,
+    fontFamily: theme.font.bold,
+  },
+  botText: {
+    color: 'gray',
+    fontSize: 13,
     fontFamily: theme.font.regular,
+  },
+  errorText: {
+    color: theme.alert,
+    fontSize: 13,
+    fontFamily: theme.font.regular,
+    marginBottom: 8,
+  },
+  schemeCard: {
+    backgroundColor: theme.surface,
+    borderWidth: 1,
+    borderColor: theme.hairline,
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+  },
+  schemeTitle: {
+    fontFamily: theme.font.bold,
+    color: theme.ink,
+    fontSize: 15,
+  },
+  schemeLink: {
+    fontFamily: theme.font.regular,
+    color: theme.monsoon,
+    fontSize: 13,
+    marginTop: 4,
+  },
+  meta: {
+    fontFamily: theme.font.regular,
+    color: theme.inkSoft,
+    fontSize: 12,
+    marginTop: 8,
+  },
+  myschemeBtn: {
+    marginTop: 10,
+    backgroundColor: theme.paddy,
+    borderRadius: 14,
+    minHeight: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  myschemeText: {
+    fontFamily: theme.font.bold,
+    color: theme.inkInverse,
   },
   inputRow: {
     flexDirection: 'row',
@@ -164,8 +372,8 @@ const styles = StyleSheet.create({
     paddingTop: 9,
   },
   sendBtn: {
-    backgroundColor: theme.secondary,
-    borderRadius: 3,
+    backgroundColor: theme.paddy,
+    borderRadius: 14,
     paddingHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -175,18 +383,5 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
-
-const markdownBot = {
-  body: {color: 'gray', fontSize: 13, fontFamily: theme.font.regular},
-  strong: {fontWeight: 'bold'},
-  table: {borderWidth: 1, borderColor: '#ccc'},
-  th: {backgroundColor: '#e0e0e0', fontWeight: 'bold'},
-  tr: {borderBottomWidth: 1, borderColor: '#eee'},
-  td: {padding: 4},
-};
-
-const markdownUser = {
-  body: {color: '#222', fontSize: 12, fontFamily: theme.font.bold},
-};
 
 export default Schemes;

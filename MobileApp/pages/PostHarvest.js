@@ -10,40 +10,35 @@ import {
   Platform,
   FlatList,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import Toast from 'react-native-toast-message';
 import { theme } from '../theme.config';
-import { AIBACKEND_URL } from '../backendConfig';
+import { adviceFetch } from '../utils/api';
 import { UserContext } from '../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
 import VoicePlayer from '../components/VoicePlayer';
 
-const API_URL = `${AIBACKEND_URL}/postharvest`;
+const API_PATH = '/postharvest';
 
 const PostHarvest = () => {
   const { user } = useContext(UserContext);
-  const navigation = useNavigation();
   const { t } = useTranslation();
   const [crop, setCrop] = useState('');
   const [harvestDate, setHarvestDate] = useState('');
-  const [region, setRegion] = useState(user.location.state);
+  const [region, setRegion] = useState(user?.location?.state || '');
   const [loading, setLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [lang, setLang] = useState('English');
-  const [voiceText , setVoiceText] = useState('');
 
   useEffect(() => {
     const loadLanguage = async () => {
       const storedLang = await AsyncStorage.getItem('appLanguage');
-      console.log("storedLang:", storedLang);
-      setLang(storedLang);
+      setLang(storedLang || 'English');
     };
     loadLanguage();
   }, []);
@@ -87,31 +82,28 @@ const PostHarvest = () => {
         longitude,
         lang,
       };
-      const res = await fetch(API_URL, {
+      const res = await adviceFetch(API_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (data.beginning_text && data.plan && data.weather) {
-        setResponseData(data);
-        const planText = data.plan.map(item => 
-          `${item.action} on ${item.date} for ${item.duration}`
-        ).join(', ');
-        setVoiceText(`${data.beginning_text} Now talking about plan: ${planText}`);
-        Toast.show({
-          type: 'success',
-          text1: t('postHarvest.results.success'),
-          text2: t('postHarvest.results.successMessage'),
-        });
-      } else {
-        setError(t('postHarvest.results.noInstructions'));
+      if (!res.ok || !data.advice) {
+        const message = data.error || t('postHarvest.results.noInstructions');
+        setError(message);
         Toast.show({
           type: 'error',
           text1: t('postHarvest.results.error'),
-          text2: t('postHarvest.results.noInstructions'),
+          text2: message,
         });
+        return;
       }
+      setResponseData(data);
+      Toast.show({
+        type: 'success',
+        text1: t('postHarvest.results.success'),
+        text2: t('postHarvest.results.successMessage'),
+      });
     } catch (err) {
       const errorMessage = typeof err === 'string' ? err : err?.message || t('postHarvest.results.errorOccurred');
       setError(errorMessage);
@@ -124,38 +116,6 @@ const PostHarvest = () => {
       setLoading(false);
     }
   };
-
-  const getActionIcon = (action) => {
-    switch (action.toLowerCase()) {
-      case 'drying':
-        return 'sunny-outline';
-      case 'grading and cleaning':
-        return 'filter-outline';
-      case 'storage preparation':
-        return 'cube-outline';
-      case 'packaging':
-        return 'briefcase-outline';
-      case 'transport to market':
-        return 'car-outline';
-      default:
-        return 'leaf-outline';
-    }
-  };
-
-  const renderPlanItem = ({ item }) => (
-    <View style={styles.planCard}>
-      <Icon name={getActionIcon(item.action)} size={24} color={theme.primary} style={styles.planIcon} />
-      <View style={styles.planDetails}>
-        <Text style={styles.planAction}>{item.action}</Text>
-        <Text style={styles.planDate}>
-          <Icon name="calendar-outline" size={16} color={theme.text2} /> {item.date}
-        </Text>
-        <Text style={styles.planDuration}>
-          <Icon name="time-outline" size={16} color={theme.text2} /> {item.duration}
-        </Text>
-      </View>
-    </View>
-  );
 
   const renderWeatherItem = ({ item, index }) => (
     <View style={styles.weatherCard}>
@@ -195,6 +155,7 @@ const PostHarvest = () => {
           <Text style={styles.description}>
             {t('postHarvest.description')}
           </Text>
+          <Text style={styles.description}>{t('postHarvest.disclaimer')}</Text>
 
           <TextInput
             style={styles.input}
@@ -259,32 +220,28 @@ const PostHarvest = () => {
           )}
           {responseData && (
             <View style={styles.resultContainer}>
-              <VoicePlayer text={voiceText} lang={lang} />
+              <VoicePlayer text={responseData.advice} lang={lang} />
               <View style={styles.textSection}>
-                <Text style={styles.sectionText}>{responseData.beginning_text}</Text>
+                <Text style={styles.sectionText}>{responseData.advice}</Text>
+                <Text style={styles.sectionText}>{t('postHarvest.disclaimer')}</Text>
+                {responseData.source ? (
+                  <Text style={styles.sectionText}>{responseData.source}</Text>
+                ) : null}
               </View>
 
-              <Text style={styles.sectionTitle}>{t('postHarvest.sections.postHarvestPlan')}</Text>
-              <FlatList
-                data={responseData.plan}
-                renderItem={renderPlanItem}
-                keyExtractor={(item, index) => index.toString()}
-                style={styles.planList}
-              />
-
-              <Text style={styles.sectionTitle}>{t('postHarvest.sections.weatherForecast')}</Text>
-              <FlatList
-                data={responseData.weather.dates}
-                renderItem={renderWeatherItem}
-                keyExtractor={(item) => item}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.weatherList}
-              />
-
-              <View style={styles.textSection}>
-                <Text style={styles.sectionText}>{responseData.conclusion_text}</Text>
-              </View>
+              {responseData.weather?.dates?.length ? (
+                <>
+                  <Text style={styles.sectionTitle}>{t('postHarvest.sections.weatherForecast')}</Text>
+                  <FlatList
+                    data={responseData.weather.dates}
+                    renderItem={renderWeatherItem}
+                    keyExtractor={(item) => item}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.weatherList}
+                  />
+                </>
+              ) : null}
             </View>
           )}
         </ScrollView>
@@ -412,47 +369,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.font.bold,
     color: theme.text2,
     marginVertical: 12,
-  },
-  planList: {
-    marginVertical: 8,
-  },
-  planCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 12,
-    marginVertical: 6,
-    borderColor: theme.border,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  planIcon: {
-    marginRight: 12,
-  },
-  planDetails: {
-    flex: 1,
-  },
-  planAction: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-    marginBottom: 4,
-  },
-  planDate: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
-    marginBottom: 2,
-  },
-  planDuration: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
   },
   weatherList: {
     marginVertical: 8,

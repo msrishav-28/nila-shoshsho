@@ -1,168 +1,837 @@
 {
-    "settings": "సెట్టింగులు",
-    "profile_complete": "మీ ప్రొఫైల్ {{progress}}% పూర్తయింది. మెరుగైన అనుభవం కోసం వివరాలను పూర్తి చేద్దాం.",
-    "update_profile": "ప్రొఫైల్ అప్‌డేట్ చేయండి",
-    "document": "పత్రాలు",
-    "change_language": "భాష మార్చండి",
-    "change_password": "పాస్‌వర్డ్ మార్చండి",
-    "logout": "లాగ్‌అవుట్",
-  
-    "langPage": {
-      "title": "భాష మార్చండి",
-      "desc": "మీ యాప్ భాషను ఎంచుకోండి. మీ మాట్లాడే భాషలు క్రింద చూపించబడ్డాయి.",
-      "select": "భాష ఎంచుకోండి",
-      "current": "ప్రస్తుత: {{lang}}",
-      "btn": "భాష మార్చండి",
-      "no_select_title": "ఏ భాష ఎంచుకోలేదు",
-      "no_select_msg": "దయచేసి ఒక భాష ఎంచుకోండి",
-      "success_title": "భాష మార్చబడింది",
-      "success_msg": "యాప్ భాష {{lang}} కు సెట్ చేయబడింది",
-      "success" : "విజయవంతం",
-      "err_title": "లోపం",
-      "err_lang" : "భాష లోడ్ చేయడంలో లోపం",
-      "err_msg": "భాష మార్చలేకపోయింది",
-      "spoken_title": "మాట్లాడే భాషలు",
-      "no_spoken": "మీ ప్రొఫైల్‌లో మాట్లాడే భాషలు ఏవీ జోడించబడలేదు",
-      "fail" : "భాష మార్చడంలో విఫలమైంది"
+  "settings": "సెట్టింగులు",
+  "profile_complete": "మీ ప్రొఫైల్ {{progress}}% పూర్తయింది. మెరుగైన అనుభవం కోసం వివరాలను పూర్తి చేద్దాం.",
+  "update_profile": "ప్రొఫైల్ అప్‌డేట్ చేయండి",
+  "document": "పత్రాలు",
+  "change_language": "భాష మార్చండి",
+  "change_password": "పాస్‌వర్డ్ మార్చండి",
+  "logout": "లాగ్‌అవుట్",
+  "langPage": {
+    "title": "భాష మార్చండి",
+    "desc": "మీ యాప్ భాషను ఎంచుకోండి. మీ మాట్లాడే భాషలు క్రింద చూపించబడ్డాయి.",
+    "select": "భాష ఎంచుకోండి",
+    "current": "ప్రస్తుత: {{lang}}",
+    "btn": "భాష మార్చండి",
+    "no_select_title": "ఏ భాష ఎంచుకోలేదు",
+    "no_select_msg": "దయచేసి ఒక భాష ఎంచుకోండి",
+    "success_title": "భాష మార్చబడింది",
+    "success_msg": "యాప్ భాష {{lang}} కు సెట్ చేయబడింది",
+    "success": "విజయవంతం",
+    "err_title": "లోపం",
+    "err_lang": "భాష లోడ్ చేయడంలో లోపం",
+    "err_msg": "భాష మార్చలేకపోయింది",
+    "spoken_title": "మాట్లాడే భాషలు",
+    "no_spoken": "మీ ప్రొఫైల్‌లో మాట్లాడే భాషలు ఏవీ జోడించబడలేదు",
+    "fail": "భాష మార్చడంలో విఫలమైంది"
+  },
+  "lang": {
+    "english": "ఇంగ్లీష్",
+    "hindi": "హిందీ",
+    "marathi": "మరాఠీ",
+    "tamil": "తమిళం",
+    "bengali": "బెంగాలీ",
+    "kannada": "కన్నడ",
+    "telugu": "తెలుగు",
+    "malayalam": "మలయాళం"
+  },
+  "UpPage": {
+    "title": "ప్రొఫైల్ అప్‌డేట్ చేయండి",
+    "desc": "మీ సమాచారాన్ని అప్‌టుడేట్‌గా ఉంచడానికి ప్రొఫైల్ వివరాలను అప్‌డేట్ చేయండి.",
+    "username_placeholder": "వాడుకరి పేరు*",
+    "bio_placeholder": "జీవన చరిత్ర",
+    "languages_spoken_label": "మాట్లాడే భాషలు",
+    "language_picker_placeholder": "భాష ఎంచుకోండి",
+    "no_languages_added": "ఏ భాషలు జోడించబడలేదు",
+    "address_placeholder": "చిరునామా",
+    "city_placeholder": "నగరం",
+    "state_placeholder": "రాష్ట్రం",
+    "country_placeholder": "దేశం",
+    "pincode_placeholder": "పిన్‌కోడ్",
+    "facebook_placeholder": "ఫేస్‌బుక్ URL",
+    "instagram_placeholder": "ఇన్‌స్టాగ్రామ్ URL",
+    "gov_id_name_placeholder": "Government ID Name (e.g., Aadhaar)",
+    "gov_id_value_placeholder": "Government ID Value",
+    "change_picture_text": "Change Picture",
+    "edit_profile_pic_error": "Image Picker Error",
+    "image_picker_error_msg": "Something went wrong while selecting the image.",
+    "profile_pic_updated": "ప్రొఫైల్ చిత్రం అప్‌డేట్ చేయబడింది.",
+    "update_failed": "Update Failed",
+    "update_profile_button": "Update Profile",
+    "loading_text": "Updating...",
+    "profile_updated_success_msg": "Profile updated successfully",
+    "profile_updated_error_msg": "An error occurred during profile update",
+    "language_added_msg": "భాష ప్రొఫైల్‌కు జోడించబడింది.",
+    "language_remove_msg": "భాష తొలగించండి",
+    "add": "Add",
+    "twitter_placeholder": "ట్విట్టర్ URL",
+    "linkedIn_placeholder": "లింక్డ్‌ఇన్ URL",
+    "save_btn": "సేవ్ చేయండి",
+    "cancel_btn": "రద్దు చేయండి",
+    "profile_pic_btn": "ప్రొఫైల్ చిత్రాన్ని అప్‌డేట్ చేయండి",
+    "language_added_title": "భాష జోడించబడింది",
+    "remove_language_title": "భాష తొలగించండి",
+    "remove_language_msg": "మీరు ఈ భాషను తొలగించాలని అనుకుంటున్నారా?",
+    "yes": "అవును",
+    "no": "లేదు",
+    "language_removed_msg": "భాష తొలగించబడింది",
+    "error_title": "లోపం",
+    "success_title": "విజయవంతం",
+    "validation_title": "ధృవీకరణ లోపం",
+    "validation_msg": "దయచేసి అన్ని అవసరమైన ఫీల్డులను పూరించండి.",
+    "profile_updated_msg": "ప్రొఫైల్ విజయవంతంగా అప్‌డేట్ చేయబడింది.",
+    "profile_update_err": "ప్రొఫైల్ అప్‌డేట్ చేయడంలో లోపం.",
+    "image_upload_error": "చిత్రం అప్‌లోడ్ చేయడంలో లోపం."
+  },
+  "HomePage": {
+    "greetings": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening",
+      "night": "Good Night"
     },
-
-    "lang" :{
-        "english" : "ఇంగ్లీష్",
-        "hindi" : "హిందీ",
-        "marathi" : "మరాఠీ",
-        "tamil" : "తమిళం",
-        "bengali" : "బెంగాలీ",
-        "kannada" : "కన్నడ",
-        "telugu" : "తెలుగు",
-        "malayalam" : "మలయాళం"
+    "searchBar": {
+      "placeholder": "Check out you Harvest Stock 🌾",
+      "caption": "ఈ యాప్‌లోని సాధనానికి తీసుకువెళ్తుంది. ఇది వెబ్ సెర్చ్ కాదు."
     },
-
-        "UpPage": {
-          "title": "ప్రొఫైల్ అప్‌డేట్ చేయండి",
-          "desc": "మీ సమాచారాన్ని అప్‌టుడేట్‌గా ఉంచడానికి ప్రొఫైల్ వివరాలను అప్‌డేట్ చేయండి.",
-          "username_placeholder": "వాడుకరి పేరు*",
-          "bio_placeholder": "జీవన చరిత్ర",
-          "languages_spoken_label": "మాట్లాడే భాషలు",
-          "language_picker_placeholder": "భాష ఎంచుకోండి",
-          "no_languages_added": "ఏ భాషలు జోడించబడలేదు",
-          "address_placeholder": "చిరునామా",
-          "city_placeholder": "నగరం",
-          "state_placeholder": "రాష్ట్రం",
-          "country_placeholder": "దేశం",
-          "pincode_placeholder": "పిన్‌కోడ్",
-          "facebook_placeholder": "ఫేస్‌బుక్ URL",
-          "instagram_placeholder": "ఇన్‌స్టాగ్రామ్ URL",
-          "twitter_placeholder": "ట్విట్టర్ URL",
-          "linkedIn_placeholder": "లింక్డ్‌ఇన్ URL",
-          "save_btn": "సేవ్ చేయండి",
-          "cancel_btn": "రద్దు చేయండి",
-          "profile_pic_btn": "ప్రొఫైల్ చిత్రాన్ని అప్‌డేట్ చేయండి",
-          "language_added_title": "భాష జోడించబడింది",
-          "language_added_msg": "భాష ప్రొఫైల్‌కు జోడించబడింది.",
-          "language_remove_msg": "భాష తొలగించండి",
-          "remove_language_title": "భాష తొలగించండి",
-          "remove_language_msg": "మీరు ఈ భాషను తొలగించాలని అనుకుంటున్నారా?",
-          "yes": "అవును",
-          "no": "లేదు",
-          "language_removed_msg": "భాష తొలగించబడింది",
-          "error_title": "లోపం",
-          "success_title": "విజయవంతం",
-          "validation_title": "ధృవీకరణ లోపం",
-          "validation_msg": "దయచేసి అన్ని అవసరమైన ఫీల్డులను పూరించండి.",
-          "profile_updated_msg": "ప్రొఫైల్ విజయవంతంగా అప్‌డేట్ చేయబడింది.",
-          "profile_update_err": "ప్రొఫైల్ అప్‌డేట్ చేయడంలో లోపం.",
-          "image_upload_error": "చిత్రం అప్‌లోడ్ చేయడంలో లోపం.",
-          "profile_pic_updated": "ప్రొఫైల్ చిత్రం అప్‌డేట్ చేయబడింది."
-        },
-
-    "crop_suggestion": {
-      "title": "పంట సూచనలు",
-      "subtitle": "మీ మట్టి మరియు వాతావరణ పరిస్థితులకు అనుకూలమైన పంటలను కనుగొనండి",
-      "form": {
-        "nitrogen": "నైట్రోజన్ (N)",
-        "phosphorus": "ఫాస్ఫరస్ (P)",
-        "potassium": "పొటాషియం (K)", 
-        "temperature": "ఉష్ణోగ్రత (°C)",
-        "humidity": "తేమ (%)",
-        "ph": "pH విలువ",
-        "rainfall": "వర్షపాతం (mm)",
-        "get_suggestions": "సూచనలు పొందండి",
-        "placeholders": {
-          "nitrogen": "నైట్రోజన్ పరిమాణం నమోదు చేయండి",
-          "phosphorus": "ఫాస్ఫరస్ పరిమాణం నమోదు చేయండి",
-          "potassium": "పొటాషియం పరిమాణం నమోదు చేయండి",
-          "temperature": "ఉష్ణోగ్రత నమోదు చేయండి",
-          "humidity": "తేమ పరిమాణం నమోదు చేయండి",
-          "ph": "pH విలువ నమోదు చేయండి",
-          "rainfall": "వర్షపాతం పరిమాణం నమోదు చేయండి"
-        }
+    "weather": {
+      "fetching": "Fetching weather...",
+      "location": "Location",
+      "windSpeed": "km/h",
+      "openMeteo": "Open-Meteo",
+      "imdChip": "IMD",
+      "forecast": {
+        "title": "Weather Forecast"
       },
-      "validation": {
-        "required": "ఈ ఫీల్డ్ అవసరం",
-        "min_value": "కనిష్ట విలువ {{min}}",
-        "max_value": "గరిష్ట విలువ {{max}}",
-        "invalid_number": "దయచేసి చెల్లుబాటు అయ్యే సంఖ్యను నమోదు చేయండి"
-      },
-      "results": {
-        "recommended_crops": "సిఫార్సు చేయబడిన పంటలు",
-        "confidence": "విశ్వాసం: {{confidence}}%",
-        "no_results": "మీ ప్రమాణాలకు ఏ పంటలు కనుగొనబడలేదు",
-        "loading": "సూచనలు లోడ్ అవుతున్నాయి..."
-      },
-      "error": {
-        "title": "లోపం",
-        "message": "పంట సూచనలను పొందడంలో విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
-        "network": "నెట్‌వర్క్ లోపం. మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేయండి."
+      "codes": {
+        "0": "Clear",
+        "1": "Mainly Clear",
+        "2": "Partly Cloudy",
+        "3": "Overcast",
+        "45": "Fog",
+        "48": "Depositing Rime Fog",
+        "51": "Drizzle: Light",
+        "53": "Drizzle: Moderate",
+        "55": "Drizzle: Dense",
+        "56": "Freezing Drizzle: Light",
+        "57": "Freezing Drizzle: Dense",
+        "61": "Rain: Slight",
+        "63": "Rain: Moderate",
+        "65": "Rain: Heavy",
+        "66": "Freezing Rain: Light",
+        "67": "Freezing Rain: Heavy",
+        "71": "Snow fall: Slight",
+        "73": "Snow fall: Moderate",
+        "75": "Snow fall: Heavy",
+        "77": "Snow grains",
+        "80": "Rain showers: Slight",
+        "81": "Rain showers: Moderate",
+        "82": "Rain showers: Violent",
+        "85": "Snow showers: Slight",
+        "86": "Snow showers: Heavy",
+        "95": "Thunderstorm: Slight/Moderate",
+        "96": "Thunderstorm: Hail",
+        "99": "Thunderstorm: Heavy Hail"
       }
     },
-
-    "home": {
-      "greeting": "నమస్కారం",
-      "welcome_back": "మళ్లీ స్వాగతం",
-      "weather": {
-        "title": "నేటి వాతావరణం",
-        "temperature": "ఉష్ణోగ్రత",
-        "humidity": "తేమ", 
-        "wind_speed": "గాలి వేగం",
-        "description": "వివరణ"
-      },
-      "quick_actions": {
-        "title": "త్వరిత చర్యలు",
-        "crop_care": "పంట సంరక్షణ",
-        "market_prices": "మార్కెట్ ధరలు",
-        "weather_forecast": "వాతావరణ అంచనా",
-        "schemes": "ప్రభుత్వ పథకాలు"
-      },
-      "recent_activities": {
-        "title": "ఇటీవలి కార్యకలాపాలు",
-        "no_activities": "ఇటీవలి కార్యకలాపాలు లేవు"
-      }
+    "sections": {
+      "farmServices": "Farm Services",
+      "govSchemes": "Government Schemes",
+      "learnMore": "Learn More"
     },
-
-    "common": {
-      "ok": "సరే",
-      "cancel": "రద్దు చేయండి", 
-      "save": "సేవ్ చేయండి",
-      "edit": "సవరించండి",
-      "delete": "తొలగించండి",
-      "back": "వెనుకకు",
-      "next": "తదుపరి",
-      "previous": "మునుపటి",
-      "loading": "లోడ్ అవుతోంది...",
-      "retry": "మళ్లీ ప్రయత్నించండి",
-      "search": "వెతకండి",
-      "filter": "ఫిల్టర్",
-      "sort": "క్రమబద్ధీకరించండి",
-      "refresh": "రిఫ్రెష్ చేయండి",
-      "share": "పంచుకోండి",
-      "download": "డౌన్‌లోడ్ చేయండి",
-      "upload": "అప్‌లోడ్ చేయండి",
-      "submit": "సమర్పించండి",
-      "reset": "రీసెట్ చేయండి",
-      "clear": "క్లియర్ చేయండి",
-      "select": "ఎంచుకోండి",
-      "confirm": "నిర్ధారించండి",
-      "yes": "అవును",
-      "no": "లేదు"
+    "features": {
+      "cropCare": "Crop Care",
+      "postHarvest": "Post Harvest",
+      "market": "Market",
+      "schemes": "Schemes",
+      "fertilize": "Fertilize",
+      "news": "News",
+      "sprinkler": "Manage Water"
+    },
+    "suggestion": {
+      "title": "Want suggestions on which crops to grow?",
+      "btn": "Suggest"
+    },
+    "chatbot": {
+      "needHelp": "Need help exploring the app? Open the guide to jump to a screen.",
+      "chatButton": "Open guide"
+    },
+    "branding": {
+      "nilaName": "Nila",
+      "shoshshoName": "Shoshsho",
+      "tagline": "Crafted with ❤️ in Bengaluru, India"
+    },
+    "loading": {
+      "userInfo": "Loading user information..."
+    },
+    "errors": {
+      "weatherPermission": "Permission to access location was denied",
+      "weatherFetch": "Could not fetch weather data.",
+      "locationError": "Location error: ",
+      "weatherLocationFetch": "Could not fetch weather/location."
+    },
+    "forecast": {
+      "rain": "వర్షం",
+      "sky": "ఆకాశం"
     }
+  },
+  "chatbot": {
+    "headerTitle": "Guide",
+    "initialMessage": "Where do you want to go?",
+    "loadingMessage": "Hold on, we're taking you there...",
+    "prompts": {
+      "schemes": "ఏ ప్రభుత్వ పథకాలు చిన్న రైతుకు సహాయం?",
+      "cropCare": "జబ్బుపడిన ఆకును ఎలా చూడాలి?",
+      "market": "మండి ధరలు ఎలా చదవాలి?"
+    },
+    "options": {
+      "governmentSchemes": "Check Government Schemes",
+      "cropCare": "Crop Care & Disease Detection",
+      "accessMarket": "Access Market",
+      "settings": "Go to Settings",
+      "viewProfile": "View My Profile",
+      "updateProfile": "Update My Profile"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "description": "Your profile details are displayed below.",
+    "fields": {
+      "username": "Username",
+      "role": "Role",
+      "gender": "Gender",
+      "bio": "Bio",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "country": "Country",
+      "pincode": "Pincode",
+      "facebookUrl": "Facebook URL",
+      "instagramUrl": "Instagram URL",
+      "governmentIdName": "Government ID Name",
+      "governmentIdValue": "Government ID Value",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "verificationStatus": "Verification Status",
+      "languagesSpoken": "Languages Spoken",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "status": {
+      "verified": "Verified",
+      "notVerified": "Not Verified",
+      "notAvailable": "N/A"
+    }
+  },
+  "postHarvest": {
+    "title": "Post Harvest",
+    "description": "Enter crop details to get post-harvest instructions for your region.",
+    "fields": {
+      "crop": "Crop (e.g., Wheat)",
+      "harvestDate": "Harvest Date (YYYY-MM-DD)",
+      "region": "Region (e.g., Maharashtra)",
+      "dob": "Date of Birth (YYYY-MM-DD)"
+    },
+    "buttons": {
+      "getInstructions": "Get Instructions",
+      "loading": "Loading..."
+    },
+    "results": {
+      "success": "Success",
+      "successMessage": "Instructions retrieved successfully",
+      "error": "Error",
+      "noInstructions": "No instructions received",
+      "errorOccurred": "An error occurred"
+    },
+    "sections": {
+      "postHarvestPlan": "Post-Harvest Plan",
+      "weatherForecast": "Weather Forecast"
+    },
+    "weather": {
+      "temperature": "°C",
+      "humidity": "%",
+      "precipitation": "mm",
+      "windSpeed": "km/h"
+    },
+    "disclaimer": "Weather plus advice, not a sensor."
+  },
+  "schemes": {
+    "header": "Schemes",
+    "botGreeting": "Hello! Ask me about government schemes for farmers.",
+    "inputPlaceholder": "Ask about a scheme...",
+    "send": "Send",
+    "error": {
+      "network": "Network error. Please try again.",
+      "noData": "Sorry, I could not find any information."
+    },
+    "openMyscheme": "Open myScheme.gov.in",
+    "sourceLabel": "Source",
+    "noSchemes": "No matching schemes. You can search on myScheme."
+  },
+  "cropCare": {
+    "header": "Crop Care",
+    "uploadImage": "Upload Image",
+    "changeImage": "Change Image",
+    "takePhoto": "Take Photo",
+    "analyzing": "Analyzing plant image...",
+    "unknownPlant": "Unknown Plant",
+    "noDisease": "No Disease Detected",
+    "treatment": {
+      "required": "Treatment Required",
+      "type": "Disease Type: {{type}}",
+      "procedure": "Treatment Procedure"
+    },
+    "health": {
+      "plantHealth": "Plant Health:",
+      "leafHealth": "Leaf Health:",
+      "statuses": {
+        "healthy": "Healthy",
+        "mildlyAffected": "Mildly Affected",
+        "severelyAffected": "Severely Affected",
+        "dead": "Dead"
+      }
+    },
+    "symptoms": "Symptoms",
+    "errors": {
+      "imagePicker": "Image picker error: {{message}}",
+      "failedImagePicker": "Failed to open image picker",
+      "camera": "Camera error: {{message}}",
+      "failedCamera": "Failed to open camera",
+      "invalidResponse": "Invalid response from server",
+      "serverError": "Server error: {{status}}. {{message}}",
+      "noResponse": "No response from server. Please check your connection.",
+      "requestError": "Request error: {{message}}"
+    }
+  },
+  "news": {
+    "header": "Agriculture News",
+    "search": "Search news...",
+    "category": "Category",
+    "selectCategory": "Select category",
+    "state": "State",
+    "selectState": "Select state",
+    "searchState": "Search state",
+    "retry": "Try Again",
+    "noResults": "No news found",
+    "errors": {
+      "fetchError": "Failed to load news",
+      "noResults": "No news matching your criteria"
+    },
+    "categories": {
+      "all": "All Categories",
+      "crops": "Crops",
+      "weather": "Weather",
+      "market": "Market",
+      "technology": "Technology",
+      "government": "Government"
+    },
+    "states": {
+      "all": "All States",
+      "andhraPradesh": "Andhra Pradesh",
+      "punjab": "Punjab",
+      "haryana": "Haryana",
+      "maharashtra": "Maharashtra",
+      "karnataka": "Karnataka",
+      "madhyaPradesh": "Madhya Pradesh",
+      "gujarat": "Gujarat",
+      "rajasthan": "Rajasthan",
+      "uttarPradesh": "Uttar Pradesh",
+      "tamilNadu": "Tamil Nadu",
+      "westBengal": "West Bengal",
+      "bihar": "Bihar",
+      "telangana": "Telangana"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "scheme": "Scheme",
+    "cropCare": "Crop Care",
+    "market": "Market",
+    "news": "News"
+  },
+  "offlineBanner": {
+    "text": "You're offline"
+  },
+  "notifications": {
+    "header": "सूचनाएँ",
+    "unavailableTitle": "अलर्ट अभी उपलब्ध नहीं हैं",
+    "unavailableBody": "यह स्क्रीन अभी जुड़ी नहीं है। मौसम, योजनाएँ और बाज़ार होम से चलते हैं।",
+    "emptyTitle": "अभी कोई अलर्ट नहीं",
+    "emptyBody": "गाँव प्रोफ़ाइल पर होने के बाद मौसम चेतावनियाँ यहाँ आएंगी।"
+  },
+  "fertilizer": {
+    "header": "Fertilizer Recommendation",
+    "description": "Enter crop and soil details to get tailored fertilizer recommendations.",
+    "inputs": {
+      "cropName": "Crop Name (e.g., Jwari)",
+      "soilPh": "Soil pH (e.g., 6.5)",
+      "soilNitrogen": "Soil Nitrogen (%)",
+      "carbon": "Carbon (%)",
+      "carbonStock": "Carbon Stock (Mg/ha)",
+      "soilClay": "Soil Clay (%)"
+    },
+    "button": {
+      "getRecommendations": "Get Recommendations",
+      "loading": "Loading..."
+    },
+    "results": {
+      "fertilizerRecommendations": "Fertilizer Recommendations",
+      "weatherConditions": "Weather Conditions",
+      "currentWeather": "Current Weather",
+      "summaryTable": "Summary Table"
+    },
+    "errors": {
+      "fillAllFields": "Please fill all fields",
+      "invalidInput": "Invalid Input",
+      "mustBeValidNumber": "must be a valid positive number",
+      "noRecommendations": "No fertilizer recommendations available",
+      "anErrorOccurred": "An error occurred"
+    },
+    "success": {
+      "recommendationsGenerated": "Fertilizer recommendations generated successfully"
+    },
+    "sections": {
+      "soilAnalysis": "Soil Analysis Interpretation",
+      "recommendedFertilizer": "Recommended Fertilizer Types & Ratios",
+      "applicationRates": "Application Rates & Units",
+      "timingMethod": "Timing & Method",
+      "localContext": "Local Context & Cost Considerations",
+      "environmentalSafety": "Environmental & Safety Precautions",
+      "additionalAmendments": "Additional Soil Amendments",
+      "expectedOutcomes": "Expected Outcomes"
+    },
+    "soilSource": "Soil source",
+    "soilCardHelp": "Optional. Copy numbers from your Soil Health Card.",
+    "soilCardLink": "Open soilhealth.dac.gov.in"
+  },
+  "cropSuggestion": {
+    "header": "Crop Suggestion",
+    "description": "Enter your location and land size to get personalized crop recommendations for the current season.",
+    "calendarDescription": "Enter a crop name to generate a detailed crop calendar plan.",
+    "inputs": {
+      "city": "City",
+      "state": "State",
+      "landAcres": "Land Size (Acres)",
+      "cropName": "Crop Name"
+    },
+    "button": {
+      "getRecommendations": "Get Crop Recommendations",
+      "generateCalendar": "Generate Crop Calendar",
+      "loading": "Loading..."
+    },
+    "errors": {
+      "invalidInput": "Invalid Input",
+      "fillAllFields": "Please fill all fields.",
+      "landAcresInvalid": "Land acres must be a valid positive number.",
+      "noRecommendations": "No crop recommendations available.",
+      "noCalendarData": "No calendar data available for the selected crop.",
+      "enterCropName": "Please enter a crop name.",
+      "anErrorOccurred": "An error occurred. Please try again."
+    },
+    "success": {
+      "recommendationsGenerated": "Fertilizer recommendations generated successfully",
+      "calendarGenerated": "Crop calendar generated successfully"
+    },
+    "results": {
+      "cropRecommendations": "Crop Recommendations",
+      "reason": "Reason for Recommendations",
+      "recommendations": "Recommended Crops",
+      "regionSeason": "Region and Season",
+      "region": "Region",
+      "season": "Season",
+      "weatherConditions": "Weather Conditions",
+      "weatherPlaceholder": "Weather Information",
+      "noWeatherData": "Weather data not available.",
+      "calendarFor": "Crop Calendar for {{crop}}",
+      "duration": "Duration",
+      "weeks": "Weeks",
+      "weatherSummary": "Weather Summary",
+      "week": "Week",
+      "table": {
+        "crop": "Crop",
+        "totalYield": "Total Yield",
+        "yieldPerAcre": "Yield per Acre",
+        "risk": "Risk",
+        "action": "Action"
+      },
+      "seasonWindows": "Season windows",
+      "nationalTypical": "National typical, local KVK may differ",
+      "landSize": "Land size",
+      "acres": "acres",
+      "sowMonths": "Sow",
+      "harvestMonths": "Harvest"
+    },
+    "tabs": {
+      "suggest": "Suggest Crops",
+      "calendar": "Crop Calendar"
+    }
+  },
+  "documents": {
+    "header": "Documents",
+    "tabs": {
+      "myDocs": "MyDocs",
+      "translate": "Translate"
+    },
+    "upload": {
+      "description": "Upload your documents here.",
+      "noFileSelected": "No file selected",
+      "uploadButton": "Upload",
+      "loading": "Loading.."
+    },
+    "previousDocs": {
+      "title": "'s Previous Documents"
+    },
+    "translate": {
+      "title": "Translate Document",
+      "description": "Choose a document to translate.",
+      "button": "Translate",
+      "translating": "Translating..",
+      "noFileSelected": "No file selected",
+      "translatedDocument": "Translated Document"
+    },
+    "alerts": {
+      "invalidFile": {
+        "title": "Invalid File",
+        "message": "Only PDF files are allowed."
+      },
+      "docNotSelected": {
+        "title": "Document not selected",
+        "message": "Please select a document first"
+      },
+      "uploadSuccess": {
+        "title": "Document uploaded",
+        "message": "Document has been uploaded successfully"
+      },
+      "uploadFailed": {
+        "title": "Document uploading failed",
+        "message": "Failed to upload document"
+      },
+      "viewFailed": {
+        "title": "View Failed",
+        "message": "Unable to open document"
+      },
+      "fileFormatFailed": {
+        "title": "File format failed",
+        "message": "Only PDF document is allowed"
+      },
+      "translateNotSelected": {
+        "title": "Document not selected",
+        "message": "Please select a document to translate"
+      },
+      "translateSuccess": {
+        "title": "Translation Successful",
+        "message": "Document has been translated"
+      },
+      "translateFailed": {
+        "title": "Translation Failed",
+        "message": "Unable to translate document"
+      }
+    }
+  },
+  "voice": "Tap here to listen to the information.",
+  "waterManagement": {
+    "title": "Water Management",
+    "description": "Plan your irrigation schedule based on crop type, field size, and irrigation method for efficient water use.",
+    "fields": {
+      "crop": "Crop Name",
+      "fieldSize": "Field Size (Acres)",
+      "irrigationMethod": "Select Irrigation Method"
+    },
+    "buttons": {
+      "loading": "Loading...",
+      "getPlan": "Get Irrigation Plan"
+    },
+    "results": {
+      "error": "Error",
+      "noInstructions": "Please fill all fields to get the irrigation plan.",
+      "success": "Success",
+      "successMessage": "Irrigation plan generated successfully.",
+      "errorOccurred": "An error occurred while fetching the plan.",
+      "totalWater": "Total Water"
+    },
+    "sections": {
+      "irrigationSchedule": "Irrigation Schedule",
+      "waterSavingTips": "Water-Saving Tips"
+    },
+    "disclaimer": "Weather plus advice, not a sensor."
+  },
+  "marketPrices": {
+    "title": "Market Prices",
+    "description": "View the latest market prices for agricultural commodities across India.",
+    "filters": {
+      "allStates": "All States",
+      "allDistricts": "All Districts",
+      "allCommodities": "All Commodities",
+      "state": "State",
+      "district": "District",
+      "commodity": "Commodity",
+      "selectState": "Select state",
+      "selectDistrict": "Select district",
+      "selectCommodity": "Select commodity",
+      "search": "Search..."
+    },
+    "fields": {
+      "commodity": "Commodity",
+      "lastUpdated": "Last Updated",
+      "currentPrice": "Current Price",
+      "minPrice": "Min Price",
+      "modalPrice": "Modal Price",
+      "maxPrice": "Max Price",
+      "priceTrend": "Price Trend",
+      "aiAnalysis": "AI Market Analysis",
+      "tips": "Tips",
+      "liveComment": "Comment on these live rows only"
+    },
+    "status": {
+      "notAvailable": "N/A",
+      "noData": "No data available",
+      "updatedOn": "Updated on",
+      "commodity": "Commodity",
+      "loading": "Loading market data...",
+      "aiLoading": "Generating AI analysis...",
+      "noChartData": "No price trend data available"
+    },
+    "errors": {
+      "title": "Error",
+      "message": "Failed to fetch market data. Please try again later.",
+      "fetchFailed": "Failed to fetch data",
+      "noData": "No data available for the selected filters.",
+      "tryChangingFilters": "Try changing your filter options.",
+      "aiNotAvailable": "AI analysis not available at this moment.",
+      "aiFailed": "Unable to generate AI analysis"
+    },
+    "actions": {
+      "retry": "Retry",
+      "previous": "Prev",
+      "next": "Next"
+    },
+    "pagination": {
+      "page": "Page",
+      "of": "of"
+    },
+    "tips": {
+      "comparePrices": "Compare prices across different markets for better deals",
+      "transportCosts": "Check transportation costs before deciding where to sell",
+      "storageOptions": "Consider storage options if current prices are unfavorable",
+      "weatherForecasts": "Stay updated with weather forecasts as they affect prices"
+    }
+  },
+  "logistics": {
+    "header": "काम",
+    "create": "पिकअप दर्ज करें",
+    "partnerCopy": "खुले काम और आपके स्वीकार किए काम।",
+    "crop": "फसल",
+    "quantity": "मात्रा (किलो)",
+    "city": "पिकअप शहर",
+    "state": "पिकअप राज्य",
+    "post": "काम दर्ज करें",
+    "cancel": "रद्द करें",
+    "accept": "स्वीकार करें",
+    "done": "पूरा करें",
+    "emptyTitle": "अभी कोई काम नहीं",
+    "emptyFarmer": "फसल ले जाने के लिए तैयार हो तो पिकअप दर्ज करें।",
+    "emptyPartner": "अभी कोई खुला पिकअप नहीं है।",
+    "invalid": "फसल और सही वजन किलो में लिखें।",
+    "error": "काम अपडेट नहीं हो सका।",
+    "forbidden": "यह काम लॉजिस्टिक्स साझेदारों के लिए है।"
+  },
+  "welcome": {
+    "name": "నీలా షోషో",
+    "desc": "రైతులు, కొనుగోలుదారులు, వ్యవసాయ నిపుణులతో కలవండి.",
+    "createAccount": "ఖాతా సృష్టించండి",
+    "haveAccount": "నా ఖాతా ఉంది",
+    "madeInIndia": "భారతదేశంలో తయారు"
+  },
+  "login": {
+    "title": "లాగిన్",
+    "desc": "ఇమెయిల్ మరియు పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.",
+    "emailPlaceholder": "ఇమెయిల్",
+    "passwordPlaceholder": "పాస్‌వర్డ్",
+    "showPassword": "పాస్‌వర్డ్ చూపించు",
+    "hidePassword": "పాస్‌వర్డ్ దాచు",
+    "submit": "లాగిన్",
+    "noAccount": "ఖాతా లేదా?",
+    "goSignup": "సైన్ అప్",
+    "emailRequiredTitle": "ఇమెయిల్ కావాలి",
+    "emailRequiredMsg": "సైన్ అప్ ఇమెయిల్ రాయండి.",
+    "passwordTitle": "పాస్‌వర్డ్ చిన్నది",
+    "passwordMsg": "పాస్‌వర్డ్ కనీసం 8 అక్షరాలు",
+    "successMsg": "మీరు లాగిన్ అయ్యారు",
+    "failedTitle": "లాగిన్ కాలేదు",
+    "failedMsg": "మళ్లీ ప్రయత్నించండి."
+  },
+  "signup": {
+    "title": "సైన్ అప్",
+    "desc": "పంట మరియు మార్కెట్ కోసం ఖాతా సృష్టించండి.",
+    "usernamePlaceholder": "వినియోగదారు పేరు",
+    "emailPlaceholder": "ఇమెయిల్",
+    "passwordPlaceholder": "పాస్‌వర్డ్",
+    "showPassword": "పాస్‌వర్డ్ చూపించు",
+    "hidePassword": "పాస్‌వర్డ్ దాచు",
+    "rolePlaceholder": "పాత్ర ఎంచుకోండి",
+    "genderPlaceholder": "లింగం ఎంచుకోండి",
+    "roleFarmer": "రైతు",
+    "roleLogistics": "లాజిస్టిక్స్",
+    "genderMale": "పురుషుడు",
+    "genderFemale": "స్త్రీ",
+    "genderOther": "ఇతరులు",
+    "submit": "సైన్ అప్",
+    "hasAccount": "ఖాతా ఉందా?",
+    "goLogin": "లాగిన్",
+    "requiredTitle": "వివరాలు లేవు",
+    "requiredMsg": "పేరు, ఇమెయిల్, పాస్‌వర్డ్, పాత్ర, లింగం నింపండి.",
+    "passwordTitle": "పాస్‌వర్డ్ చిన్నది",
+    "passwordMsg": "పాస్‌వర్డ్ కనీసం 8 అక్షరాలు",
+    "successMsg": "ఖాతా సిద్ధం",
+    "failedTitle": "సైన్ అప్ కాలేదు",
+    "failedMsg": "మళ్లీ ప్రయత్నించండి."
+  },
+  "password": {
+    "title": "పాస్‌వర్డ్ మార్చండి",
+    "copy": "ప్రస్తుత పాస్‌వర్డ్, తర్వాత కొత్తది.",
+    "current": "ప్రస్తుత పాస్‌వర్డ్",
+    "next": "కొత్త పాస్‌వర్డ్",
+    "confirm": "కొత్తదాన్ని నిర్ధారించండి",
+    "submit": "పాస్‌వర్డ్ నవీకరించండి",
+    "needBoth": "ప్రస్తుత మరియు కొత్త పాస్‌వర్డ్ రాయండి",
+    "tooShort": "కొత్త పాస్‌వర్డ్ 8 అక్షరాలు",
+    "mismatch": "పాస్‌వర్డ్‌లు సరిపోలలేదు",
+    "success": "పాస్‌వర్డ్ నవీకరించబడింది",
+    "failed": "పాస్‌వర్డ్ మారలేదు"
+  },
+  "searchMic": {
+    "listening": "వినిపిస్తోంది… ఆపడానికి ట్యాప్ చేయండి",
+    "unavailable": "వాయిస్ వినడం లేదు",
+    "noSpeech": "మాట వినిపించలేదు"
+  },
+  "marketTabs": {
+    "prices": "ప్రస్తుత ధరలు",
+    "stores": "దగ్గరి దుకాణాలు",
+    "compare": "పోల్చండి",
+    "insights": "సమాచారం"
+  },
+  "marketCompare": {
+    "title": "मंडी भाव तुलना",
+    "crop": "फसल",
+    "stateA": "पहला राज्य",
+    "stateB": "दूसरा राज्य",
+    "submit": "तुलना करें",
+    "needFields": "एक फसल और दो राज्य लिखें।",
+    "unavailable": "तुलना उपलब्ध नहीं है",
+    "emptyPair": "उस जोड़ी की कोई पंक्ति नहीं।",
+    "emptyTitle": "दो राज्य, एक फसल",
+    "emptyBody": "केवल जीवित मंडी पंक्तियाँ। खाली का मतलब अनुमान नहीं।"
+  },
+  "marketInsights": {
+    "title": "मंडी जानकारी",
+    "crop": "फसल",
+    "state": "राज्य",
+    "submit": "जानकारी लाएँ",
+    "needFields": "फसल और राज्य लिखें।",
+    "unavailable": "जानकारी उपलब्ध नहीं है",
+    "emptyTitle": "केवल जीवित पंक्तियाँ",
+    "emptyBody": "जानकारी उसी फसल और राज्य की मंडी पंक्तियों से बनती है।",
+    "liveComment": "Comment on these live rows only"
+  },
+  "header": {
+    "back": "వెనక్కి"
+  },
+  "settingsToasts": {
+    "profileFetchTitle": "ప్రొఫైల్ పూర్తి కాలేదు",
+    "logoutTitle": "లాగ్ అవుట్",
+    "logoutErrorTitle": "లాగ్ అవుట్ కాలేదు"
+  },
+  "cropCareSpeak": {
+    "disease": "వ్యాధి",
+    "plant": "మొక్క",
+    "leafHealth": "ఆకు ఆరోగ్యం",
+    "treatment": "చికిత్స"
+  },
+  "crop_suggestion": {
+    "title": "పంట సూచనలు",
+    "subtitle": "మీ మట్టి మరియు వాతావరణ పరిస్థితులకు అనుకూలమైన పంటలను కనుగొనండి",
+    "form": {
+      "nitrogen": "నైట్రోజన్ (N)",
+      "phosphorus": "ఫాస్ఫరస్ (P)",
+      "potassium": "పొటాషియం (K)",
+      "temperature": "ఉష్ణోగ్రత (°C)",
+      "humidity": "తేమ (%)",
+      "ph": "pH విలువ",
+      "rainfall": "వర్షపాతం (mm)",
+      "get_suggestions": "సూచనలు పొందండి",
+      "placeholders": {
+        "nitrogen": "నైట్రోజన్ పరిమాణం నమోదు చేయండి",
+        "phosphorus": "ఫాస్ఫరస్ పరిమాణం నమోదు చేయండి",
+        "potassium": "పొటాషియం పరిమాణం నమోదు చేయండి",
+        "temperature": "ఉష్ణోగ్రత నమోదు చేయండి",
+        "humidity": "తేమ పరిమాణం నమోదు చేయండి",
+        "ph": "pH విలువ నమోదు చేయండి",
+        "rainfall": "వర్షపాతం పరిమాణం నమోదు చేయండి"
+      }
+    },
+    "validation": {
+      "required": "ఈ ఫీల్డ్ అవసరం",
+      "min_value": "కనిష్ట విలువ {{min}}",
+      "max_value": "గరిష్ట విలువ {{max}}",
+      "invalid_number": "దయచేసి చెల్లుబాటు అయ్యే సంఖ్యను నమోదు చేయండి"
+    },
+    "results": {
+      "recommended_crops": "సిఫార్సు చేయబడిన పంటలు",
+      "confidence": "విశ్వాసం: {{confidence}}%",
+      "no_results": "మీ ప్రమాణాలకు ఏ పంటలు కనుగొనబడలేదు",
+      "loading": "సూచనలు లోడ్ అవుతున్నాయి..."
+    },
+    "error": {
+      "title": "లోపం",
+      "message": "పంట సూచనలను పొందడంలో విఫలమైంది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+      "network": "నెట్‌వర్క్ లోపం. మీ ఇంటర్నెట్ కనెక్షన్‌ను తనిఖీ చేయండి."
+    }
+  },
+  "home": {
+    "greeting": "నమస్కారం",
+    "welcome_back": "మళ్లీ స్వాగతం",
+    "weather": {
+      "title": "నేటి వాతావరణం",
+      "temperature": "ఉష్ణోగ్రత",
+      "humidity": "తేమ",
+      "wind_speed": "గాలి వేగం",
+      "description": "వివరణ"
+    },
+    "quick_actions": {
+      "title": "త్వరిత చర్యలు",
+      "crop_care": "పంట సంరక్షణ",
+      "market_prices": "మార్కెట్ ధరలు",
+      "weather_forecast": "వాతావరణ అంచనా",
+      "schemes": "ప్రభుత్వ పథకాలు"
+    },
+    "recent_activities": {
+      "title": "ఇటీవలి కార్యకలాపాలు",
+      "no_activities": "ఇటీవలి కార్యకలాపాలు లేవు"
+    }
+  },
+  "common": {
+    "ok": "సరే",
+    "cancel": "రద్దు చేయండి",
+    "save": "సేవ్ చేయండి",
+    "edit": "సవరించండి",
+    "delete": "తొలగించండి",
+    "back": "వెనుకకు",
+    "next": "తదుపరి",
+    "previous": "మునుపటి",
+    "loading": "లోడ్ అవుతోంది...",
+    "retry": "మళ్లీ ప్రయత్నించండి",
+    "search": "వెతకండి",
+    "filter": "ఫిల్టర్",
+    "sort": "క్రమబద్ధీకరించండి",
+    "refresh": "రిఫ్రెష్ చేయండి",
+    "share": "పంచుకోండి",
+    "download": "డౌన్‌లోడ్ చేయండి",
+    "upload": "అప్‌లోడ్ చేయండి",
+    "submit": "సమర్పించండి",
+    "reset": "రీసెట్ చేయండి",
+    "clear": "క్లియర్ చేయండి",
+    "select": "ఎంచుకోండి",
+    "confirm": "నిర్ధారించండి",
+    "yes": "అవును",
+    "no": "లేదు"
+  }
 }

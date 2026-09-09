@@ -1,31 +1,36 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import { StatusBar, StyleSheet, View, Dimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import MarketPrices from './MarketPrices';
 import NearbyStores from './NearbyStores';
 import PriceComparison from './PriceComparison';
 import MarketInsights from './MarketInsights';
 import { theme } from '../../theme.config';
-import Header from '../../components/Header';
+import { useTranslation } from 'react-i18next';
 
 const Tab = createMaterialTopTabNavigator();
-const {width, height} = Dimensions.get('window');
 
 const Market = () => {
+  const { t } = useTranslation();
+  const route = useRoute();
+  const initial = route.params?.screen || 'Prices';
   return (
     <View style={Styles.container}>
       <Tab.Navigator
+        initialRouteName={initial}
         screenOptions={{
-          tabBarActiveTintColor: theme.white,
-          tabBarInactiveTintColor: theme.card,
+          tabBarActiveTintColor: theme.paddy,
+          tabBarInactiveTintColor: theme.inkFaint,
           tabBarStyle: {
-            backgroundColor: theme.secondary,
+            backgroundColor: theme.surface,
             elevation: 0,
             shadowOpacity: 0,
+            borderBottomWidth: 1,
+            borderBottomColor: theme.hairline,
           },
           tabBarIndicatorStyle: {
-            backgroundColor: theme.accent,
+            backgroundColor: theme.turmeric,
             height: 3,
           },
           tabBarLabelStyle: {
@@ -38,23 +43,23 @@ const Market = () => {
         <Tab.Screen
           name="Prices"
           component={MarketPrices}
-          options={{ tabBarLabel: 'Current Prices' }}
+          options={{ tabBarLabel: t('marketTabs.prices') }}
         />
         <Tab.Screen
           name="Stores"
           component={NearbyStores}
-          options={{ tabBarLabel: 'Nearby Stores' }}
+          options={{ tabBarLabel: t('marketTabs.stores') }}
         />
-        {/* <Tab.Screen
+        <Tab.Screen
           name="Compare"
           component={PriceComparison}
-          options={{ tabBarLabel: 'Compare' }}
+          options={{ tabBarLabel: t('marketTabs.compare') }}
         />
         <Tab.Screen
           name="Insights"
           component={MarketInsights}
-          options={{ tabBarLabel: 'AI Insights' }}
-        /> */}
+          options={{ tabBarLabel: t('marketTabs.insights') }}
+        />
       </Tab.Navigator>
     </View>
   );
@@ -64,13 +69,7 @@ export default Market;
 
 const Styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
-    // width: width,
-    height: height + StatusBar.currentHeight,
-    // padding: width * 0.02,
-    // paddingTop: StatusBar.currentHeight + width * 0.06,
-    flexDirection: 'column',
-    paddingTop: StatusBar.currentHeight,
-    // padding: 0,
+    flex: 1,
+    backgroundColor: theme.canvas,
   },
 })

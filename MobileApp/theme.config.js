@@ -1,65 +1,124 @@
 import {Dimensions, StatusBar} from 'react-native';
-import { opacity } from 'react-native-reanimated/lib/typescript/Colors';
 
 const {width, height} = Dimensions.get('window');
 
+const paddy = '#1F6B3A';
+const paddyPressed = '#17532D';
+const paddyTint = '#1F6B3A1A';
+const paddySoft = '#E5F0E8';
+const turmeric = '#D4A017';
+const turmericPressed = '#B38710';
+const turmericTint = '#D4A01722';
+const monsoon = '#3E6D7A';
+const monsoonSoft = '#E4EEF0';
+const canvas = '#F4EFE4';
+const surface = '#FFFBF3';
+const recessed = '#EBE4D6';
+const hairline = '#D7CFBF';
+const ink = '#1C1915';
+const inkSoft = '#5C564C';
+const inkFaint = '#8A8376';
+const inkInverse = '#FFFBF3';
+const alert = '#C4472A';
+const alertSoft = '#F8E6E1';
+
+const statusPad = StatusBar.currentHeight || 24;
+
 export const theme = {
-  // Modern Primary Colors
-  primary: '#2563EB', // Modern blue - professional and trustworthy
-  primaryDark: '#1D4ED8', // Darker shade for pressed states
-  secondary: '#10B981', // Fresh emerald green - success and growth
-  secondaryDark: '#059669', // Darker green variant
-  
-  // Accent Colors
-  accent: '#F59E0B', // Warm amber - calls attention without being harsh
-  accentLight: '#FCD34D', // Light amber for backgrounds
-  danger: '#EF4444', // Modern red for errors/warnings
-  warning: '#F97316', // Orange for caution
-  success: '#10B981', // Same as secondary for consistency
-  info: '#3B82F6', // Information blue
-  
-  // Background Colors
-  bg: '#FAFBFC', // Very light gray-blue background
-  bgSecondary: '#F8FAFC', // Slightly darker for contrast
-  card: '#FFFFFF', // Pure white for cards
-  cardSecondary: '#F1F5F9', // Light gray for secondary cards
-  
-  // Border and UI Elements
-  border: '#E2E8F0', // Light gray border
-  borderDark: '#CBD5E1', // Darker border for emphasis
-  shadow: '#64748B', // Modern gray for shadows
-  overlay: 'rgba(15, 23, 42, 0.1)', // Dark overlay with transparency
-  
-  // Special Colors
-  gradient: ['#2563EB', '#3B82F6'], // Blue gradient
-  gradientSecondary: ['#10B981', '#34D399'], // Green gradient
-  blue: '#3B82F6', // Standard blue
-  
-  // Text Colors
-  text: '#0F172A', // Very dark slate for primary text
-  text2: '#475569', // Medium gray for secondary text
-  text3: '#94A3B8', // Light gray for muted text
-  textInverse: '#FFFFFF', // White text for dark backgrounds
-  link: '#2563EB', // Primary blue for links
-  white: '#FFFFFF',
-  
-  // Legacy color compatibility (gradually migrate away from these)
-  darkBrown: '#334155', // Updated to modern dark slate
-  skin: '#FED7AA', // Updated to modern peach tone
+  paddy,
+  paddyPressed,
+  paddyTint,
+  paddySoft,
+  turmeric,
+  turmericPressed,
+  turmericTint,
+  monsoon,
+  monsoonSoft,
+  canvas,
+  surface,
+  recessed,
+  hairline,
+  ink,
+  inkSoft,
+  inkFaint,
+  inkInverse,
+  alert,
+  alertSoft,
 
-  fs0 : width * 0.099,
-  fs00 : width * 0.08,
-  fs1: width * 0.07,
-  fs2: width * 0.055,
-  fs3: width * 0.05,
-  fs4: width * 0.045,
-  fs5: width * 0.04,
-  fs6: width * 0.035,
-  fs7: width * 0.03,
+  primary: paddy,
+  primaryDark: paddyPressed,
+  primaryLight: paddySoft,
+  secondary: paddy,
+  secondaryDark: paddyPressed,
+  accent: turmeric,
+  accentLight: turmericTint,
+  danger: alert,
+  warning: turmeric,
+  success: paddy,
+  info: monsoon,
+  bg: canvas,
+  bgSecondary: recessed,
+  card: surface,
+  cardSecondary: recessed,
+  border: hairline,
+  borderDark: '#C4BBA8',
+  shadow: '#1C1915',
+  overlay: '#1C191566',
+  gradient: [paddy, '#3E9A58'],
+  gradientSecondary: [monsoon, '#7FA4AE'],
+  blue: monsoon,
+  text: ink,
+  text2: inkSoft,
+  text3: inkFaint,
+  textInverse: inkInverse,
+  link: monsoon,
+  white: inkInverse,
+  darkBrown: ink,
+  skin: '#E8D7B8',
 
-  r1: 20,
-  r2: 12,
-  r3: 6,
+  fs0: 40,
+  fs00: 28,
+  fs1: 28,
+  fs2: 22,
+  fs3: 17,
+  fs4: 16,
+  fs5: 15,
+  fs6: 15,
+  fs7: 13,
+
+  r1: 16,
+  r2: 14,
+  r3: 12,
+
+  space: {4: 4, 8: 8, 12: 12, 16: 16, 20: 20, 24: 24, 32: 32, 48: 48, 64: 64},
+  radius: {sm: 12, md: 14, lg: 16, pill: 999},
+  type: {
+    display: {fontSize: 40, fontFamily: 'Poppins-Black', lineHeight: 44, color: ink},
+    title: {fontSize: 28, fontFamily: 'Poppins-Bold', lineHeight: 34, color: ink},
+    titleSm: {fontSize: 22, fontFamily: 'Poppins-Bold', lineHeight: 28, color: ink},
+    price: {fontSize: 34, fontFamily: 'Poppins-Bold', lineHeight: 38, color: ink, fontVariant: ['tabular-nums']},
+    temp: {fontSize: 44, fontFamily: 'Poppins-Bold', lineHeight: 44, color: ink, fontVariant: ['tabular-nums']},
+    body: {fontSize: 17, fontFamily: 'Poppins-Regular', lineHeight: 25, color: ink},
+    bodyStrong: {fontSize: 17, fontFamily: 'Poppins-SemiBold', lineHeight: 25, color: ink},
+    callout: {fontSize: 15, fontFamily: 'Poppins-SemiBold', lineHeight: 20, color: ink},
+    meta: {fontSize: 13, fontFamily: 'Poppins-Regular', lineHeight: 18, color: inkSoft},
+    tab: {fontSize: 11, fontFamily: 'Poppins-SemiBold', lineHeight: 13, color: inkFaint},
+    button: {fontSize: 16, fontFamily: 'Poppins-Bold', lineHeight: 16, color: inkInverse},
+  },
+  shadow1: {
+    shadowColor: '#1C1915',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  shadow2: {
+    shadowColor: '#1C1915',
+    shadowOffset: {width: 0, height: 4},
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
+  },
 
   font: {
     regular: 'Poppins-Regular',
@@ -67,77 +126,71 @@ export const theme = {
     light: 'Poppins-Light',
     thin: 'Poppins-Thin',
     dark: 'Poppins-Black',
+    medium: 'Poppins-Medium',
+    semi: 'Poppins-SemiBold',
   },
 
   width,
   height,
+  tabBarHeight: 64,
+  seedSize: 64,
+  hit: 48,
+  screenPad: 20,
 
   container: {
-    backgroundColor: 'white',
-    width: width,
-    height: height + StatusBar.currentHeight,
-    padding: width * 0.02,
-    paddingTop: StatusBar.currentHeight + width * 0.06,
-    flexDirection: 'column',
-    paddingTop: StatusBar.currentHeight + 20,
-    padding: 20,
+    flex: 1,
+    backgroundColor: canvas,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: statusPad + 12,
   },
-  
-  // Additional modern container variants
   containerPrimary: {
-    backgroundColor: '#2563EB',
-    width: width,
-    height: height + StatusBar.currentHeight,
-    padding: width * 0.02,
-    paddingTop: StatusBar.currentHeight + width * 0.06,
-    flexDirection: 'column',
-    paddingTop: StatusBar.currentHeight + 20,
-    padding: 20,
+    flex: 1,
+    backgroundColor: paddy,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: statusPad + 12,
   },
-  
   containerSecondary: {
-    backgroundColor: '#FAFBFC',
-    width: width,
-    height: height + StatusBar.currentHeight,
-    padding: width * 0.02,
-    paddingTop: StatusBar.currentHeight + width * 0.06,
-    flexDirection: 'column',
-    paddingTop: StatusBar.currentHeight + 20,
-    padding: 20,
+    flex: 1,
+    backgroundColor: canvas,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingTop: statusPad + 12,
   },
-  
-  test: {borderWidth: 1, borderColor: '#E2E8F0'}, // Updated to use new border color
-  
+  test: {borderWidth: 1, borderColor: hairline},
   button: {
     width: '100%',
-    paddingVertical: width * 0.04,
-    borderRadius: 12, // Increased border radius for modern look
+    minHeight: 52,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: width * 0.05,
-    backgroundColor: '#2563EB', // Primary button color
+    marginTop: 16,
+    backgroundColor: paddy,
   },
-  
-  // Additional button variants
   buttonSecondary: {
     width: '100%',
-    paddingVertical: width * 0.04,
-    borderRadius: 12,
+    minHeight: 52,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: width * 0.05,
-    backgroundColor: '#10B981',
+    marginTop: 16,
+    backgroundColor: surface,
+    borderWidth: 1.5,
+    borderColor: paddy,
   },
-  
   buttonOutline: {
     width: '100%',
-    paddingVertical: width * 0.04,
-    borderRadius: 12,
+    minHeight: 52,
+    paddingVertical: 14,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: width * 0.05,
+    marginTop: 16,
     backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: '#2563EB',
+    borderWidth: 1.5,
+    borderColor: paddy,
   },
 };

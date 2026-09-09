@@ -1,47 +1,91 @@
-import React, { useEffect, useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, PermissionsAndroid, Platform } from 'react-native';
+import React, {useState} from 'react';
+import {View, TextInput, StyleSheet, TouchableOpacity, Text} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { theme } from '../theme.config';
+import {useNavigation} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import {useTranslation} from 'react-i18next';
+import {theme} from '../theme.config';
+import {adviceFetch} from '../utils/api';
+import {isSarvamRecording, startSarvamRecording, stopSarvamTranscription} from '../utils/sarvamStt';
 
-const SearchBar = ({ value, onChangeText, placeholder, toEdit }) => {
-  const [isListening, setIsListening] = useState(false);
-  const [hasPermission, setHasPermission] = useState(false);
+const SearchBar = ({placeholder, toEdit, caption}) => {
+  const navigation = useNavigation();
+  const {t, i18n} = useTranslation();
+  const [query, setQuery] = useState('');
+  const [hits, setHits] = useState([]);
+  const [listening, setListening] = useState(false);
 
+  const search = async text => {
+    const q = (text ?? query).trim();
+    const res = await adviceFetch(`/search?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+    setHits(data.results || []);
+  };
 
-  const checkPermission = async () => {
-    if (Platform.OS === 'android') {
+  const listen = async () => {
+    if (isSarvamRecording() || listening) {
       try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          {
-            title: "Microphone Permission",
-            message: "This app needs access to your microphone for voice search.",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK"
-          }
-        );
-        setHasPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
+        const transcript = await stopSarvamTranscription(i18n.language);
+        setListening(false);
+        if (transcript) {
+          setQuery(transcript);
+          await search(transcript);
+        }
       } catch (err) {
-        console.error('Permission error:', err);
+        setListening(false);
+        Toast.show({
+          type: 'error',
+          text1: err.message || t('searchMic.unavailable'),
+        });
       }
-    } else {
-      setHasPermission(true); // iOS handles permissions differently
+      return;
+    }
+    try {
+      await startSarvamRecording();
+      setListening(true);
+      Toast.show({type: 'info', text1: t('searchMic.listening')});
+    } catch (err) {
+      setListening(false);
+      Toast.show({
+        type: 'error',
+        text1: err.message || t('searchMic.unavailable'),
+      });
     }
   };
 
-
   return (
-    <View style={styles.container}>
-      <Ionicons name="search" size={24} color="#888" style={styles.icon} />
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder || 'Search...'}
-        placeholderTextColor="#888"
-        editable={toEdit}
-      />
+    <View>
+      {caption ? <Text style={styles.caption}>{caption}</Text> : null}
+      <View style={styles.container}>
+        <Ionicons name="search" size={22} color={theme.inkSoft} style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          value={query}
+          onChangeText={setQuery}
+          onSubmitEditing={() => search()}
+          placeholder={placeholder || 'Ask Nila or search...'}
+          placeholderTextColor={theme.inkFaint}
+          editable={toEdit !== false}
+        />
+        <TouchableOpacity onPress={listen}>
+          <Ionicons name={listening ? 'mic' : 'mic-outline'} size={22} color={theme.paddy} />
+        </TouchableOpacity>
+      </View>
+      {hits.map(hit => (
+        <TouchableOpacity
+          key={hit.id}
+          onPress={() => {
+            const nested = {Stores: 'Stores', Compare: 'Compare', Insights: 'Insights'};
+            if (nested[hit.route]) {
+              navigation.navigate('Market', {screen: nested[hit.route]});
+              return;
+            }
+            navigation.navigate(hit.route);
+          }}
+          style={styles.hit}>
+          <Text style={styles.hitText}>{hit.title}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
@@ -49,15 +93,15 @@ const SearchBar = ({ value, onChangeText, placeholder, toEdit }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 7,
+    backgroundColor: theme.surface,
+    borderRadius: 14,
     paddingHorizontal: 12,
     alignItems: 'center',
-    height: 50,
+    minHeight: 52,
     marginVertical: 7,
     width: '100%',
-    borderWidth: 1.2,
-    borderColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: theme.hairline,
   },
   icon: {
     marginRight: 8,
@@ -69,6 +113,12 @@ const styles = StyleSheet.create({
     fontFamily: theme.font.regular,
     marginTop: 3,
   },
+  caption: {
+    ...theme.type.meta,
+    marginBottom: 4,
+  },
+  hit: {paddingHorizontal: 12, paddingVertical: 8},
+  hitText: {color: theme.text, fontFamily: theme.font.regular},
 });
 
 export default SearchBar;

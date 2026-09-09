@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   ScrollView,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 import {theme} from '../theme.config';
 
 const Welcome = () => {
   const navigation = useNavigation();
-  const desc =
-    'Join a growing community of farmers, buyers, and agri-experts working together to improve productivity, connect directly, and access real-time insights for better crop management and trade.';
+  const {t} = useTranslation();
 
   return (
     <View style={theme.container}>
@@ -26,55 +26,30 @@ const Welcome = () => {
         </View>
 
         <View style={styles.contentContainer}>
-          <Text style={styles.appName}>Nila Shoshsho</Text>
-          <Text style={styles.description}>{desc}</Text>
+          <Text style={styles.appName}>{t('welcome.name')}</Text>
+          <Text style={styles.description}>{t('welcome.desc')}</Text>
 
           <TouchableOpacity
-            style={[styles.button, {backgroundColor: theme.secondary}]}
+            style={[styles.button, {backgroundColor: theme.paddy}]}
             onPress={() => navigation.navigate('Signup')}>
-            <Text style={styles.buttonText}>Sign Up</Text>
+            <Text style={styles.buttonText}>{t('welcome.createAccount')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, {backgroundColor: theme.darkBrown}]}
+            style={[styles.button, {backgroundColor: 'transparent', borderWidth: 1.5, borderColor: theme.paddy}]}
             onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={[styles.buttonText, {color: theme.paddy}]}>{t('welcome.haveAccount')}</Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.featuresRow}>
-          <Feature
-            icon={require('../assets/icons/smart-farming.png')}
-            label="Smart Farming"
-          />
-          <Feature
-            icon={require('../assets/icons/direct-trade.png')}
-            label="Direct Trade"
-          />
-          <Feature
-            icon={require('../assets/icons/crop-insights.png')}
-            label="Crop Insights"
-          />
-          <Feature
-            icon={require('../assets/icons/expert-advice.png')}
-            label="Expert Help"
-          />
         </View>
       </ScrollView>
 
       <View style={styles.madeWithLove}>
-        <Text style={styles.madeWithLoveText}>🇮🇳 Made in India with ❤️</Text>
+        <Text style={styles.madeWithLoveText}>{t('welcome.madeInIndia')}</Text>
       </View>
     </View>
   );
 };
 
-const Feature = ({icon, label}) => (
-  <View style={styles.featureItem}>
-    <Image source={icon} style={styles.featureIcon} />
-    <Text style={styles.featureLabel}>{label}</Text>
-  </View>
-);
 
 const styles = StyleSheet.create({
   scrollContainer: {
@@ -112,37 +87,18 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '90%',
-    padding: 12,
-    borderRadius: 10,
+    minHeight: 52,
+    padding: 14,
+    borderRadius: 14,
     marginVertical: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonText: {
     fontSize: theme.fs4,
     fontFamily: theme.font.bold,
     color: theme.white,
     textAlign: 'center',
-  },
-  featuresRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 25,
-    width: '100%',
-    paddingHorizontal: 10,
-  },
-  featureItem: {
-    alignItems: 'center',
-    width: '20%',
-  },
-  featureIcon: {
-    width: 40,
-    height: 40,
-    marginBottom: 5,
-  },
-  featureLabel: {
-    fontSize: theme.fs7,
-    textAlign: 'center',
-    color: theme.text2,
-    fontFamily: theme.font.light,
   },
   madeWithLove: {
     position : 'absolute',

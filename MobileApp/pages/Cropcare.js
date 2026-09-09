@@ -10,23 +10,20 @@ import {
   Platform,
 } from 'react-native';
 import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
-import axios from 'axios';
 import Markdown from 'react-native-markdown-display';
 import Header from '../components/Header';
 import { theme } from '../theme.config';
-import { AIBACKEND_URL } from '../backendConfig';
+import { adviceFetch } from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
 
-const API_URL = `${AIBACKEND_URL}/plant-disease`;
-
 const HealthBar = ({ status, t }) => {
   const healthLevels = {
-    healthy: { percent: 100, color: '#4caf50' },
-    'mildly affected': { percent: 65, color: '#ffc107' },
-    'severely affected': { percent: 30, color: '#ff9800' },
-    dead: { percent: 0, color: '#f44336' },
+    healthy: { percent: 100, color: theme.paddy },
+    'mildly affected': { percent: 65, color: theme.turmeric },
+    'severely affected': { percent: 30, color: theme.alert },
+    dead: { percent: 0, color: theme.alert },
   };
 
   const health = healthLevels[status.toLowerCase()] || {
@@ -114,7 +111,7 @@ const Cropcare = () => {
     try {
       launchCamera(
         {
-          mediaTypeetten: 'photo',
+          mediaType: 'photo',
           quality: 0.7,
           includeBase64: false,
           saveToPhotos: true,
@@ -154,38 +151,21 @@ const Cropcare = () => {
       });
       formData.append('lang', i18n.language || lang); // Use i18n.language
 
-      console.log('Uploading image:', img.uri);
-      console.log(formData);
-
-      const res = await axios.post(API_URL, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Accept: 'application/json',
-        },
-        timeout: 30000,
+      const res = await adviceFetch('/plant-disease', {
+        method: 'POST',
+        body: formData,
       });
-
-      if (res.data && res.data.disease) {
-        setDiagnosis(res.data);
+      const data = await res.json();
+      if (res.status === 422) {
+        setError(data.error || t('cropCare.errors.invalidResponse'));
+        setDiagnosis(null);
+      } else if (res.ok) {
+        setDiagnosis(data);
       } else {
-        setError(t('cropCare.errors.invalidResponse'));
+        setError(data.error || t('cropCare.errors.noResponse'));
       }
     } catch (err) {
-      console.error('Upload error:', err);
-      if (err.response) {
-        console.error('Response data:', err.response.data);
-        console.error('Response status:', err.response.status);
-        setError(
-          t('cropCare.errors.serverError', {
-            status: err.response.status,
-            message: err.response.data?.error || '',
-          }),
-        );
-      } else if (err.request) {
-        setError(t('cropCare.errors.noResponse'));
-      } else {
-        setError(t('cropCare.errors.requestError', { message: err.message }));
-      }
+      setError(t('cropCare.errors.requestError', { message: err.message }));
     } finally {
       setLoading(false);
     }
@@ -195,18 +175,12 @@ const Cropcare = () => {
   const getDiagnosisText = () => {
     if (!diagnosis) return '';
     const parts = [];
-    if (diagnosis.disease) parts.push(`Disease: ${diagnosis.disease}`);
-    if (diagnosis.plant) parts.push(`Plant: ${diagnosis.plant}`);
-    if (diagnosis.type_of_disease)
-      parts.push(`Type of disease: ${diagnosis.type_of_disease}`);
-    if (diagnosis.plant_health)
-      parts.push(`Plant health: ${diagnosis.plant_health}`);
+    if (diagnosis.disease) parts.push(`${t('cropCareSpeak.disease')}: ${diagnosis.disease}`);
+    if (diagnosis.plant) parts.push(`${t('cropCareSpeak.plant')}: ${diagnosis.plant}`);
     if (diagnosis.leaf_health)
-      parts.push(`Leaf health: ${diagnosis.leaf_health}`);
-    if (diagnosis.disease_symptoms && diagnosis.disease_symptoms.length > 0)
-      parts.push(`Symptoms: ${diagnosis.disease_symptoms.join(', ')}`);
+      parts.push(`${t('cropCareSpeak.leafHealth')}: ${diagnosis.leaf_health}`);
     if (diagnosis.treatment_procedure)
-      parts.push(`Treatment: ${diagnosis.treatment_procedure}`);
+      parts.push(`${t('cropCareSpeak.treatment')}: ${diagnosis.treatment_procedure}`);
     return parts.join('. ');
   };
 

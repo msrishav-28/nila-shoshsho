@@ -148,11 +148,6 @@ const Profile = () => {
         </View>
 
         <View style={styles.input}>
-          <Text style={styles.label}>{t('profile.fields.phoneNumber')}</Text>
-          <Text style={styles.value}>{displayValue(user?.phoneNo)}</Text>
-        </View>
-
-        <View style={styles.input}>
           <Text style={styles.label}>{t('profile.fields.verificationStatus')}</Text>
           <Text style={styles.value}>
             {user?.isVerified ? t('profile.status.verified') : t('profile.status.notVerified')}

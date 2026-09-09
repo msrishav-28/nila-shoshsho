@@ -10,32 +10,28 @@ import {
   Platform,
   FlatList,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import Toast from 'react-native-toast-message';
 import { theme } from '../theme.config';
-import { AIBACKEND_URL } from '../backendConfig';
+import { adviceFetch } from '../utils/api';
 import { UserContext } from '../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
 
-const API_URL = `${AIBACKEND_URL}/water_management`;
+const API_PATH = '/water_management';
 
 const WaterManagement = () => {
   const { user } = useContext(UserContext);
-  const navigation = useNavigation();
   const { t } = useTranslation();
   const [crop, setCrop] = useState('');
   const [fieldSize, setFieldSize] = useState('');
   const [irrigationMethod, setIrrigationMethod] = useState('');
-  const [soilType] = useState('dry'); // Fixed as per request
   const [loading, setLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
   const [lang, setLang] = useState('English');
-  const [voiceText, setVoiceText] = useState('');
 
   const irrigationMethods = [
     { name: 'Drip', icon: 'water-outline' },
@@ -74,36 +70,32 @@ const WaterManagement = () => {
         crop,
         field_size_acres: parseFloat(fieldSize),
         irrigation_method: irrigationMethod,
-        soil_type: soilType,
         latitude,
         longitude,
         lang,
       };
-      const res = await fetch(API_URL, {
+      const res = await adviceFetch(API_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (data.explanation && data.irrigation_schedule && data.water_saving_tips) {
-        setResponseData(data);
-        const scheduleText = data.irrigation_schedule.map(item => 
-          `${item.method} irrigation on ${item.date} for ${item.duration_minutes} minutes`
-        ).join(', ');
-        setVoiceText(`${data.explanation} Irrigation schedule: ${scheduleText}`);
-        Toast.show({
-          type: 'success',
-          text1: t('waterManagement.results.success'),
-          text2: t('waterManagement.results.successMessage'),
-        });
-      } else {
-        setError(t('waterManagement.results.noInstructions'));
+      if (!res.ok || !data.advice) {
+        const message = data.error || t('waterManagement.results.noInstructions');
+        setError(message);
         Toast.show({
           type: 'error',
           text1: t('waterManagement.results.error'),
-          text2: t('waterManagement.results.noInstructions'),
+          text2: message,
         });
+        return;
       }
+      setResponseData(data);
+      Toast.show({
+        type: 'success',
+        text1: t('waterManagement.results.success'),
+        text2: t('waterManagement.results.successMessage'),
+      });
     } catch (err) {
       const errorMessage = typeof err === 'string' ? err : err?.message || t('waterManagement.results.errorOccurred');
       setError(errorMessage);
@@ -114,23 +106,6 @@ const WaterManagement = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getScheduleIcon = (method) => {
-    switch (method.toLowerCase()) {
-      case 'drip':
-        return 'water-outline';
-      case 'sprinkler':
-        return 'rainy-outline';
-      case 'surface':
-        return 'earth-outline';
-      case 'subsurface':
-        return 'layers-outline';
-      case 'manual':
-        return 'hand-right-outline';
-      default:
-        return 'water-outline';
     }
   };
 
@@ -146,34 +121,6 @@ const WaterManagement = () => {
     </TouchableOpacity>
   );
 
-  const renderScheduleItem = ({ item }) => (
-    <View style={styles.scheduleCard}>
-      <Icon name={getScheduleIcon(item.method)} size={24} color={theme.primary} style={styles.scheduleIcon} />
-      <View style={styles.scheduleDetails}>
-        <Text style={styles.scheduleMethod}>{item.method}</Text>
-        <Text style={styles.scheduleDate}>
-          <Icon name="calendar-outline" size={16} color={theme.text2} /> {item.date}
-        </Text>
-        <Text style={styles.scheduleDuration}>
-          <Icon name="time-outline" size={16} color={theme.text2} /> {item.duration_minutes} min
-        </Text>
-        <Text style={styles.scheduleWater}>
-          <Icon name="water-outline" size={16} color={theme.text2} /> {item.water_mm} mm
-        </Text>
-      </View>
-    </View>
-  );
-
-  const renderTipItem = ({ item }) => (
-    <View style={styles.tipCard}>
-      <Icon name="bulb-outline" size={24} color={theme.primary} style={styles.tipIcon} />
-      <View style={styles.tipDetails}>
-        <Text style={styles.tipText}>{item.tip}</Text>
-        <Text style={styles.tipBenefit}>{item.benefit}</Text>
-      </View>
-    </View>
-  );
-
   return (
     <View style={theme.container}>
       <Header text={t('waterManagement.title')} />
@@ -186,6 +133,7 @@ const WaterManagement = () => {
           <Text style={styles.description}>
             {t('waterManagement.description')}
           </Text>
+          <Text style={styles.description}>{t('waterManagement.disclaimer')}</Text>
 
           <TextInput
             style={styles.input}
@@ -225,29 +173,14 @@ const WaterManagement = () => {
           )}
           {responseData && (
             <View style={styles.resultContainer}>
-              <VoicePlayer text={voiceText} lang={lang} />
+              <VoicePlayer text={responseData.advice} lang={lang} />
               <View style={styles.textSection}>
-                <Text style={styles.sectionText}>{responseData.explanation}</Text>
-                <Text style={styles.sectionText}>
-                  {t('waterManagement.results.totalWater')}: {responseData.total_water_liters} L ({responseData.total_water_mm} mm)
-                </Text>
+                <Text style={styles.sectionText}>{responseData.advice}</Text>
+                <Text style={styles.sectionText}>{t('waterManagement.disclaimer')}</Text>
+                {responseData.source ? (
+                  <Text style={styles.sectionText}>{responseData.source}</Text>
+                ) : null}
               </View>
-
-              <Text style={styles.sectionTitle}>{t('waterManagement.sections.irrigationSchedule')}</Text>
-              <FlatList
-                data={responseData.irrigation_schedule}
-                renderItem={renderScheduleItem}
-                keyExtractor={(item, index) => index.toString()}
-                style={styles.scheduleList}
-              />
-
-              <Text style={styles.sectionTitle}>{t('waterManagement.sections.waterSavingTips')}</Text>
-              <FlatList
-                data={responseData.water_saving_tips}
-                renderItem={renderTipItem}
-                keyExtractor={(item, index) => index.toString()}
-                style={styles.tipList}
-              />
             </View>
           )}
         </ScrollView>
@@ -369,88 +302,6 @@ const styles = StyleSheet.create({
   },
   methodTextSelected: {
     color: '#fff',
-  },
-  scheduleList: {
-    marginVertical: 8,
-  },
-  scheduleCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 12,
-    marginVertical: 6,
-    borderColor: theme.border,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  scheduleIcon: {
-    marginRight: 12,
-  },
-  scheduleDetails: {
-    flex: 1,
-  },
-  scheduleMethod: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-    marginBottom: 4,
-  },
-  scheduleDate: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
-    marginBottom: 2,
-  },
-  scheduleDuration: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
-    marginBottom: 2,
-  },
-  scheduleWater: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
-  },
-  tipList: {
-    marginVertical: 8,
-  },
-  tipCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 5,
-    padding: 12,
-    marginVertical: 6,
-    borderColor: theme.border,
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  tipIcon: {
-    marginRight: 12,
-  },
-  tipDetails: {
-    flex: 1,
-  },
-  tipText: {
-    fontSize: theme.fs6,
-    fontFamily: theme.font.bold,
-    color: theme.text,
-    marginBottom: 4,
-  },
-  tipBenefit: {
-    fontSize: theme.fs7,
-    fontFamily: theme.font.regular,
-    color: theme.text2,
   },
 });
 

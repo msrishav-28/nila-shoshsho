@@ -1,45 +1,62 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {theme} from '../theme.config';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {useTranslation} from 'react-i18next';
 
-const Header = ({text}) => {
+const Header = ({text, right}) => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const {t} = useTranslation();
   return (
-    <View style={styles.topNav}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}>
-        <Image
-          source={require('../assets/icons/back.png')}
-          style={{width: 25, height: 25}}
-        />
-      </TouchableOpacity>
-      <Text style={styles.appName}>{text}</Text>
+    <View style={[styles.topNav, {paddingTop: Math.max(insets.top, 12)}]}>
+      <View style={styles.row}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel={t('header.back')}
+          hitSlop={8}>
+          <Icon name="chevron-back" size={22} color={theme.ink} />
+        </TouchableOpacity>
+        <Text style={styles.appName} numberOfLines={1}>
+          {text}
+        </Text>
+        <View style={styles.right}>{right}</View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   topNav: {
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    gap: 7,
-    marginBottom: -10,
+    backgroundColor: theme.canvas,
+    paddingBottom: 8,
+    marginHorizontal: -20,
+    paddingHorizontal: 20,
+  },
+  row: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   backButton: {
-    padding: 10,
-    backgroundColor: theme.darkBrown,
-    borderRadius: 60,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: theme.recessed,
     justifyContent: 'center',
     alignItems: 'center',
-    opacity: 0.7,
-    width: 50,
   },
   appName: {
-    fontSize: theme.fs00,
-    fontFamily: theme.font.dark,
-    color: theme.text2,
+    ...theme.type.titleSm,
+    flex: 1,
+  },
+  right: {
+    minWidth: 44,
+    alignItems: 'flex-end',
   },
 });
 

@@ -1,6 +1,7 @@
 import multer from 'multer';
 import cloudinary from '../lib/cloudinary.js';
-import User from '../models/user.model.js';
+import { getSql } from '../lib/db.js';
+import { toUser } from '../lib/farmer.js';
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -28,17 +29,26 @@ export const uploadDoc = async (req, res) => {
     }
 
     try {
-      const userId = req.user._id;
+      const userId = req.user.neon_user_id;
       if (!req.file) {
         return res.status(400).json({ success: false, message: 'No file uploaded' });
       }
+      const header = req.file.buffer.subarray(0, 5).toString('utf8');
+      if (!header.startsWith('%PDF')) {
+        return res.status(400).json({ success: false, message: 'Only PDF files are allowed.' });
+      }
+      const safeName = String(req.file.originalname || 'document.pdf')
+        .split(/[/\\]/)
+        .pop()
+        .replace(/[^\w.\-]/g, '_')
+        .slice(0, 80) || 'document.pdf';
 
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
             resource_type: 'raw',
             folder: 'nila-shoshsho/documents',
-            public_id: `${userId}/${req.file.originalname}-${Date.now()}`,
+            public_id: `${userId}/${safeName}-${Date.now()}`,
           },
           (error, result) => {
             if (error) reject(error);
@@ -48,39 +58,23 @@ export const uploadDoc = async (req, res) => {
         stream.end(req.file.buffer);
       });
 
-      const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        {
-          $push: { documents: result.secure_url },
-        },
-        { new: true }
-      ).select('-password');
+      const sql = getSql();
+      const rows = await sql`
+        UPDATE farmers
+        SET documents = array_append(documents, ${result.secure_url}),
+            updated_at = now()
+        WHERE neon_user_id = ${userId}
+        RETURNING *
+      `;
 
-      if (!updatedUser) {
+      if (!rows[0]) {
         return res.status(404).json({ success: false, message: 'User not found' });
       }
 
       res.status(200).json({
         success: true,
         message: 'Document uploaded successfully',
-        user: {
-          _id: updatedUser._id,
-          username: updatedUser.username,
-          email: updatedUser.email,
-          phoneNo: updatedUser.phoneNo,
-          role: updatedUser.role,
-          gender: updatedUser.gender,
-          profilePic: updatedUser.profilePic,
-          dob: updatedUser.dob,
-          age: updatedUser.age,
-          location: updatedUser.location,
-          governmentId: updatedUser.governmentId,
-          languageSpoken: updatedUser.languageSpoken,
-          bio: updatedUser.bio,
-          socialLinks: updatedUser.socialLinks,
-          documents: updatedUser.documents,
-          isVerified: updatedUser.isVerified,
-        },
+        user: toUser(rows[0], req.accessToken),
       });
     } catch (err) {
       console.error('Error in uploadDoc:', err);

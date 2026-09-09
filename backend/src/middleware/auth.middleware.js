@@ -1,34 +1,31 @@
-import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import { getSql } from "../lib/db.js";
+import { getFarmerByNeonId } from "../lib/farmer.js";
+import { readBearer, verifyAccessToken } from "../lib/verifyToken.js";
 
-export const protectRoute = async (req,res , next) => { //next function
-    try {
-        const token  = req.cookies.jwt
-
-        if(!token){
-            return res.status(401).json({success : false , message : "Unauthorized - No Token Provided"})
-        }
-
-        //token present now validate it
-        const decoded = jwt.verify(token , process.env.JWT_SECRET)
-
-        if(!decoded){
-            return res.status(401).json({success : false , message : "Unauthorized - Token is Invalid"})
-        }
-
-        const user = await User.findById(decoded.userId).select("-password");
-
-        if(!user){
-            return res.status(404).json({success : false , message : "User not found"})
-        }
-
-        //now user 
-        req.user = user; //sent in the request
-        next()
-
-
-    } catch (err) {
-        console.log("Error in protect route" , err);
-        return res.status(500).json({success : false , message : "Internal Server Error"})
+export const protectRoute = async (req, res, next) => {
+  try {
+    const token = readBearer(req);
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized - No Token Provided" });
     }
-} 
+
+    const { neonUserId } = await verifyAccessToken(token);
+    const farmer = await getFarmerByNeonId(getSql(), neonUserId);
+    if (!farmer) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    req.accessToken = token;
+    req.user = farmer;
+    req.user._id = farmer.neon_user_id;
+    next();
+  } catch (err) {
+    const status = err.status || 401;
+    return res.status(status).json({
+      success: false,
+      message: err.message || "Unauthorized",
+    });
+  }
+};

@@ -3,7 +3,9 @@ import requests
 import os
 import datetime
 from dotenv import load_dotenv
-from groq import Groq
+from app.farmer_context import farmer_profile
+from app.live_data import fetch_current_weather
+from app.llm import route_models
 
 load_dotenv()
 
@@ -12,48 +14,48 @@ fertilizer_bp = Blueprint('fertilizer', __name__)
 # ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
 
 FERTILIZER_SYSTEM_PROMPT = """
-You are a world‑class agronomist and fertilizer specialist advising farmers on optimal nutrient management. 
-Given the user's location (city, region, country, latitude/longitude), soil test data, and current weather conditions, produce a tailored fertilizer recommendation plan. 
+You are an agronomist advising Indian farmers on nutrient management.
+Use only the soil and weather numbers given. Do not invent lab values.
 
 In your response:
-1. *Soil Analysis Interpretation*  
-   - Briefly interpret pH, organic carbon, nitrogen, clay content, and any nutrient imbalances.  
-2. *Recommended Fertilizer Types & Ratios*  
-   - Specify the ideal N–P–K ratio(s).  
-   - Include any secondary (e.g., S, Mg) or micronutrients if warranted.  
-3. *Application Rates & Units*  
-   - Give precise application rates (e.g., kg/ha or lbs/acre).  
-   - Break down per application event if split‑dosing is recommended.  
-4. *Timing & Method*  
-   - Recommend best timing (pre‑plant, basal, top‑dress) aligned with local climate and crop phenology.  
-   - Suggest application methods (broadcast, banding, foliar spray, fertigation).  
-5. *Local Context & Cost Considerations*  
-   - Highlight locally available fertilizer brands or formulations.  
-   - Provide ballpark cost estimates and cost‑benefit comparison.  
-6. *Environmental & Safety Precautions*  
-   - Warn about leaching/runoff risks in given soil texture and weather.  
-   - Recommend best management practices to minimize environmental impact.  
-7. *Additional Soil Amendments*  
-   - If pH is suboptimal, include liming or acidifying steps.  
-   - Suggest organic options (compost, green manures) where beneficial.  
-8. *Expected Outcomes*  
-   - Estimate yield improvement or crop quality benefits.  
-9. *Summary Table*  
-   At the end, include a Markdown table with columns:  
+1. *Soil Analysis Interpretation*
+   - Briefly interpret pH, organic carbon, nitrogen, clay content, and any nutrient imbalances.
+2. *Recommended Fertilizer Types & Ratios*
+   - Specify the ideal N–P–K ratio(s).
+   - Include any secondary (e.g., S, Mg) or micronutrients if warranted.
+   - Use generic nutrient names only (urea, DAP, MOP, SSP, compost). Do not name commercial brands.
+3. *Application Rates & Units*
+   - Give application rates in kg/ha or kg/acre.
+   - Break down per application event if split-dosing is recommended.
+4. *Timing & Method*
+   - Recommend best timing (pre-plant, basal, top-dress) aligned with local climate and crop phenology.
+   - Suggest application methods (broadcast, banding, foliar spray, fertigation).
+5. *Local Context*
+   - Note that local KVK or a soil-testing lab may adjust rates.
+   - Do not give prices, brand names, or cost estimates.
+6. *Environmental & Safety Precautions*
+   - Warn about leaching/runoff risks in given soil texture and weather.
+   - Recommend practices to minimize environmental impact.
+7. *Additional Soil Amendments*
+   - If pH is suboptimal, include liming or acidifying steps.
+   - Suggest organic options (compost, green manures) where beneficial.
+8. *Expected Outcomes*
+   - Describe likely crop response in plain language. Do not invent a guaranteed yield.
+9. *Summary Table*
+   At the end, include a Markdown table with columns:
    | Component           | Recommendation               | Rate         | Timing/Method               | Notes                            |
    |---------------------|------------------------------|--------------|-----------------------------|----------------------------------|
-   | e.g. Urea (46% N)   | Basal + Top‑dress           | 100 kg/ha    | Pre‑plant; 30 days after sowing | Use split application to reduce volatilization |
+   | e.g. Urea (46% N)   | Basal + Top-dress           | 100 kg/ha    | Pre-plant; 30 days after sowing | Use split application to reduce volatilization |
 
-Use clear, jargon‑free language, and localize units & terminology for Indian farmers.  
+Use clear language and Indian units. Never invent a Soil Health Card.
 """
 
 # ─── LLM FUNCTION ─────────────────────────────────────────────────────────────
 
 def get_fertilizer_recommendation(data, crop, lang):
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
     user_prompt = f"""
 Please answer in {lang} language only.
+Use only the soil and weather numbers given. Do not invent lab values.
 Provide a fertilizer recommendation for the crop: *{crop}* using the following data:
 
 Location:
@@ -75,16 +77,8 @@ Weather Data:
 Timestamp: {data['timestamp']}
 """
 
-    chat_completion = client.chat.completions.create(
-        model="llama3-70b-8192",
-        messages=[
-            {"role": "system", "content": FERTILIZER_SYSTEM_PROMPT},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=0.7
-    )
-
-    return chat_completion.choices[0].message.content.strip()
+    answer, _model = route_models(FERTILIZER_SYSTEM_PROMPT + "\n\n" + user_prompt, lang)
+    return answer
 
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 
@@ -96,7 +90,7 @@ def get_soil_data(lat, lon):
             f"properties=phh2o&properties=nitrogen&properties=soc&properties=clay&"
             f"values=mean"
         )
-        response = requests.get(url)
+        response = requests.get(url, timeout=20)
         data = response.json()
         properties = data.get('properties', [])
 
@@ -104,7 +98,8 @@ def get_soil_data(lat, lon):
             "soil_ph": None,
             "soil_organic_carbon": None,
             "soil_nitrogen": None,
-            "soil_clay": None
+            "soil_clay": None,
+            "soil_organic_carbon_stock": None,
         }
 
         for prop in properties:
@@ -121,78 +116,58 @@ def get_soil_data(lat, lon):
             f"https://api.openepi.io/soil/property?"
             f"lon={lon}&lat={lat}&depths=0-30cm&properties=ocs&values=mean"
         )
-        ocs_response = requests.get(ocs_url)
+        ocs_response = requests.get(ocs_url, timeout=20)
         if ocs_response.status_code == 200:
             ocs_data = ocs_response.json()
             for prop in ocs_data.get('properties', []):
                 if prop['property'] == 'ocs':
                     soil_data['soil_organic_carbon_stock'] = prop['depth_0_30']['mean']
 
-        # Fill missing with defaults
-        defaults = {
-            "soil_ph": 6.5,
-            "soil_organic_carbon": 1.2,
-            "soil_nitrogen": 0.1,
-            "soil_clay": 20.0,
-            "soil_organic_carbon_stock": 50.0
-        }
-        for key in defaults:
-            if soil_data.get(key) is None:
-                soil_data[key] = defaults[key]
-
+        required = ("soil_ph", "soil_organic_carbon", "soil_nitrogen", "soil_clay")
+        if any(soil_data.get(key) is None for key in required):
+            return None
         return soil_data
 
     except Exception as e:
         print(f"[ERROR] Soil data fetch failed: {e}")
-        return {
-            "soil_ph": 6.5,
-            "soil_organic_carbon": 1.2,
-            "soil_nitrogen": 0.1,
-            "soil_clay": 20.0,
-            "soil_organic_carbon_stock": 50.0
-        }
+        return None
 
 def get_weather(lat, lon):
-    try:
-        url = (
-            f"https://api.open-meteo.com/v1/forecast"
-            f"?latitude={lat}&longitude={lon}&current_weather=true&hourly=relativehumidity_2m,precipitation"
-        )
-        response = requests.get(url)
-        data = response.json()
-        return {
-            "temperature": data.get("current_weather", {}).get("temperature", 30),
-            "humidity": data.get("hourly", {}).get("relativehumidity_2m", [50])[0],
-            "precipitation": data.get("hourly", {}).get("precipitation", [0])[0],
-            "windspeed": data.get("current_weather", {}).get("windspeed", 10)
-        }
-    except Exception as e:
-        print(f"[ERROR] Weather data fetch failed: {e}")
-        return {
-            "temperature": 30,
-            "humidity": 50,
-            "precipitation": 0,
-            "windspeed": 10
-        }
+    return fetch_current_weather(lat, lon)
 
 # ─── ROUTE: FERTILIZER RECOMMENDATION ─────────────────────────────────────────
 
 @fertilizer_bp.route("/api/fertilizer_recommendation", methods=["POST"])
 def fertilizer_route():
     try:
-        req_json = request.get_json()
+        req_json = request.get_json() or {}
+        profile = farmer_profile()
         crop = req_json.get("crop")
-        lat = req_json.get("lat")
-        lon = req_json.get("lon")
-        lang = req_json.get("lang", "English")
-        region = req_json.get("region", "Unknown")
-        country = "India"  # fixed for now
+        lat = req_json.get("lat") or profile.get("lat")
+        lon = req_json.get("lon") or profile.get("lon")
+        lang = req_json.get("lang") or profile.get("lang") or "English"
+        region = req_json.get("region") or profile.get("state") or profile.get("city") or "Unknown"
+        country = "India"
 
         if not all([crop, lat, lon]):
             return jsonify({"error": "Missing required fields: crop, lat, lon"}), 400
 
-        soil_data = get_soil_data(lat, lon)
+        shc = req_json.get("soil_health_card") or {}
+        if shc.get("soil_ph") is not None:
+            soil_data = {
+                "soil_ph": shc.get("soil_ph"),
+                "soil_organic_carbon": shc.get("soil_organic_carbon"),
+                "soil_nitrogen": shc.get("soil_nitrogen"),
+                "soil_clay": shc.get("soil_clay"),
+                "soil_organic_carbon_stock": shc.get("soil_organic_carbon_stock"),
+            }
+            soil_source = "Soil Health Card entered by farmer"
+        else:
+            soil_data = get_soil_data(lat, lon)
+            soil_source = "OpenEPI typical soils near this map point, not your field lab card"
         weather_data = get_weather(lat, lon)
+        if not soil_data or not weather_data:
+            return jsonify({"error": "Soil or weather data is unavailable"}), 502
 
         input_data = {
             "location": {
@@ -213,9 +188,10 @@ def fertilizer_route():
             "crop": crop,
             "location": input_data["location"],
             "soil_data": soil_data,
+            "soil_source": soil_source,
             "weather_data": weather_data,
             "recommendation": recommendation
         })
 
-    except Exception as e:
-        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+    except Exception:
+        return jsonify({"error": "Fertilizer advice is unavailable"}), 500

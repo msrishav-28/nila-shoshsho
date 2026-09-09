@@ -2,12 +2,11 @@ import { ScrollView, StyleSheet, Text, View, ActivityIndicator, TextInput, Touch
 import React, { useState, useEffect } from 'react';
 import { theme } from '../theme.config';
 import Header from '../components/Header';
-import axios from 'axios';
 import Icon from 'react-native-vector-icons/Feather';
 import { Dropdown } from 'react-native-element-dropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SERP_API_KEY } from '../backendConfig';
 import { useTranslation } from 'react-i18next';
+import { adviceFetch } from '../utils/api';
 
 const safeString = (value) => {
     if (value === null || value === undefined) return '';
@@ -98,12 +97,9 @@ const News = () => {
         const loadLanguage = async () => {
             const storedLang = await AsyncStorage.getItem('appLanguage');
             setLang(storedLang || 'English');
-            console.log('Stored language:', storedLang);
         };
         loadLanguage();
     }, []);
-
-    const BASE_QUERY = 'latest agriculture news india farmers';
 
     const fetchNews = async (refresh = false) => {
         if (refresh) {
@@ -115,48 +111,27 @@ const News = () => {
         setError(null);
 
         try {
-            let query = BASE_QUERY;
-
-            if (category !== 'all') {
-                query += ` ${category}`;
-            }
-
-            if (state !== 'all') {
-                query += ` ${state}`;
-            }
-
-            if (searchQuery) {
-                query += ` ${searchQuery}`;
-            }
-
-            const languageMap = {
-                'English': 'en',
-                'Hindi': 'hi',
-                'Marathi': 'mr',
-                'Tamil': 'ta',
-            };
-
-            const hl = languageMap[lang] || 'en';
-
-            const response = await axios.get('https://serpapi.com/search', {
-                params: {
-                    api_key: SERP_API_KEY,
-                    engine: 'google_news',
-                    q: query,
-                    tbm: 'nws',
-                    num: 20,
-                    gl: 'in',
-                    hl: hl,
-                },
+            const params = new URLSearchParams({
+                category,
+                state,
+                search: searchQuery,
+                lang,
             });
-
-            if (response.data && response.data.news_results) {
-                setNews(response.data.news_results);
+            const response = await adviceFetch(`/news?${params.toString()}`);
+            const payload = await response.json();
+            if (!response.ok) {
+                setNews([]);
+                setError(payload.error || t('news.errors.fetchError'));
+                return;
+            }
+            if (payload && Array.isArray(payload.news_results)) {
+                setNews(payload.news_results);
             } else {
+                setNews([]);
                 setError(t('news.errors.noResults'));
             }
         } catch (err) {
-            console.error('Fetch error:', err);
+            setNews([]);
             setError(t('news.errors.fetchError'));
         } finally {
             setLoading(false);
@@ -269,11 +244,26 @@ const News = () => {
         <View style={[theme.container]}>
             <Header text={t('news.header')} />
             {renderFilterSection()}
+            {loading && !refreshing ? (
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color={theme.secondary} />
+                </View>
+            ) : error ? (
+                <View style={styles.centerContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                    <TouchableOpacity style={styles.retryButton} onPress={() => fetchNews()}>
+                        <Text style={styles.retryButtonText}>{t('news.retry')}</Text>
+                    </TouchableOpacity>
+                </View>
+            ) : (
             <FlatList
                 data={news}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => <NewsCard item={item} />}
                 contentContainerStyle={{ paddingBottom: 20 }}
+                ListEmptyComponent={
+                    <Text style={styles.noResultsText}>{t('news.noResults')}</Text>
+                }
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -284,6 +274,7 @@ const News = () => {
                 }
                 keyboardShouldPersistTaps="handled"
             />
+            )}
         </View>
     );
 };

@@ -1,102 +1,69 @@
-import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, Image, Text, TouchableOpacity} from 'react-native';
-import Tts from 'react-native-tts';
-import Entypo from 'react-native-vector-icons/Entypo';
+import React, {useEffect, useRef, useState} from 'react';
+import {View, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {Audio} from 'expo-av';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {theme} from '../theme.config';
 import {useTranslation} from 'react-i18next';
-
-const stripMarkdown = text => {
-  return text
-    .replace(/(\*\*|__)(.*?)\1/g, '$2')
-    .replace(/(\*|_)(.*?)\1/g, '$2')
-    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
-    .replace(/#{1,6}\s/g, '')
-    .replace(/(\n\s*[-*+]\s)/g, '\n')
-    .replace(/\n{2,}/g, '\n')
-    .replace(/>\s/g, '')
-    .trim();
-};
+import {adviceFetch} from '../utils/api';
+import Toast from 'react-native-toast-message';
 
 const VoicePlayer = ({text, lang}) => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const [playing, setPlaying] = useState(false);
-  
-  useEffect(() => {
-    setPlaying(false);
-    const setTtsLanguage = async () => {
-      let ttsLang = 'en-US';
-      switch (lang) {
-        case 'en':
-          ttsLang = 'en-US';
-          break;
-        case 'hi':
-          ttsLang = 'hi-IN';
-          break;
-        case 'mr':
-          ttsLang = 'mr-IN';
-          break;
-        case 'ta':
-          ttsLang = 'ta-IN';
-          break;
-        default:
-          ttsLang = 'en-US';
-      }
-      try {
-        await Tts.setDefaultLanguage(ttsLang);
-        await Tts.setDefaultVoice(ttsLang);
-      } catch (err) {
-        console.log('TTS Language Error:', err);
-      }
-    };
-    setTtsLanguage();
-  }, [text, lang]);
+  const soundRef = useRef(null);
 
-  const speak = () => {
-    setPlaying(true);
-    Tts.stop();
-    const cleanText = stripMarkdown(text);
-    Tts.speak(cleanText);
+  useEffect(() => {
+    return () => {
+      soundRef.current?.unloadAsync?.();
+    };
+  }, []);
+
+  const stop = async () => {
+    setPlaying(false);
+    await soundRef.current?.stopAsync?.();
+    await soundRef.current?.unloadAsync?.();
+    soundRef.current = null;
   };
 
-  const stop = () => {
-    Tts.stop();
-    setPlaying(false);
+  const speak = async () => {
+    if (!text) {
+      return;
+    }
+    try {
+      setPlaying(true);
+      const res = await adviceFetch('/voice/tts', {
+        method: 'POST',
+        body: JSON.stringify({text: String(text).slice(0, 2400), lang: lang || i18n.language}),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.audio_base64) {
+        Toast.show({type: 'error', text1: data.error || t('searchMic.unavailable')});
+        setPlaying(false);
+        return;
+      }
+      const sound = new Audio.Sound();
+      await sound.loadAsync({uri: `data:audio/wav;base64,${data.audio_base64}`});
+      soundRef.current = sound;
+      sound.setOnPlaybackStatusUpdate(status => {
+        if (status.didJustFinish) {
+          setPlaying(false);
+        }
+      });
+      await sound.playAsync();
+    } catch (err) {
+      setPlaying(false);
+      Toast.show({type: 'error', text1: t('searchMic.unavailable')});
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/images/voice.png')}
-        style={{width: 50, height: 50}}
-      />
-      <View
-        style={{
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          gap: 7,
-          width: '70%',
-        }}>
-        <Text
-          style={{
-            fontFamily: theme.font.regular,
-            fontSize: 13,
-            color: 'black',
-          }}>
-          {t('voice')}
-        </Text>
-        <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
-          {playing ? (
-            <TouchableOpacity onPress={stop}>
-              <Icon name="pause" size={25} color={'black'} />
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={speak}>
-              <Entypo name="controller-play" size={25} color={'black'} />
-            </TouchableOpacity>
-          )}
-        </View>
+      <Icon name="volume-high-outline" size={28} color={theme.paddy} />
+      <View style={{flex: 1}}>
+        <Text style={styles.label}>{t('voice') === 'voice' ? 'Listen' : t('voice')}</Text>
+        <TouchableOpacity onPress={playing ? stop : speak} accessibilityRole="button" hitSlop={8}>
+          <Icon name={playing ? 'pause' : 'play'} size={26} color={theme.ink} />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -104,17 +71,23 @@ const VoicePlayer = ({text, lang}) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '96%',
+    width: '100%',
     marginVertical: 10,
-    borderRadius: 5,
+    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    gap: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 16,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
-    marginLeft: '2%',
+    borderColor: theme.hairline,
+    backgroundColor: theme.surface,
+  },
+  label: {
+    fontFamily: theme.font.regular,
+    fontSize: 13,
+    color: theme.ink,
+    marginBottom: 4,
   },
 });
 

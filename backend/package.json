@@ -4,24 +4,25 @@
   "description": "Backend API for Nila Shoshsho - AI-driven agricultural companion for Indian farmers",
   "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "db:setup": "node src/db/applySchema.js",
+    "test": "node --test src/lib/verifyToken.test.js src/lib/pii.test.js",
+    "loadtest": "node scripts/load-test.mjs"
   },
   "keywords": [],
   "author": "",
   "type": "module",
   "license": "ISC",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
+    "@neondatabase/serverless": "^1.0.2",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.6.0",
-    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.13.2",
-    "multer": "^1.4.5-lts.2",
-    "twilio": "^5.5.2"
+    "jose": "^6.1.0",
+    "multer": "^1.4.5-lts.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

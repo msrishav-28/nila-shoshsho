@@ -4,17 +4,8 @@ import { LineChart } from 'react-native-chart-kit';
 import { Dropdown } from 'react-native-element-dropdown';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { theme } from '../../theme.config';
-import Groq from 'groq-sdk';
-import { DATA_GOV_API_KEY, GROQ_API_KEY } from '../../backendConfig';
 import { useTranslation } from 'react-i18next';
-
-const API_KEY = DATA_GOV_API_KEY;
-const BASE_URL = 'https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070';
-
-const groq = new Groq({
-    apiKey: GROQ_API_KEY,
-    dangerouslyAllowBrowser: true
-});
+import { adviceFetch } from '../../utils/api';
 
 const initialFilterOptions = { label: 'All', value: '' };
 
@@ -112,10 +103,46 @@ const MarketPrices = () => {
     });
 
     const [aiAnalysis, setAiAnalysis] = useState(null);
+    const [aiMeta, setAiMeta] = useState(null);
     const [isFocused, setIsFocused] = useState(false);
     const [offset, setOffset] = useState(0);
     const [limit, setLimit] = useState(10);
     const [totalRecords, setTotalRecords] = useState(0);
+    const [liveStates, setLiveStates] = useState(null);
+    const [liveDistricts, setLiveDistricts] = useState({});
+    const [liveCommodities, setLiveCommodities] = useState(null);
+
+    const mergeLiveFilters = records => {
+        if (!records || records.length === 0) {
+            return;
+        }
+        setLiveStates(prev => {
+            const next = new Set(prev || []);
+            records.forEach(row => {
+                if (row.state) next.add(row.state);
+            });
+            return Array.from(next).sort();
+        });
+        setLiveCommodities(prev => {
+            const next = new Set(prev || []);
+            records.forEach(row => {
+                if (row.commodity) next.add(row.commodity);
+            });
+            return Array.from(next).sort();
+        });
+        setLiveDistricts(prev => {
+            const next = { ...prev };
+            records.forEach(row => {
+                if (!row.state || !row.district) {
+                    return;
+                }
+                const set = new Set(next[row.state] || []);
+                set.add(row.district);
+                next[row.state] = Array.from(set).sort();
+            });
+            return next;
+        });
+    };
 
     const fetchFilterOptions = async () => {
         try {
@@ -168,22 +195,19 @@ const MarketPrices = () => {
         setError(null);
 
         try {
-            const filters = {};
-            if (selectedState) filters.state = selectedState;
-            if (selectedDistrict) filters.district = selectedDistrict;
-            if (selectedCommodity) filters.commodity = selectedCommodity;
+            const params = new URLSearchParams({
+                offset: String(offset),
+                limit: String(limit),
+            });
+            if (selectedState) params.append('state', selectedState);
+            if (selectedDistrict) params.append('district', selectedDistrict);
+            if (selectedCommodity) params.append('commodity', selectedCommodity);
 
-            const filtersQueryString = Object.entries(filters)
-                .map(([key, value]) => `filters[${key}]=${encodeURIComponent(value)}`)
-                .join('&');
-
-            const url = `${BASE_URL}?api-key=${API_KEY}&format=json&offset=${offset}&limit=${limit}${filtersQueryString ? '&' + filtersQueryString : ''}`;
-
-            const response = await fetch(url);
+            const response = await adviceFetch(`/api/market-prices?${params.toString()}`);
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || t('marketPrices.errors.fetchFailed'));
+                throw new Error(data.error || data.message || t('marketPrices.errors.fetchFailed'));
             }
 
             if (data.total !== undefined) {
@@ -192,6 +216,7 @@ const MarketPrices = () => {
 
             if (data.records && data.records.length > 0) {
                 setMarketPrices(data.records);
+                mergeLiveFilters(data.records);
                 processDataForChart(data.records);
                 fetchAIAnalysis(data.records);
             } else {
@@ -257,68 +282,32 @@ const MarketPrices = () => {
         setAiLoading(true);
 
         try {
-            const commodity = records[0]?.commodity || 'commodity';
-            const variety = records[0]?.variety || '';
-            const marketName = records[0]?.market || 'market';
-            const district = records[0]?.district || '';
-            const state = records[0]?.state || '';
-
-            const modalPrices = records.map(r => parseFloat(r.modal_price));
-            const minPrice = Math.min(...modalPrices).toFixed(2);
-            const maxPrice = Math.max(...modalPrices).toFixed(2);
-            const avgPrice = (modalPrices.reduce((sum, price) => sum + price, 0) / modalPrices.length).toFixed(2);
-
-            const arrivalDates = [...new Set(records.map(r => r.arrival_date))].sort();
-            const dateRange = arrivalDates.length > 0 ?
-                `${arrivalDates[0]} to ${arrivalDates[arrivalDates.length - 1]}` : 'unknown date range';
-
-            const prompt = `
-        You are an agricultural market analyst AI. Based on the following market data for ${commodity} in ${marketName}, provide:
-        1. A concise analysis of current market trends (rising, falling, or stable)
-        2. Potential factors affecting prices
-        3. A short-term forecast (1-2 weeks)
-        4. Actionable advice for farmers on whether to sell now or wait
-  
-        Market Data Summary:
-        - Commodity: ${commodity} ${variety ? `(${variety})` : ''}
-        - Market: ${marketName}, ${district}, ${state}
-        - Price Range: ₹${minPrice} to ₹${maxPrice} per quintal
-        - Average Price: ₹${avgPrice} per quintal
-        - Date Range: ${dateRange}
-        - Data Points: ${records.length} records
-  
-        Keep your response focused, practical, and under 150 words. Format your response in simple paragraphs.
-      `;
-
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            const response = await adviceFetch('/api/market-analysis', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${GROQ_API_KEY}`,
                 },
-                body: JSON.stringify({
-                    messages: [{ role: "user", content: prompt }],
-                    model: "llama3-70b-8192",
-                    temperature: 0.5,
-                    max_tokens: 300
-                }),
+                body: JSON.stringify({ records }),
             });
 
+            const payload = await response.json();
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(payload.error || t('marketPrices.errors.aiFailed'));
             }
 
-            const chatCompletion = await response.json();
-            const analysisText = chatCompletion.choices[0]?.message?.content;
-
-            if (analysisText) {
-                setAiAnalysis(analysisText);
+            if (payload.analysis) {
+                setAiAnalysis(payload.analysis);
+                setAiMeta({
+                    source: payload.source,
+                    asOf: payload.asOf,
+                });
             } else {
                 setAiAnalysis(t('marketPrices.errors.aiNotAvailable'));
+                setAiMeta(null);
             }
         } catch (err) {
             console.error('Error fetching AI analysis:', err);
-            setAiAnalysis(`${t('marketPrices.errors.aiFailed')}: ${err.message}`);
+            setAiAnalysis(t('marketPrices.errors.aiFailed'));
         } finally {
             setAiLoading(false);
         }
@@ -330,13 +319,47 @@ const MarketPrices = () => {
     };
 
     useEffect(() => {
+        if (liveStates) {
+            return;
+        }
         fetchFilterOptions();
-    }, [t]);
+    }, [t, liveStates]);
 
     useEffect(() => {
+        if (liveStates) {
+            setStateOptions([
+                { label: t('marketPrices.filters.allStates'), value: '' },
+                ...liveStates.map(name => ({ label: name, value: name })),
+            ]);
+        }
+    }, [liveStates, t]);
+
+    useEffect(() => {
+        if (liveCommodities) {
+            setCommodityOptions([
+                { label: t('marketPrices.filters.allCommodities'), value: '' },
+                ...liveCommodities.map(name => ({ label: name, value: name })),
+            ]);
+        }
+    }, [liveCommodities, t]);
+
+    useEffect(() => {
+        if (liveStates) {
+            const districts = selectedState
+                ? liveDistricts[selectedState] || []
+                : Array.from(new Set(Object.values(liveDistricts).flat()));
+            setDistrictOptions([
+                { label: t('marketPrices.filters.allDistricts'), value: '' },
+                ...districts.map(name => ({ label: name, value: name })),
+            ]);
+            return;
+        }
         updateDistrictOptions(selectedState);
+    }, [liveStates, liveDistricts, selectedState, t]);
+
+    useEffect(() => {
         fetchData();
-    }, [selectedState, selectedDistrict, selectedCommodity, offset, limit, t]);
+    }, [selectedState, selectedDistrict, selectedCommodity, offset, limit]);
 
     const chartConfig = {
         backgroundGradientFrom: '#fff',
@@ -569,8 +592,9 @@ const MarketPrices = () => {
                                 <Text style={styles.value}>₹{parseFloat(marketPrices[0].max_price).toFixed(2)}</Text>
                             </View>
                         </View>
-                        <View style={{ marginTop: 16, height: 150 }}>
+                        <View style={{ marginTop: 16 }}>
                             <Text style={styles.label}>{t('marketPrices.fields.aiAnalysis')}</Text>
+                            <Text style={styles.value}>{t('marketPrices.fields.liveComment')}</Text>
                             {aiLoading ? (
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <ActivityIndicator size="small" color={theme.darkBrown} />
@@ -579,6 +603,11 @@ const MarketPrices = () => {
                             ) : (
                                 <Text style={styles.value}>{aiAnalysis || t('marketPrices.errors.aiNotAvailable')}</Text>
                             )}
+                            {aiMeta?.source ? (
+                                <Text style={styles.value}>
+                                    {aiMeta.source}{aiMeta.asOf ? ` · ${aiMeta.asOf}` : ''}
+                                </Text>
+                            ) : null}
                         </View>
 
                         <View style={{ marginTop: 30 }}>

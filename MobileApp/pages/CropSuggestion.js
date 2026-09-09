@@ -8,25 +8,22 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  FlatList,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import Toast from 'react-native-toast-message';
 import { theme } from '../theme.config';
-import { AIBACKEND_URL } from '../backendConfig';
+import { adviceFetch } from '../utils/api';
 import { UserContext } from '../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 
-const API_URL = `${AIBACKEND_URL}/crop_suggestion`;
-const CALENDAR_API_URL = `${AIBACKEND_URL}/crop_calendar`;
+const API_PATH = '/crop_suggestion';
+const CALENDAR_API_PATH = '/crop_calendar';
 
 const CropSuggestion = () => {
   const { t } = useTranslation();
   const { user } = useContext(UserContext);
-  const navigation = useNavigation();
   const [city, setCity] = useState(user.location?.city || '');
   const [state, setState] = useState(user.location?.state || '');
   const [landAcres, setLandAcres] = useState('');
@@ -86,14 +83,24 @@ const CropSuggestion = () => {
         lang,
       };
 
-      const res = await fetch(API_URL, {
+      const res = await adviceFetch(API_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (data.recommendations && data.recommendations.length > 0) {
+      if (!res.ok) {
+        const message = data.error || t('cropSuggestion.errors.anErrorOccurred');
+        setError(message);
+        Toast.show({
+          type: 'error',
+          text1: t('cropSuggestion.errors.invalidInput'),
+          text2: message,
+        });
+        return;
+      }
+      if (Array.isArray(data.windows)) {
         setResponseData(data);
         Toast.show({
           type: 'success',
@@ -137,29 +144,31 @@ const CropSuggestion = () => {
         lang,
       };
 
-      const res = await fetch(CALENDAR_API_URL, {
+      const res = await adviceFetch(CALENDAR_API_PATH, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (data.calendar && data.calendar.length > 0) {
-        setCalendarData(data);
-        setSelectedTab('calendar');
-        Toast.show({
-          type: 'success',
-          text1: t('cropSuggestion.success.calendarGenerated'),
-          text2: t('cropSuggestion.success.calendarGenerated'),
-        });
-      } else {
-        setCalendarError(t('cropSuggestion.errors.noCalendarData'));
+      if (!res.ok || !data.window) {
+        const message =
+          data.error || t('cropSuggestion.errors.noCalendarData');
+        setCalendarError(message);
         Toast.show({
           type: 'error',
           text1: t('cropSuggestion.errors.invalidInput'),
-          text2: t('cropSuggestion.errors.noCalendarData'),
+          text2: message,
         });
+        return;
       }
+      setCalendarData(data);
+      setSelectedTab('calendar');
+      Toast.show({
+        type: 'success',
+        text1: t('cropSuggestion.success.calendarGenerated'),
+        text2: t('cropSuggestion.success.calendarGenerated'),
+      });
     } catch (err) {
       const errorMessage = err?.message || t('cropSuggestion.errors.anErrorOccurred');
       setCalendarError(errorMessage);
@@ -186,95 +195,63 @@ const CropSuggestion = () => {
     await handleCalendarRequest(cropName);
   };
 
-  const renderWeatherItem = () => (
-    <View style={styles.weatherCard}>
-      <Text style={styles.weatherDate}>{t('cropSuggestion.results.weatherPlaceholder')}</Text>
-      <Text style={styles.weatherText}>{t('cropSuggestion.results.noWeatherData')}</Text>
-    </View>
-  );
-
-  const renderRecommendationTable = () => {
-    const headers = [
-      t('cropSuggestion.results.table.crop'),
-      t('cropSuggestion.results.table.totalYield'),
-      t('cropSuggestion.results.table.yieldPerAcre'),
-      t('cropSuggestion.results.table.risk'),
-    ];
-    const rows = responseData.recommendations.map((item) => [
-      item.crop,
-      `${item.estimated_total_yield_kg} kg`,
-      `${item.expected_yield_per_acre_kg} kg`,
-      `${item.risk_percent}%`,
-      item.crop,
-    ]);
-
-    return (
-      <View style={styles.tableContainer}>
-        <View style={styles.tableRow}>
-          {headers.map((header, index) => (
-            <View key={index} style={styles.tableHeaderCell}>
-              <Text style={styles.tableHeaderText}>{header}</Text>
-            </View>
-          ))}
+  const renderWeatherOverlay = weather => {
+    const dates = weather?.dates || [];
+    if (!dates.length) {
+      return (
+        <View style={styles.weatherCard}>
+          <Text style={styles.weatherDate}>{t('cropSuggestion.results.weatherPlaceholder')}</Text>
+          <Text style={styles.weatherText}>{t('cropSuggestion.results.noWeatherData')}</Text>
         </View>
-        {rows.map((row, rowIndex) => (
-          <View key={rowIndex}>
-            <View style={styles.tableRow}>
-              {row.slice(0, 4).map((cell, cellIndex) => (
-                <View key={cellIndex} style={styles.tableCell}>
-                  {cellIndex === 0 && (
-                    <Icon
-                      name={getCropIcon(cell)}
-                      size={18}
-                      color={theme.primary}
-                      style={styles.cellIcon}
-                    />
-                  )}
-                  <Text style={styles.tableCellText}>{cell}</Text>
-                </View>
-              ))}
-            </View>
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={[styles.calendarButton, calendarLoading && loadingCrop === row[4] && styles.buttonDisabled]}
-                onPress={() => handleCalendarRequest(row[4])}
-                disabled={calendarLoading && loadingCrop === row[4]}
-              >
-                <Text style={styles.calendarButtonText}>
-                  {calendarLoading && loadingCrop === row[4]
-                    ? t('cropSuggestion.button.loading')
-                    : t('cropSuggestion.button.generateCalendar')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+      );
+    }
+    return dates.slice(0, 7).map((date, index) => (
+      <View key={date} style={styles.weatherCard}>
+        <Text style={styles.weatherDate}>{date}</Text>
+        <Text style={styles.weatherText}>
+          {weather.temp_max?.[index]}° / {weather.temp_min?.[index]}°
+        </Text>
+        <Text style={styles.weatherText}>
+          {weather.precipitation?.[index]} mm
+        </Text>
+        {weather.source ? (
+          <Text style={styles.weatherText}>{weather.source}</Text>
+        ) : null}
       </View>
-    );
+    ));
   };
 
-  const getCropIcon = (crop) => {
-    const cropIconMap = {
-      Bajra: 'leaf-outline',
-      Jowar: 'leaf-outline',
-      Moong: 'nutrition-outline',
-      Urad: 'nutrition-outline',
-    };
-    return cropIconMap[crop] || 'leaf-outline';
-  };
-
-  const renderReason = () => (
-    <View style={styles.textSection}>
-      <View style={styles.sectionHeader}>
-        <Icon
-          name="information-circle-outline"
-          size={20}
-          color={theme.primary}
-          style={styles.sectionIcon}
-        />
-        <Text style={styles.sectionSubtitle}>{t('cropSuggestion.results.reason')}</Text>
+  const renderWindowCard = (window, cropKey) => (
+    <View key={window.crop || cropKey} style={styles.infoCard}>
+      <View style={styles.infoRow}>
+        <Icon name="leaf-outline" size={18} color={theme.primary} />
+        <Text style={styles.infoText}>{window.crop}</Text>
       </View>
-      <Text style={styles.sectionText}>{responseData.reason}</Text>
+      <Text style={styles.sectionText}>
+        {t('cropSuggestion.results.season')}: {window.season}
+      </Text>
+      <Text style={styles.sectionText}>
+        {t('cropSuggestion.results.sowMonths')}: {(window.sow_months || []).join(', ')}
+      </Text>
+      <Text style={styles.sectionText}>
+        {t('cropSuggestion.results.harvestMonths')}: {(window.harvest_months || []).join(', ')}
+      </Text>
+      <Text style={styles.sectionText}>{t('cropSuggestion.results.nationalTypical')}</Text>
+      {window.source ? <Text style={styles.sectionText}>{window.source}</Text> : null}
+      {window.asOf ? <Text style={styles.sectionText}>{window.asOf}</Text> : null}
+      {cropKey ? (
+        <TouchableOpacity
+          style={[styles.calendarButton, calendarLoading && loadingCrop === cropKey && styles.buttonDisabled]}
+          onPress={() => handleCalendarRequest(cropKey)}
+          disabled={calendarLoading && loadingCrop === cropKey}
+        >
+          <Text style={styles.calendarButtonText}>
+            {calendarLoading && loadingCrop === cropKey
+              ? t('cropSuggestion.button.loading')
+              : t('cropSuggestion.button.generateCalendar')}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 
@@ -292,43 +269,30 @@ const CropSuggestion = () => {
           {t('cropSuggestion.results.season')}: {responseData.season}
         </Text>
       </View>
+      <View style={styles.infoRow}>
+        <Icon name="resize-outline" size={18} color={theme.primary} />
+        <Text style={styles.infoText}>
+          {t('cropSuggestion.results.landSize')}: {responseData.land_acres} {t('cropSuggestion.results.acres')}
+        </Text>
+      </View>
     </View>
   );
 
   const renderCalendar = () => {
-    if (!calendarData) return null;
+    if (!calendarData?.window) return null;
+    const window = calendarData.window;
 
     return (
       <View style={styles.resultContainer}>
         <Text style={styles.sectionTitle}>
           {t('cropSuggestion.results.calendarFor', { crop: cropName })}
         </Text>
-        <Text style={styles.sectionText}>
-          {t('cropSuggestion.results.duration')}: {calendarData.duration_weeks} {t('cropSuggestion.results.weeks')}
-        </Text>
-        <Text style={styles.sectionText}>
-          {t('cropSuggestion.results.weatherSummary')}: {calendarData.weather_summary}
-        </Text>
-        <FlatList
-          data={calendarData.calendar}
-          keyExtractor={(item) => `week-${item.week}`}
-          renderItem={({ item }) => (
-            <View style={styles.weekCard}>
-              <Text style={styles.weekTitle}>
-                {t('cropSuggestion.results.week')} {item.week}
-              </Text>
-              {item.tasks.map((task, index) => (
-                <View key={index} style={styles.taskCard}>
-                  <Text style={styles.taskTitle}>{task.task_title}</Text>
-                  <Text style={styles.taskDescription}>{task.description}</Text>
-                  <Text style={styles.taskDuration}>
-                    {t('cropSuggestion.results.duration')}: {task.duration}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-        />
+        {renderWindowCard(window)}
+        {calendarData.note ? (
+          <Text style={styles.sectionText}>{calendarData.note}</Text>
+        ) : null}
+        <Text style={styles.sectionTitle}>{t('cropSuggestion.results.weatherConditions')}</Text>
+        {renderWeatherOverlay(calendarData.weather)}
       </View>
     );
   };
@@ -378,14 +342,17 @@ const CropSuggestion = () => {
       {error && <Text style={styles.errorText}>{error}</Text>}
       {responseData && (
         <View style={styles.resultContainer}>
-          <Text style={styles.sectionTitle}>{t('cropSuggestion.results.cropRecommendations')}</Text>
-          {renderReason()}
-          <Text style={styles.sectionTitle}>{t('cropSuggestion.results.recommendations')}</Text>
-          {renderRecommendationTable()}
-          <Text style={styles.sectionTitle}>{t('cropSuggestion.results.regionSeason')}</Text>
+          <Text style={styles.sectionTitle}>{t('cropSuggestion.results.seasonWindows')}</Text>
+          <Text style={styles.sectionText}>{t('cropSuggestion.results.nationalTypical')}</Text>
+          {responseData.source ? (
+            <Text style={styles.sectionText}>{responseData.source}</Text>
+          ) : null}
           {renderRegionSeason()}
+          {(responseData.windows || []).map(window =>
+            renderWindowCard(window, window.crop),
+          )}
           <Text style={styles.sectionTitle}>{t('cropSuggestion.results.weatherConditions')}</Text>
-          {renderWeatherItem()}
+          {renderWeatherOverlay(responseData.weather)}
         </View>
       )}
     </>
@@ -657,6 +624,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     width: '80%',
+    marginTop: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,

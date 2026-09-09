@@ -6,21 +6,18 @@ import {
   View,
 } from 'react-native';
 import {theme} from '../theme.config';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Entypo from 'react-native-vector-icons/Entypo';
 import {useNavigation} from '@react-navigation/native';
-//import ProgressBar from 'react-native-progress/Bar';
 import {AnimatedCircularProgress} from 'react-native-circular-progress';
 import Header from '../components/Header';
 import {useContext, useEffect, useState} from 'react';
 import {UserContext} from '../context/UserContext';
-import {BACKEND_URL} from '../backendConfig';
+import {accountFetch} from '../utils/api';
 import Toast from 'react-native-toast-message';
 import {useTranslation} from 'react-i18next';
 
 const Settings = () => {
   const navigation = useNavigation();
-  const {user, logout} = useContext(UserContext);
+  const {logout} = useContext(UserContext);
   const [progress, setProgress] = useState(0);
   const {t} = useTranslation();
 
@@ -29,35 +26,30 @@ const Settings = () => {
     {name: t('document'), route: 'Documents'},
     {name: t('change_language'), route: 'LanguageChange'},
     {name: t('change_password'), route: 'PasswordChange'},
+    {name: t('logistics.header'), route: 'Logistics'},
   ];
 
   useEffect(() => {
     const fetchProfileCompletion = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/auth/profile-completion`, {
+        const res = await accountFetch('/auth/profile-completion', {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials : 'include'
         });
         const data = await res.json();
-        console.log('res' , data)
         if (data.success) {
           setProgress(data.percentage);
         } else {
           setProgress(0);
           Toast.show({
             type: 'error',
-            text1: 'Error occured while fetching profile data',
+            text1: t('settingsToasts.profileFetchTitle'),
             text2: data.message,
           });
         }
       } catch (err) {
-        console.log(err);
         Toast.show({
           type: 'error',
-          text1: 'Error occured while fetching profile data',
+          text1: t('settingsToasts.profileFetchTitle'),
           text2: err.toString(),
         });
       }
@@ -71,22 +63,22 @@ const Settings = () => {
       if (result.success) {
         Toast.show({
           type: 'success',
-          text1: 'Logout',
+          text1: t('settingsToasts.logoutTitle'),
           text2: result.message,
         });
         navigation.navigate('Welcome');
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Logout error',
+          text1: t('settingsToasts.logoutErrorTitle'),
           text2: result.message,
         });
       }
     } catch (err) {
       Toast.show({
         type: 'error',
-        text1: 'Logout error',
-        text2: err,
+        text1: t('settingsToasts.logoutErrorTitle'),
+        text2: String(err),
       });
     }
   };

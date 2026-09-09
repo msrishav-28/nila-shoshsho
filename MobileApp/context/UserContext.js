@@ -1,28 +1,40 @@
-import {createContext, useState} from 'react';
+import {createContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {BACKEND_URL} from '../backendConfig';
+import {accountFetch, setUnauthorizedHandler} from '../utils/api';
 
 export const UserContext = createContext();
+
+const persistSession = async nextUser => {
+  if (nextUser?.accessToken) {
+    await AsyncStorage.setItem('accessToken', nextUser.accessToken);
+  }
+  await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+};
 
 export const UserProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setUnauthorizedHandler(async () => {
+      setUser(null);
+      await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('accessToken');
+    });
+  }, []);
+
   const signup = async userData => {
     try {
       setLoading(true);
-      const res = await fetch(`${BACKEND_URL}/auth/signup`, {
+      const res = await accountFetch('/auth/signup', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(userData),
       });
 
       const data = await res.json();
       if (data.success) {
         setUser(data.user);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        await persistSession(data.user);
         return {success: true, message: 'Signup Successful!'};
       } else {
         return {success: false, message: data.error || data.message};
@@ -37,17 +49,14 @@ export const UserProvider = ({children}) => {
   const loginWithEmailPassword = async loginData => {
     try {
       setLoading(true);
-      const res = await fetch(`${BACKEND_URL}/auth/login-email`, {
+      const res = await accountFetch('/auth/login-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(loginData),
       });
       const data = await res.json();
       if (data.success) {
         setUser(data.user);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        await persistSession(data.user);
         return {success: true, message: 'Login Successful!'};
       } else {
         return {success: false, message: data.message};
@@ -62,47 +71,17 @@ export const UserProvider = ({children}) => {
     }
   };
 
-  const loginWithPhonePassword = async loginData => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${BACKEND_URL}/auth/login-phone`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setUser(data.user);
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
-        return {success: true, message: 'Login Successful!'};
-      } else {
-        return {success: false, message: data.message};
-      }
-    } catch (err) {
-      return {
-        success: false,
-        message: 'Error logging in with phone and password',
-      };
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const logout = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BACKEND_URL}/auth/logout`, {
+      const res = await accountFetch('/auth/logout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
       const data = await res.json();
       if (data.success) {
         setUser(null);
         await AsyncStorage.removeItem('user');
+        await AsyncStorage.removeItem('accessToken');
         return {success: true, message: 'Logout Successful!'};
       } else {
         return {success: false, message: data.message};
@@ -119,19 +98,14 @@ export const UserProvider = ({children}) => {
       setLoading(true);
 
       if (userData) {
-        const res = await fetch(`${BACKEND_URL}/auth/update-profile`, {
+        const res = await accountFetch('/auth/update-profile', {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
           body: JSON.stringify(userData),
         });
-
-        console.log('result', data);
         const data = await res.json();
         if (data.success) {
           setUser(data.user);
-          await AsyncStorage.setItem('user', JSON.stringify(data.user));
+          await persistSession(data.user);
           return {success: true, message: 'Profile updated successfully!'};
         } else {
           return {
@@ -143,7 +117,6 @@ export const UserProvider = ({children}) => {
 
       return {success: false, message: 'No data provided to update.'};
     } catch (err) {
-      console.log(err);
       return {success: false, message: `${err}`};
     } finally {
       setLoading(false);
@@ -152,23 +125,17 @@ export const UserProvider = ({children}) => {
 
   const updateProfilePic = async profilePic => {
     try {
-      console.log('Sending profile pic update request');
-
-      const response = await fetch(`${BACKEND_URL}/auth/update-profile-pic`, {
+      const response = await accountFetch('/auth/update-profile-pic', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
           profilePic: profilePic,
         }),
       });
 
       const data = await response.json();
-      console.log('profile data' , data)
       if (data.success) {
-        setUser(data.user)
-        await AsyncStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+        await persistSession(data.user);
         return {
           success: true,
           message: 'Profile picture updated successfully',
@@ -180,7 +147,6 @@ export const UserProvider = ({children}) => {
         };
       }
     } catch (err) {
-      console.log('Error updating profile pic:', err);
       return {
         success: false,
         message: 'An error occurred during the image upload.',
@@ -195,7 +161,6 @@ export const UserProvider = ({children}) => {
         loading,
         signup,
         loginWithEmailPassword,
-        loginWithPhonePassword,
         logout,
         updateUser,
         updateProfilePic,

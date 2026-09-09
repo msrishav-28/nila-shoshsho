@@ -10,11 +10,10 @@ import {
 } from 'react-native';
 import {theme} from '../theme.config';
 import Header from '../components/Header';
-import axios from 'axios';
 import {pick} from '@react-native-documents/picker';
 import Toast from 'react-native-toast-message';
 import {UserContext} from '../context/UserContext';
-import {BACKEND_URL, AIBACKEND_URL} from '../backendConfig';
+import {accountFetch, adviceFetch} from '../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {useTranslation} from 'react-i18next';
@@ -63,16 +62,17 @@ const Documents = () => {
         name: pickResult.name || 'unnamed_file.pdf',
       });
     } catch (err) {
-      if (err?.code === 'CANCELLED') {
-        console.log('User cancelled the picker');
-      } else {
-        console.log('Error picking document:', err);
+      if (err?.code !== 'CANCELLED') {
+        Toast.show({
+          type: 'error',
+          text1: t('documents.alerts.invalidFile.title'),
+          text2: t('documents.alerts.invalidFile.message'),
+        });
       }
     }
   };
 
   const handleUpload = async () => {
-    setLoading(true);
     if (!selectedFile) {
       Toast.show({
         type: 'error',
@@ -81,6 +81,7 @@ const Documents = () => {
       });
       return;
     }
+    setLoading(true);
 
     const formData = new FormData();
     formData.append('document', {
@@ -90,18 +91,12 @@ const Documents = () => {
     });
 
     try {
-      const response = await axios.post(
-        `${BACKEND_URL}/upload/upload-doc`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      const data = await response.data;
-      console.log(data);
-      if (data.success) {
+      const response = await accountFetch('/upload/upload-doc', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
         setUser(data.user);
         await AsyncStorage.setItem('user', JSON.stringify(data.user));
         Toast.show({
@@ -114,17 +109,16 @@ const Documents = () => {
         Toast.show({
           type: 'error',
           text1: t('documents.alerts.uploadFailed.title'),
-          text2: t('documents.alerts.uploadFailed.message'),
+          text2: data.message || t('documents.alerts.uploadFailed.message'),
         });
       }
-      setLoading(false);
     } catch (error) {
       Toast.show({
         type: 'error',
         text1: t('documents.alerts.uploadFailed.title'),
         text2: `${error}`,
       });
-      console.log('Upload error:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -150,7 +144,6 @@ const Documents = () => {
         text1: t('documents.alerts.viewFailed.title'),
         text2: t('documents.alerts.viewFailed.message'),
       });
-      console.log('View error:', error);
     }
   };
 
@@ -180,16 +173,17 @@ const Documents = () => {
         name: pickResult.name || 'unnamed_file.pdf',
       });
     } catch (err) {
-      if (err?.code === 'CANCELLED') {
-        console.log('User cancelled the picker');
-      } else {
-        console.log('Error picking document for translation:', err);
+      if (err?.code !== 'CANCELLED') {
+        Toast.show({
+          type: 'error',
+          text1: t('documents.alerts.fileFormatFailed.title'),
+          text2: t('documents.alerts.fileFormatFailed.message'),
+        });
       }
     }
   };
 
   const handleTranslate = async () => {
-    console.log('translate');
     setTranslating(true);
     if (!translateFile) {
       Toast.show({
@@ -210,19 +204,12 @@ const Documents = () => {
     formData.append('target_language', lang ? lang : 'English');
 
     try {
-      console.log('reached here');
-      const response = await axios.post(
-        `${AIBACKEND_URL}/translate`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        },
-      );
-      console.log(response);
-      const data = await response.data;
-      if (data.translated_document) {
+      const response = await adviceFetch('/translate', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok && data.translated_document) {
         setTranslatedText(data.translated_document);
         Toast.show({
           type: 'success',
@@ -233,17 +220,16 @@ const Documents = () => {
         Toast.show({
           type: 'error',
           text1: t('documents.alerts.translateFailed.title'),
-          text2: t('documents.alerts.translateFailed.message'),
+          text2: data.error || t('documents.alerts.translateFailed.message'),
         });
       }
-      setTranslating(false);
     } catch (error) {
       Toast.show({
         type: 'error',
         text1: t('documents.alerts.translateFailed.title'),
         text2: `${error}`,
       });
-      console.log('Translation error:', error);
+    } finally {
       setTranslating(false);
     }
   };

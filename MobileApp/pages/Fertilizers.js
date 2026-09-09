@@ -8,30 +8,42 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  FlatList,
+  Linking,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Header from '../components/Header';
 import Toast from 'react-native-toast-message';
 import {theme} from '../theme.config';
-import {AIBACKEND_URL} from '../backendConfig';
+import {adviceFetch} from '../utils/api';
 import {UserContext} from '../context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 
-const API_URL = `${AIBACKEND_URL}/api/fertilizer_recommendation`;
+const API_PATH = '/api/fertilizer_recommendation';
 
 const Fertilizers = () => {
   const {t} = useTranslation();
   const {user} = useContext(UserContext);
-  const navigation = useNavigation();
   const [crop, setCrop] = useState('');
+  const [soilPh, setSoilPh] = useState('');
+  const [soilOrganicCarbon, setSoilOrganicCarbon] = useState('');
+  const [soilNitrogen, setSoilNitrogen] = useState('');
+  const [soilClay, setSoilClay] = useState('');
+  const [soilOrganicCarbonStock, setSoilOrganicCarbonStock] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
   const [lang, setLang] = useState();
+
+  const parseOptionalNumber = text => {
+    const trimmed = String(text || '').trim();
+    if (!trimmed) {
+      return undefined;
+    }
+    const value = Number(trimmed);
+    return Number.isFinite(value) ? value : undefined;
+  };
 
   useEffect(() => {
     const loadLanguage = async () => {
@@ -40,14 +52,6 @@ const Fertilizers = () => {
     };
     loadLanguage();
   }, []);
-
-  const location = {
-    city: user?.location?.city || '',
-    country: user?.location?.country || '',
-    lat: user?.location?.lat || 0,
-    lon: user?.location?.lon || 0,
-    region: user?.location?.state || '',
-  };
 
   const handleSubmit = async () => {
     if (!crop.trim()) {
@@ -66,22 +70,39 @@ const Fertilizers = () => {
     try {
       const payload = {
         crop: crop.trim(),
-        lat: user.location?.lat || 0,
-        lon: user.location?.lon || 0,
+        lat: user?.location?.lat,
+        lon: user?.location?.lon,
         lang: lang,
-        region: user.location?.city + ' ' + user.location?.state || 'Pune',
+        region: user?.location?.state || user?.location?.city || '',
       };
+      const cardPh = parseOptionalNumber(soilPh);
+      if (cardPh !== undefined) {
+        payload.soil_health_card = {
+          soil_ph: cardPh,
+          soil_organic_carbon: parseOptionalNumber(soilOrganicCarbon),
+          soil_nitrogen: parseOptionalNumber(soilNitrogen),
+          soil_clay: parseOptionalNumber(soilClay),
+          soil_organic_carbon_stock: parseOptionalNumber(soilOrganicCarbonStock),
+        };
+      }
 
-      console.log(payload);
-
-      const res = await fetch(API_URL, {
+      const res = await adviceFetch(API_PATH, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      console.log(data);
+      if (!res.ok) {
+        const message = data.error || t('fertilizer.errors.anErrorOccurred');
+        setError(message);
+        Toast.show({
+          type: 'error',
+          text1: t('fertilizer.errors.invalidInput'),
+          text2: message,
+        });
+        return;
+      }
       if (data.status === 'success' && data.recommendation) {
         setResponseData(data);
         Toast.show({
@@ -266,6 +287,52 @@ const Fertilizers = () => {
               multiline={false}
             />
           </View>
+          <Text style={styles.helpText}>{t('fertilizer.soilCardHelp')}</Text>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('https://soilhealth.dac.gov.in')}
+            accessibilityRole="link">
+            <Text style={styles.linkText}>{t('fertilizer.soilCardLink')}</Text>
+          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            placeholder={t('fertilizer.inputs.soilPh')}
+            placeholderTextColor={theme.text3}
+            value={soilPh}
+            onChangeText={setSoilPh}
+            keyboardType="decimal-pad"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder={t('fertilizer.inputs.carbon')}
+            placeholderTextColor={theme.text3}
+            value={soilOrganicCarbon}
+            onChangeText={setSoilOrganicCarbon}
+            keyboardType="decimal-pad"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder={t('fertilizer.inputs.soilNitrogen')}
+            placeholderTextColor={theme.text3}
+            value={soilNitrogen}
+            onChangeText={setSoilNitrogen}
+            keyboardType="decimal-pad"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder={t('fertilizer.inputs.soilClay')}
+            placeholderTextColor={theme.text3}
+            value={soilClay}
+            onChangeText={setSoilClay}
+            keyboardType="decimal-pad"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder={t('fertilizer.inputs.carbonStock')}
+            placeholderTextColor={theme.text3}
+            value={soilOrganicCarbonStock}
+            onChangeText={setSoilOrganicCarbonStock}
+            keyboardType="decimal-pad"
+          />
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleSubmit}
@@ -279,6 +346,9 @@ const Fertilizers = () => {
           {error && <Text style={styles.errorText}>{error}</Text>}
           {responseData && (
             <View style={styles.resultContainer}>
+              <Text style={styles.soilSource}>
+                {t('fertilizer.soilSource')}: {responseData.soil_source}
+              </Text>
               <Text style={styles.sectionTitle}>
                 {t('fertilizer.results.fertilizerRecommendations')}
               </Text>
@@ -314,6 +384,25 @@ const styles = StyleSheet.create({
     color: theme.text2,
     marginBottom: 20,
     textAlign: 'center',
+  },
+  helpText: {
+    fontSize: theme.fs7,
+    fontFamily: theme.font.regular,
+    color: theme.text2,
+    marginTop: 12,
+  },
+  linkText: {
+    fontSize: theme.fs7,
+    fontFamily: theme.font.bold,
+    color: theme.monsoon,
+    marginBottom: 8,
+    textDecorationLine: 'underline',
+  },
+  soilSource: {
+    fontSize: theme.fs7,
+    fontFamily: theme.font.regular,
+    color: theme.text2,
+    marginBottom: 12,
   },
   input: {
     borderWidth: 1,

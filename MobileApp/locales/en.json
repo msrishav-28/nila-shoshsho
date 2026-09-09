@@ -75,12 +75,15 @@
       "night" : "Good Night"
     },
     "searchBar": {
-      "placeholder": "Check out you Harvest Stock 🌾"
+      "placeholder": "Check out you Harvest Stock 🌾",
+      "caption": "Jumps to a tool in this app. This is not a web search."
     },
     "weather": {
       "fetching": "Fetching weather...",
       "location": "Location",
       "windSpeed": "km/h",
+      "openMeteo": "Open-Meteo",
+      "imdChip": "IMD",
       "forecast": {
         "title": "Weather Forecast"
       },
@@ -134,8 +137,8 @@
       "btn" : "Suggest"
     },
     "chatbot": {
-      "needHelp": "Need help exploring the app? Ask our smart assistant to guide you!",
-      "chatButton": "Chat with Assistaant"
+      "needHelp": "Need help exploring the app? Open the guide to jump to a screen.",
+      "chatButton": "Open guide"
     },
     "branding": {
       "nilaName": "Nila",
@@ -150,12 +153,21 @@
       "weatherFetch": "Could not fetch weather data.",
       "locationError": "Location error: ",
       "weatherLocationFetch": "Could not fetch weather/location."
+    },
+    "forecast": {
+      "rain": "Rain",
+      "sky": "Sky"
     }
   },
     "chatbot": {
-      "headerTitle": "Chatbot Assistant",
+      "headerTitle": "Guide",
       "initialMessage": "Where do you want to go?",
       "loadingMessage": "Hold on, we're taking you there...",
+      "prompts": {
+        "schemes": "Which government schemes can help a smallholder farmer?",
+        "cropCare": "How do I check a diseased leaf?",
+        "market": "How do I read mandi prices?"
+      },
       "options": {
         "governmentSchemes": "Check Government Schemes",
         "cropCare": "Crop Care & Disease Detection",
@@ -198,6 +210,7 @@
   "postHarvest": {
     "title": "Post Harvest",
     "description": "Enter crop details to get post-harvest instructions for your region.",
+    "disclaimer": "Weather plus advice, not a sensor.",
     "fields": {
       "crop": "Crop (e.g., Wheat)",
       "harvestDate": "Harvest Date (YYYY-MM-DD)",
@@ -231,6 +244,9 @@
     "botGreeting": "Hello! Ask me about government schemes for farmers.",
     "inputPlaceholder": "Ask about a scheme...",
     "send": "Send",
+    "openMyscheme": "Open myScheme.gov.in",
+    "sourceLabel": "Source",
+    "noSchemes": "No matching schemes. You can search on myScheme.",
     "error": {
       "network": "Network error. Please try again.",
       "noData": "Sorry, I could not find any information."
@@ -320,9 +336,19 @@
   "offlineBanner": {
     "text": "You're offline"
   },
+  "notifications": {
+    "header": "Notifications",
+    "unavailableTitle": "Alerts are not available yet",
+    "unavailableBody": "This screen is not connected yet. Weather, schemes, and market tools still work from Home.",
+    "emptyTitle": "No alerts yet",
+    "emptyBody": "Weather warnings will land here once your village is on the profile."
+  },
   "fertilizer": {
     "header": "Fertilizer Recommendation",
     "description": "Enter crop and soil details to get tailored fertilizer recommendations.",
+    "soilSource": "Soil source",
+    "soilCardHelp": "Optional. Copy numbers from your Soil Health Card.",
+    "soilCardLink": "Open soilhealth.dac.gov.in",
     "inputs": {
       "cropName": "Crop Name (e.g., Jwari)",
       "soilPh": "Soil pH (e.g., 6.5)",
@@ -356,7 +382,7 @@
       "recommendedFertilizer": "Recommended Fertilizer Types & Ratios",
       "applicationRates": "Application Rates & Units",
       "timingMethod": "Timing & Method",
-      "localContext": "Local Context & Cost Considerations",
+      "localContext": "Local Context",
       "environmentalSafety": "Environmental & Safety Precautions",
       "additionalAmendments": "Additional Soil Amendments",
       "expectedOutcomes": "Expected Outcomes"
@@ -364,8 +390,8 @@
   },
   "cropSuggestion": {
     "header": "Crop Suggestion",
-    "description": "Enter your location and land size to get personalized crop recommendations for the current season.",
-    "calendarDescription": "Enter a crop name to generate a detailed crop calendar plan.",
+    "description": "Enter your location and land size to see official season windows for now. Land size is shown as size only.",
+    "calendarDescription": "Enter a crop name to see the official sowing and harvest months, plus a 7-day weather overlay.",
     "inputs": {
       "city": "City",
       "state": "State",
@@ -392,6 +418,12 @@
     },
     "results": {
       "cropRecommendations": "Crop Recommendations",
+      "seasonWindows": "Season windows",
+      "nationalTypical": "National typical, local KVK may differ",
+      "landSize": "Land size",
+      "acres": "acres",
+      "sowMonths": "Sow",
+      "harvestMonths": "Harvest",
       "reason": "Reason for Recommendations",
       "recommendations": "Recommended Crops",
       "regionSeason": "Region and Season",
@@ -484,6 +516,7 @@
   "waterManagement": {
     "title": "Water Management",
     "description": "Plan your irrigation schedule based on crop type, field size, and irrigation method for efficient water use.",
+    "disclaimer": "Weather plus advice, not a sensor.",
     "fields": {
       "crop": "Crop Name",
       "fieldSize": "Field Size (Acres)",
@@ -530,6 +563,7 @@
                 "maxPrice": "Max Price",
                 "priceTrend": "Price Trend",
                 "aiAnalysis": "AI Market Analysis",
+                "liveComment": "Comment on these live rows only",
                 "tips": "Tips"
             },
             "status": {
@@ -565,6 +599,137 @@
                 "storageOptions": "Consider storage options if current prices are unfavorable",
                 "weatherForecasts": "Stay updated with weather forecasts as they affect prices"
             }
-        }
+        },
+  "logistics": {
+    "header": "Jobs",
+    "create": "Post a pickup",
+    "partnerCopy": "Open jobs and the ones you accepted.",
+    "crop": "Crop",
+    "quantity": "Quantity (kg)",
+    "city": "Pickup city",
+    "state": "Pickup state",
+    "post": "Post job",
+    "cancel": "Cancel",
+    "accept": "Accept",
+    "done": "Mark done",
+    "emptyTitle": "No jobs yet",
+    "emptyFarmer": "Post a pickup when you have crop ready to move.",
+    "emptyPartner": "No open pickups right now. Pull to refresh later.",
+    "invalid": "Enter a crop and a positive weight in kg.",
+    "error": "Could not update jobs.",
+    "forbidden": "This action is for logistics partners."
+  },
+  "welcome": {
+    "name": "Nila Shoshsho",
+    "desc": "Join a growing community of farmers, buyers, and agri-experts working together to improve productivity, connect directly, and access real-time insights for better crop management and trade.",
+    "createAccount": "Create account",
+    "haveAccount": "I already have an account",
+    "madeInIndia": "Made in India with love"
+  },
+  "login": {
+    "title": "Login",
+    "desc": "Log in with your email and password.",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Log in",
+    "noAccount": "Don't have an account?",
+    "goSignup": "Sign up",
+    "emailRequiredTitle": "Email needed",
+    "emailRequiredMsg": "Please enter the email you used to sign up.",
+    "passwordTitle": "Password too short",
+    "passwordMsg": "Password cannot be less than 8 characters",
+    "successMsg": "You are signed in",
+    "failedTitle": "Login failed",
+    "failedMsg": "Could not sign in. Please try again."
+  },
+  "signup": {
+    "title": "Sign up",
+    "desc": "Create an account to manage crops and access trade insights.",
+    "usernamePlaceholder": "Username",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "rolePlaceholder": "Select role",
+    "genderPlaceholder": "Select gender",
+    "roleFarmer": "Farmer",
+    "roleLogistics": "Logistics",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
+    "submit": "Sign up",
+    "hasAccount": "Already have an account?",
+    "goLogin": "Log in",
+    "requiredTitle": "Missing details",
+    "requiredMsg": "Please fill username, email, password, role, and gender.",
+    "passwordTitle": "Password too short",
+    "passwordMsg": "Password cannot be less than 8 characters",
+    "successMsg": "Your account is ready",
+    "failedTitle": "Sign up failed",
+    "failedMsg": "Could not create the account. Please try again."
+  },
+  "password": {
+    "title": "Change password",
+    "copy": "Enter your current password, then a new one.",
+    "current": "Current password",
+    "next": "New password",
+    "confirm": "Confirm new password",
+    "submit": "Update password",
+    "needBoth": "Enter current and new password",
+    "tooShort": "New password must be 8 characters",
+    "mismatch": "Passwords do not match",
+    "success": "Password updated",
+    "failed": "Could not update password"
+  },
+  "searchMic": {
+    "listening": "Listening… tap to stop",
+    "unavailable": "Voice listen is unavailable",
+    "noSpeech": "Could not hear speech"
+  },
+  "marketTabs": {
+    "prices": "Current prices",
+    "stores": "Nearby stores",
+    "compare": "Compare",
+    "insights": "Insight"
+  },
+  "marketCompare": {
+    "title": "Compare mandi prices",
+    "crop": "Crop",
+    "stateA": "First state",
+    "stateB": "Second state",
+    "submit": "Compare",
+    "needFields": "Enter a crop and two states.",
+    "unavailable": "Compare is unavailable",
+    "emptyPair": "No rows for that pair.",
+    "emptyTitle": "Two states, one crop",
+    "emptyBody": "Live market rows only. Empty means no arrivals, not a guessed price."
+  },
+  "marketInsights": {
+    "title": "Mandi insight",
+    "crop": "Crop",
+    "state": "State",
+    "submit": "Load insight",
+    "needFields": "Enter a crop and a state.",
+    "unavailable": "Insights are unavailable",
+    "emptyTitle": "Live rows only",
+    "emptyBody": "Insight is written from market arrivals for that crop and state. If none exist, the server says so.",
+    "liveComment": "Comment on these live rows only"
+  },
+  "header": {
+    "back": "Go back"
+  },
+  "settingsToasts": {
+    "profileFetchTitle": "Could not load profile completion",
+    "logoutTitle": "Logged out",
+    "logoutErrorTitle": "Could not log out"
+  },
+  "cropCareSpeak": {
+    "disease": "Disease",
+    "plant": "Plant",
+    "leafHealth": "Leaf health",
+    "treatment": "Treatment"
   }
+}
   

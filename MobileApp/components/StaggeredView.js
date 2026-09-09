@@ -11,9 +11,9 @@ const StaggeredView = ({
   children, 
   style, 
   index = 0, 
-  staggerDelay = 100,
+  staggerDelay = 50,
   animationType = 'slideUp', // 'slideUp', 'slideLeft', 'scale', 'fade'
-  duration = 600,
+  duration = 260,
 }) => {
   const opacity = useSharedValue(0);
   const translateX = useSharedValue(animationType === 'slideLeft' ? -50 : 0);

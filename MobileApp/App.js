@@ -7,14 +7,14 @@ import {
   View,
   Text,
   StyleSheet,
-  Platform,
 } from 'react-native';
+import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
+import {PaperProvider, MD3LightTheme} from 'react-native-paper';
 import Signup from './pages/Signup';
 import Toast from 'react-native-toast-message';
 import Welcome from './pages/Welcome';
 import CustomToast from './components/CustomToast';
 import Login from './pages/Login';
-import Home from './pages/Home';
 import {UserProvider, UserContext} from './context/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {theme} from './theme.config';
@@ -37,6 +37,7 @@ import CropSuggestion from './pages/CropSuggestion';
 import Documents from './pages/Documents';
 import PasswordChange from './pages/PasswordChange';
 import WaterManagement from './pages/WaterManagement';
+import Logistics from './pages/Logistics';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,11 +47,25 @@ const toastConfig = {
   info: props => <CustomToast {...props} />,
 };
 
+const paperTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: theme.paddy,
+    secondary: theme.turmeric,
+    background: theme.canvas,
+    surface: theme.surface,
+    error: theme.alert,
+    onPrimary: theme.inkInverse,
+    onSurface: theme.ink,
+  },
+};
+
 const OfflineBanner = () => {
-  const { t } = useTranslation();
-  
+  const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.offlineBanner}>
+    <View style={[styles.offlineBanner, {paddingTop: insets.top + 8}]}>
       <Text style={styles.offlineText}>{t('offlineBanner.text')}</Text>
     </View>
   );
@@ -68,8 +83,7 @@ const MainNavigator = ({isConnected}) => {
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
-      } catch (err) {
-        console.log('Error loading user from storage', err);
+      } catch {
       } finally {
         setLoadingStorage(false);
       }
@@ -85,7 +99,7 @@ const MainNavigator = ({isConnected}) => {
           backgroundColor={'transparent'}
           barStyle="dark-content"
         />
-        <ActivityIndicator size={45} color={theme.darkBrown} />
+        <ActivityIndicator size={45} color={theme.paddy} />
       </View>
     );
   }
@@ -99,22 +113,25 @@ const MainNavigator = ({isConnected}) => {
           barStyle="dark-content"
         />
         <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName={user ? 'MainApp' : 'Welcome'}>
-          <Stack.Screen name="MainApp" component={BottomTabNavigator} />
-          <Stack.Screen name="Settings" component={Settings} />
-          <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
+          {user ? (
+            <Stack.Screen name="MainApp" component={BottomTabNavigator} />
+          ) : null}
+          {user ? <Stack.Screen name="Settings" component={Settings} /> : null}
+          {user ? <Stack.Screen name="UpdateProfile" component={UpdateProfile} /> : null}
           <Stack.Screen name="Welcome" component={Welcome} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Signup" component={Signup} />
-          <Stack.Screen name="PostHarvest" component={PostHarvest} />
-          <Stack.Screen name="Profile" component={Profile} />
-          <Stack.Screen name="Chatbot" component={Chatbot} />
-          <Stack.Screen name="LanguageChange" component={LanguageChange} />
-          <Stack.Screen name="Notifications" component={Notifications} />
-          <Stack.Screen name="Fertilizers" component={Fertilizers} />
-          <Stack.Screen name="CropSuggestion" component={CropSuggestion} />
-          <Stack.Screen name="Documents" component={Documents} />
-          <Stack.Screen name="PasswordChange" component={PasswordChange} />
-          <Stack.Screen name="WaterManagement" component={WaterManagement} />
+          {user ? <Stack.Screen name="PostHarvest" component={PostHarvest} /> : null}
+          {user ? <Stack.Screen name="Profile" component={Profile} /> : null}
+          {user ? <Stack.Screen name="Chatbot" component={Chatbot} /> : null}
+          {user ? <Stack.Screen name="LanguageChange" component={LanguageChange} /> : null}
+          {user ? <Stack.Screen name="Notifications" component={Notifications} /> : null}
+          {user ? <Stack.Screen name="Fertilizers" component={Fertilizers} /> : null}
+          {user ? <Stack.Screen name="CropSuggestion" component={CropSuggestion} /> : null}
+          {user ? <Stack.Screen name="Documents" component={Documents} /> : null}
+          {user ? <Stack.Screen name="PasswordChange" component={PasswordChange} /> : null}
+          {user ? <Stack.Screen name="WaterManagement" component={WaterManagement} /> : null}
+          {user ? <Stack.Screen name="Logistics" component={Logistics} /> : null}
         </Stack.Navigator>
       </NavigationContainer>
       {!isConnected && <OfflineBanner />}
@@ -129,19 +146,23 @@ const App = () => {
     const unsubscribe = NetInfo.addEventListener(state => {
       const status = state.isConnected;
       setIsConnected(status);
-      changeNavigationBarColor(status ? 'white' : theme.blue, false);
+      changeNavigationBarColor(status ? theme.surface : theme.monsoon, true);
     });
 
     return () => unsubscribe();
   }, []);
 
   return (
-    <I18nextProvider i18n={i18n}> 
-    <UserProvider>
-      <MainNavigator isConnected={isConnected} />
-      <Toast config={toastConfig} />
-    </UserProvider>
-    </I18nextProvider>
+    <SafeAreaProvider>
+      <PaperProvider theme={paperTheme}>
+        <I18nextProvider i18n={i18n}>
+          <UserProvider>
+            <MainNavigator isConnected={isConnected} />
+            <Toast config={toastConfig} />
+          </UserProvider>
+        </I18nextProvider>
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 };
 
@@ -152,22 +173,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: '100%',
-    backgroundColor: 'white',
+    backgroundColor: theme.canvas,
   },
   offlineBanner: {
-    position: 'fixed',
-    bottom: Platform.OS === 'ios' ? 20 : 0,
+    position: 'absolute',
+    top: 0,
     left: 0,
     right: 0,
-    backgroundColor: theme.blue,
-    zIndex: 1000,
+    backgroundColor: theme.monsoon,
+    zIndex: 40,
     alignItems: 'center',
-    paddingTop : 10,
+    paddingBottom: 10,
   },
   offlineText: {
-    color: theme.text,
-    fontSize: 13,
-    fontFamily : theme.font.regular
+    color: theme.inkInverse,
+    fontSize: 15,
+    fontFamily: theme.font.semi,
   },
 });
 
