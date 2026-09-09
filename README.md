@@ -7,7 +7,6 @@
 ## Documentation Index
 
 - [Current architecture](./ARCHITECTURE.md) — boxes, arrows, and what is left to launch
-- [Frontend contract](./FRONTEND.md) — live HTTP paths for the phone
 - [Design system](./DESIGN.md)
 - [Agentic AI Strategy 2027](./AGENTIC_AI_STRATEGY_2027.md) — future notes, not the live system
 - [Backend Elevation Plan](./BACKEND_ELEVATION_PLAN.md) — future notes, not the live system
@@ -160,8 +159,6 @@ Nila Shoshsho supports **8 languages**:
 - Set `ACCOUNT_URL` on the advice server to the account server (default `http://127.0.0.1:5001`) so advice can use the farmer's saved location.
 
 Phone server addresses live in `MobileApp/backendConfig.js` (no secrets). The defaults talk to an Android emulator (`10.0.2.2`). Use `localhost` for an iOS simulator, or your computer's LAN IP for a physical phone.
-
-Frontend team: use `FRONTEND.md`. It is the contract for every live route. You do not need to read server source.
 
 ## Local Setup
 
