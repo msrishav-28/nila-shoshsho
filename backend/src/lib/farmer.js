@@ -1,5 +1,20 @@
 import { decryptGovId } from "./pii.js";
 
+export function maskGovId(plain) {
+  const text = String(plain || "");
+  if (!text) {
+    return "";
+  }
+  if (text.length <= 4) {
+    return "****";
+  }
+  return "*".repeat(text.length - 4) + text.slice(-4);
+}
+
+export function isMaskedGovId(value) {
+  return /^\*+\d{0,4}$/.test(String(value || "").trim());
+}
+
 export function toUser(row, accessToken) {
   const user = {
     _id: row.neon_user_id,
@@ -21,7 +36,7 @@ export function toUser(row, accessToken) {
     },
     governmentId: {
       idName: row.gov_id_name || "",
-      idValue: decryptGovId(row.gov_id_value || ""),
+      idValue: maskGovId(decryptGovId(row.gov_id_value || "")),
     },
     languageSpoken: row.language_spoken || [],
     bio: row.bio || "",
@@ -31,6 +46,8 @@ export function toUser(row, accessToken) {
     },
     documents: row.documents || [],
     isVerified: Boolean(row.is_verified),
+    createdAt: row.created_at || null,
+    updatedAt: row.updated_at || null,
   };
   if (accessToken) {
     user.accessToken = accessToken;

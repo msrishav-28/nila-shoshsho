@@ -7,6 +7,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import { adviceFetch } from '../utils/api';
+import { adviceLang } from '../utils/lang';
 
 const safeString = (value) => {
     if (value === null || value === undefined) return '';
@@ -55,7 +56,7 @@ const NewsCard = ({ item }) => {
 };
 
 const News = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [news, setNews] = useState([]);
@@ -79,18 +80,29 @@ const News = () => {
     const INDIAN_STATES = [
         { label: t('news.states.all'), value: 'all' },
         { label: t('news.states.andhraPradesh'), value: 'andhra pradesh' },
-        { label: t('news.states.punjab'), value: 'punjab' },
-        { label: t('news.states.haryana'), value: 'haryana' },
-        { label: t('news.states.maharashtra'), value: 'maharashtra' },
-        { label: t('news.states.karnataka'), value: 'karnataka' },
-        { label: t('news.states.madhyaPradesh'), value: 'madhya pradesh' },
-        { label: t('news.states.gujarat'), value: 'gujarat' },
-        { label: t('news.states.rajasthan'), value: 'rajasthan' },
-        { label: t('news.states.uttarPradesh'), value: 'uttar pradesh' },
-        { label: t('news.states.tamilNadu'), value: 'tamil nadu' },
-        { label: t('news.states.westBengal'), value: 'west bengal' },
+        { label: t('news.states.arunachalPradesh', {defaultValue: 'Arunachal Pradesh'}), value: 'arunachal pradesh' },
+        { label: t('news.states.assam', {defaultValue: 'Assam'}), value: 'assam' },
         { label: t('news.states.bihar'), value: 'bihar' },
+        { label: t('news.states.chhattisgarh', {defaultValue: 'Chhattisgarh'}), value: 'chhattisgarh' },
+        { label: t('news.states.goa', {defaultValue: 'Goa'}), value: 'goa' },
+        { label: t('news.states.gujarat'), value: 'gujarat' },
+        { label: t('news.states.haryana'), value: 'haryana' },
+        { label: t('news.states.himachalPradesh', {defaultValue: 'Himachal Pradesh'}), value: 'himachal pradesh' },
+        { label: t('news.states.jharkhand', {defaultValue: 'Jharkhand'}), value: 'jharkhand' },
+        { label: t('news.states.karnataka'), value: 'karnataka' },
+        { label: t('news.states.kerala', {defaultValue: 'Kerala'}), value: 'kerala' },
+        { label: t('news.states.madhyaPradesh'), value: 'madhya pradesh' },
+        { label: t('news.states.maharashtra'), value: 'maharashtra' },
+        { label: t('news.states.odisha', {defaultValue: 'Odisha'}), value: 'odisha' },
+        { label: t('news.states.punjab'), value: 'punjab' },
+        { label: t('news.states.rajasthan'), value: 'rajasthan' },
+        { label: t('news.states.tamilNadu'), value: 'tamil nadu' },
         { label: t('news.states.telangana'), value: 'telangana' },
+        { label: t('news.states.uttarPradesh'), value: 'uttar pradesh' },
+        { label: t('news.states.uttarakhand', {defaultValue: 'Uttarakhand'}), value: 'uttarakhand' },
+        { label: t('news.states.westBengal'), value: 'west bengal' },
+        { label: t('news.states.delhi', {defaultValue: 'Delhi'}), value: 'delhi' },
+        { label: t('news.states.jammuAndKashmir', {defaultValue: 'Jammu and Kashmir'}), value: 'jammu and kashmir' },
     ];
 
     useEffect(() => {
@@ -115,7 +127,7 @@ const News = () => {
                 category,
                 state,
                 search: searchQuery,
-                lang,
+                lang: adviceLang(i18n.language, lang),
             });
             const response = await adviceFetch(`/news?${params.toString()}`);
             const payload = await response.json();

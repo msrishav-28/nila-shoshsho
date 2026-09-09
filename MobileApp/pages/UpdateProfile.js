@@ -8,7 +8,9 @@ import {
   TextInput,
   ScrollView,
   FlatList,
+  Platform,
 } from 'react-native';
+import {isMaskedGovId} from '../utils/govId';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
@@ -80,7 +82,10 @@ const UpdateProfile = () => {
     {label: 'Assamese', value: 'Assamese'},
   ]);
 
-  const [location, setLocation] = useState({lat: 0, lon: 0});
+  const [location, setLocation] = useState({
+    lat: Number(user?.location?.lat) || 0,
+    lon: Number(user?.location?.lon) || 0,
+  });
   useEffect(() => {
     const requestLocationPermission = async () => {
       try {
@@ -118,13 +123,15 @@ const UpdateProfile = () => {
       Geolocation.getCurrentPosition(
         position => {
           const {latitude, longitude} = position.coords;
-          setLocation({lat: latitude, lon: longitude});
+          if (latitude && longitude) {
+            setLocation({lat: latitude, lon: longitude});
+          }
         },
-        error => {
+        () => {
           Toast.show({
-            type: 'error',
+            type: 'info',
             text1: 'Location Error',
-            text2: 'Unable to fetch current location.',
+            text2: 'Keeping your last saved village on the map.',
           });
         },
         {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
@@ -214,6 +221,12 @@ const UpdateProfile = () => {
   };
 
   const updateProfileData = async () => {
+    const savedLat = Number(user?.location?.lat) || 0;
+    const savedLon = Number(user?.location?.lon) || 0;
+    const gpsLat = Number(location?.lat) || 0;
+    const gpsLon = Number(location?.lon) || 0;
+    const lat = gpsLat && gpsLon ? gpsLat : savedLat;
+    const lon = gpsLat && gpsLon ? gpsLon : savedLon;
     const updatedData = {
       username,
       role,
@@ -221,17 +234,13 @@ const UpdateProfile = () => {
       bio,
       dob,
       location: {
-        lat: location?.lat,
-        lon: location?.lon,
+        lat,
+        lon,
         address,
         city,
         state,
         country,
         pincode,
-      },
-      governmentId: {
-        idName,
-        idValue,
       },
       socialLinks: {
         facebook,
@@ -239,6 +248,17 @@ const UpdateProfile = () => {
       },
       languageSpoken: languagesSpoken,
     };
+    if (!isMaskedGovId(idValue)) {
+      updatedData.governmentId = {
+        idName,
+        idValue,
+      };
+    } else if (idName !== (user?.governmentId?.idName || '')) {
+      updatedData.governmentId = {
+        idName,
+        idValue: user?.governmentId?.idValue || '',
+      };
+    }
 
     try {
       const result = await updateUser(updatedData);

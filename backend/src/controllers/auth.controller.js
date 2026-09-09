@@ -3,6 +3,7 @@ import cloudinary from "../lib/cloudinary.js";
 import {
   getFarmerByEmail,
   getFarmerByNeonId,
+  isMaskedGovId,
   toUser,
 } from "../lib/farmer.js";
 import {
@@ -66,16 +67,20 @@ export const signup = async (req, res) => {
       });
     }
 
-    const { ok, payload } = await neonSignUp({
+    let { ok, payload } = await neonSignUp({
       email,
       password,
       name: username,
     });
     if (!ok) {
-      return res.status(400).json({
-        success: false,
-        message: authErrorMessage(payload, "Could not create account"),
-      });
+      const retry = await neonSignIn({ email, password });
+      if (!retry.ok) {
+        return res.status(400).json({
+          success: false,
+          message: authErrorMessage(payload, "Could not create account"),
+        });
+      }
+      payload = retry.payload;
     }
 
     const accessToken = extractAccessToken(payload);
@@ -88,17 +93,34 @@ export const signup = async (req, res) => {
       });
     }
 
-    const rows = await sql`
-      INSERT INTO farmers (neon_user_id, email, phone_no, username, role, gender)
-      VALUES (${neonUserId}, ${email}, ${''}, ${username.trim()}, ${role}, ${gender})
-      RETURNING *
-    `;
+    let rows;
+    let created = false;
+    try {
+      rows = await sql`
+        INSERT INTO farmers (neon_user_id, email, phone_no, username, role, gender)
+        VALUES (${neonUserId}, ${email}, ${''}, ${username.trim()}, ${role}, ${gender})
+        RETURNING *
+      `;
+      created = Boolean(rows[0]);
+    } catch (insertErr) {
+      const existing = await getFarmerByNeonId(sql, neonUserId);
+      if (!existing) {
+        console.error("Error in signup insert", insertErr);
+        return res.status(500).json({
+          success: false,
+          message: "Could not finish creating your account. Please try again.",
+        });
+      }
+      rows = [existing];
+    }
 
-    await createNotification(
-      neonUserId,
-      "Welcome to Nila Shoshsho",
-      "Your account is ready. Weather, schemes, and crop tools are on Home."
-    );
+    if (created) {
+      await createNotification(
+        neonUserId,
+        "Welcome to Nila Shoshsho",
+        "Your account is ready. Weather, schemes, and crop tools are on Home."
+      );
+    }
 
     return res.status(201).json({
       success: true,
@@ -160,11 +182,10 @@ export const logout = async (req, res) => {
     if (token) {
       await neonSignOut({ token });
     }
-    return res.status(200).json({ success: true, message: "Logout successful" });
   } catch (err) {
     console.error("Error in logout", err);
-    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
+  return res.status(200).json({ success: true, message: "Logout successful" });
 };
 
 export const getMe = async (req, res) => {
@@ -309,18 +330,31 @@ export const updateProfile = async (req, res) => {
       nextState = location.state?.trim() || "";
       nextCountry = location.country?.trim() || "";
       nextPincode = location.pincode?.trim() || "";
-      nextLat = location.lat ?? 0;
-      nextLon = location.lon ?? 0;
+      const incomingLat = Number(location.lat);
+      const incomingLon = Number(location.lon);
+      const hasFix =
+        Number.isFinite(incomingLat) &&
+        Number.isFinite(incomingLon) &&
+        incomingLat !== 0 &&
+        incomingLon !== 0;
+      if (hasFix) {
+        nextLat = incomingLat;
+        nextLon = incomingLon;
+      }
       if (nextPincode && !/^\d{5,10}$/.test(nextPincode)) {
         return res.status(400).json({ success: false, message: "Invalid pincode format" });
       }
     }
-    const govIdPlain = governmentId
-      ? governmentId.idValue?.trim() || ""
-      : decryptGovId(current.gov_id_value || "");
-    if (governmentId) {
+    const incomingGovValue = governmentId?.idValue?.trim() || "";
+    const keepCurrentGov = !governmentId || isMaskedGovId(incomingGovValue);
+    const govIdPlain = keepCurrentGov
+      ? decryptGovId(current.gov_id_value || "")
+      : incomingGovValue;
+    if (governmentId && !keepCurrentGov) {
       nextGovName = governmentId.idName?.trim() || "";
       nextGovValue = encryptGovId(govIdPlain);
+    } else if (governmentId && governmentId.idName !== undefined) {
+      nextGovName = governmentId.idName?.trim() || nextGovName;
     }
     if (socialLinks) {
       nextFacebook = socialLinks.facebook?.trim() || "";

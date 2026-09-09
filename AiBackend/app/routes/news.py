@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, jsonify, request
 import requests
+from app.news_filters import is_allowed_state, news_hl, normalize_state
 
 news_bp = Blueprint("news", __name__)
 
@@ -11,42 +12,6 @@ MAX_SEARCH_LEN = 120
 ALLOWED_CATEGORIES = frozenset(
     {"all", "crops", "weather", "market", "technology", "government"}
 )
-ALLOWED_STATES = frozenset(
-    {
-        "all",
-        "andhra pradesh",
-        "punjab",
-        "haryana",
-        "maharashtra",
-        "karnataka",
-        "madhya pradesh",
-        "gujarat",
-        "rajasthan",
-        "uttar pradesh",
-        "tamil nadu",
-        "west bengal",
-        "bihar",
-        "telangana",
-    }
-)
-LANG_TO_HL = {
-    "english": "en",
-    "hindi": "hi",
-    "marathi": "mr",
-    "tamil": "ta",
-    "bengali": "bn",
-    "kannada": "kn",
-    "telugu": "te",
-    "malayalam": "ml",
-    "en": "en",
-    "hi": "hi",
-    "mr": "mr",
-    "ta": "ta",
-    "bn": "bn",
-    "kn": "kn",
-    "te": "te",
-    "ml": "ml",
-}
 
 
 def _build_query(category, state, search):
@@ -67,18 +32,18 @@ def get_news():
         return jsonify({"error": "News service is not configured"}), 503
 
     category = (request.args.get("category") or "all").strip().lower()
-    state = (request.args.get("state") or "all").strip().lower()
+    state = normalize_state(request.args.get("state"))
     search = (request.args.get("search") or "").strip()
-    lang = (request.args.get("lang") or "english").strip().lower()
+    lang = (request.args.get("lang") or "en").strip()
 
     if category not in ALLOWED_CATEGORIES:
         return jsonify({"error": "Invalid category"}), 400
-    if state not in ALLOWED_STATES:
+    if not is_allowed_state(state):
         return jsonify({"error": "Invalid state"}), 400
     if len(search) > MAX_SEARCH_LEN:
         return jsonify({"error": "Search is too long"}), 400
 
-    hl = LANG_TO_HL.get(lang, "en")
+    hl = news_hl(lang)
     query = _build_query(category, state, search)
 
     try:

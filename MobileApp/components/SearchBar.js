@@ -17,9 +17,17 @@ const SearchBar = ({placeholder, toEdit, caption}) => {
 
   const search = async text => {
     const q = (text ?? query).trim();
-    const res = await adviceFetch(`/search?q=${encodeURIComponent(q)}`);
-    const data = await res.json();
-    setHits(data.results || []);
+    try {
+      const res = await adviceFetch(`/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      setHits(data.results || []);
+    } catch (err) {
+      setHits([]);
+      Toast.show({
+        type: 'error',
+        text1: t('searchMic.unavailable'),
+      });
+    }
   };
 
   const listen = async () => {

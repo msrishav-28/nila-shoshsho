@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from app.farmer_context import farmer_profile
 from app.live_data import fetch_current_weather
 from app.llm import route_models
+from app.soil import parse_soil_payload
 
 load_dotenv()
 
@@ -91,26 +92,15 @@ def get_soil_data(lat, lon):
             f"values=mean"
         )
         response = requests.get(url, timeout=20)
+        if response.status_code != 200:
+            return None
+        content_type = (response.headers.get("Content-Type") or "").lower()
+        if "json" not in content_type:
+            return None
         data = response.json()
-        properties = data.get('properties', [])
-
-        soil_data = {
-            "soil_ph": None,
-            "soil_organic_carbon": None,
-            "soil_nitrogen": None,
-            "soil_clay": None,
-            "soil_organic_carbon_stock": None,
-        }
-
-        for prop in properties:
-            if prop['property'] == 'phh2o':
-                soil_data['soil_ph'] = prop['depth_0_5']['mean']
-            elif prop['property'] == 'nitrogen':
-                soil_data['soil_nitrogen'] = prop['depth_0_5']['mean']
-            elif prop['property'] == 'soc':
-                soil_data['soil_organic_carbon'] = prop['depth_0_5']['mean']
-            elif prop['property'] == 'clay':
-                soil_data['soil_clay'] = prop['depth_0_5']['mean']
+        soil_data = parse_soil_payload(data)
+        if not soil_data:
+            return None
 
         ocs_url = (
             f"https://api.openepi.io/soil/property?"
@@ -118,18 +108,16 @@ def get_soil_data(lat, lon):
         )
         ocs_response = requests.get(ocs_url, timeout=20)
         if ocs_response.status_code == 200:
-            ocs_data = ocs_response.json()
-            for prop in ocs_data.get('properties', []):
-                if prop['property'] == 'ocs':
-                    soil_data['soil_organic_carbon_stock'] = prop['depth_0_30']['mean']
-
-        required = ("soil_ph", "soil_organic_carbon", "soil_nitrogen", "soil_clay")
-        if any(soil_data.get(key) is None for key in required):
-            return None
+            ocs_type = (ocs_response.headers.get("Content-Type") or "").lower()
+            if "json" in ocs_type:
+                ocs_soil = parse_soil_payload(ocs_response.json()) or {}
+                if ocs_soil.get("soil_organic_carbon_stock") is not None:
+                    soil_data["soil_organic_carbon_stock"] = ocs_soil[
+                        "soil_organic_carbon_stock"
+                    ]
         return soil_data
 
-    except Exception as e:
-        print(f"[ERROR] Soil data fetch failed: {e}")
+    except Exception:
         return None
 
 def get_weather(lat, lon):
@@ -149,8 +137,16 @@ def fertilizer_route():
         region = req_json.get("region") or profile.get("state") or profile.get("city") or "Unknown"
         country = "India"
 
-        if not all([crop, lat, lon]):
-            return jsonify({"error": "Missing required fields: crop, lat, lon"}), 400
+        crop = str(crop or "").strip()
+        if not crop:
+            return jsonify({"error": "Crop is required"}), 400
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Add your village in Update Profile"}), 400
+        if not lat or not lon:
+            return jsonify({"error": "Add your village in Update Profile"}), 400
 
         shc = req_json.get("soil_health_card") or {}
         if shc.get("soil_ph") is not None:
@@ -166,8 +162,14 @@ def fertilizer_route():
             soil_data = get_soil_data(lat, lon)
             soil_source = "OpenEPI typical soils near this map point, not your field lab card"
         weather_data = get_weather(lat, lon)
-        if not soil_data or not weather_data:
-            return jsonify({"error": "Soil or weather data is unavailable"}), 502
+        if not soil_data:
+            return jsonify(
+                {
+                    "error": "Type your Soil Health Card numbers. Typical soil near this map point is unavailable."
+                }
+            ), 422
+        if not weather_data:
+            return jsonify({"error": "Weather data is unavailable"}), 502
 
         input_data = {
             "location": {

@@ -1,5 +1,7 @@
 import {Audio} from 'expo-av';
 import {adviceFetch} from './api';
+import {audioPart} from './audioPart';
+import {adviceLang} from './lang';
 
 let activeRecording = null;
 
@@ -41,10 +43,9 @@ export async function stopSarvamTranscription(lang) {
     throw err;
   }
   const form = new FormData();
-  form.append('audio', {uri, name: 'speech.wav', type: 'audio/wav'});
-  if (lang) {
-    form.append('lang', lang);
-  }
+  const part = audioPart(uri);
+  form.append('audio', {uri, name: part.name, type: part.type});
+  form.append('lang', adviceLang(lang));
   const res = await adviceFetch('/voice/stt', {method: 'POST', body: form});
   const data = await res.json();
   if (!res.ok) {

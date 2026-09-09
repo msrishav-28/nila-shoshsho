@@ -11,6 +11,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {theme} from '../../theme.config';
 import {adviceFetch} from '../../utils/api';
+import {adviceLang} from '../../utils/lang';
 import {UserContext} from '../../context/UserContext';
 import EmptyState from '../../components/EmptyState';
 import VoicePlayer from '../../components/VoicePlayer';
@@ -38,7 +39,7 @@ const MarketInsights = () => {
         body: JSON.stringify({
           crop: crop.trim(),
           state: stateName.trim(),
-          lang: i18n.language,
+          lang: adviceLang(i18n.language),
         }),
       });
       const data = await res.json();

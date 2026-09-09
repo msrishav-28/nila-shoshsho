@@ -32,7 +32,13 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>Nila Shoshsho uses your location for weather, mandi prices, and nearby farm shops.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Nila Shoshsho uses the microphone so you can ask questions by voice.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Nila Shoshsho uses the camera to check crop leaves.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Nila Shoshsho uses your photos to check crop leaves and update your profile picture.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

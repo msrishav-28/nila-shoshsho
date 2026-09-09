@@ -72,25 +72,21 @@ export const UserProvider = ({children}) => {
   };
 
   const logout = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await accountFetch('/auth/logout', {
+      await accountFetch('/auth/logout', {
         method: 'POST',
       });
-      const data = await res.json();
-      if (data.success) {
-        setUser(null);
-        await AsyncStorage.removeItem('user');
-        await AsyncStorage.removeItem('accessToken');
-        return {success: true, message: 'Logout Successful!'};
-      } else {
-        return {success: false, message: data.message};
-      }
     } catch (err) {
-      return {success: false, message: 'Error occurred while logging out.'};
-    } finally {
-      setLoading(false);
+      if (err) {
+        // Network may be down. Local sign-out still proceeds.
+      }
     }
+    setUser(null);
+    await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('accessToken');
+    setLoading(false);
+    return {success: true, message: 'Logout Successful!'};
   };
 
   const updateUser = async userData => {

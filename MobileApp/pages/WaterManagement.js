@@ -16,6 +16,8 @@ import Toast from 'react-native-toast-message';
 import { theme } from '../theme.config';
 import { adviceFetch } from '../utils/api';
 import { UserContext } from '../context/UserContext';
+import { adviceLang } from '../utils/lang';
+import { hasMapPoint } from '../utils/place';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
@@ -24,7 +26,7 @@ const API_PATH = '/water_management';
 
 const WaterManagement = () => {
   const { user } = useContext(UserContext);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [crop, setCrop] = useState('');
   const [fieldSize, setFieldSize] = useState('');
   const [irrigationMethod, setIrrigationMethod] = useState('');
@@ -61,6 +63,14 @@ const WaterManagement = () => {
       });
       return;
     }
+    if (!hasMapPoint(user)) {
+      Toast.show({
+        type: 'error',
+        text1: t('waterManagement.results.error'),
+        text2: t('HomePage.errors.addVillage'),
+      });
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -72,7 +82,7 @@ const WaterManagement = () => {
         irrigation_method: irrigationMethod,
         latitude,
         longitude,
-        lang,
+        lang: adviceLang(i18n.language, lang),
       };
       const res = await adviceFetch(API_PATH, {
         method: 'POST',

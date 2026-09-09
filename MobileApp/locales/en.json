@@ -130,15 +130,16 @@
       "schemes": "Schemes",
       "fertilize": "Fertilize",
       "news": "News",
-      "sprinkler" : "Manage Water"
+      "sprinkler" : "Manage Water",
+      "cropSuggestion": "Crop calendar"
     },
     "suggestion" :{
       "title" : "Want suggestions on which crops to grow?",
       "btn" : "Suggest"
     },
     "chatbot": {
-      "needHelp": "Need help exploring the app? Open the guide to jump to a screen.",
-      "chatButton": "Open guide"
+      "needHelp": "Ask Nila about weather, schemes, crops, or prices.",
+      "chatButton": "Ask Nila"
     },
     "branding": {
       "nilaName": "Nila",
@@ -152,7 +153,9 @@
       "weatherPermission": "Permission to access location was denied",
       "weatherFetch": "Could not fetch weather data.",
       "locationError": "Location error: ",
-      "weatherLocationFetch": "Could not fetch weather/location."
+      "weatherLocationFetch": "Could not fetch weather/location.",
+      "addVillage": "Add your village in Update Profile.",
+      "openProfile": "Open Update Profile"
     },
     "forecast": {
       "rain": "Rain",
@@ -160,8 +163,8 @@
     }
   },
     "chatbot": {
-      "headerTitle": "Guide",
-      "initialMessage": "Where do you want to go?",
+      "headerTitle": "Ask Nila",
+      "initialMessage": "Ask about weather, schemes, crops, or mandi prices.",
       "loadingMessage": "Hold on, we're taking you there...",
       "prompts": {
         "schemes": "Which government schemes can help a smallholder farmer?",

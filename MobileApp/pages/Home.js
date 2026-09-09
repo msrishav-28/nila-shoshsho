@@ -21,6 +21,7 @@ const tools = [
   {key: 'postharvest', titleKey: 'features.postHarvest', icon: require('../assets/icons/harvest.png'), nav: 'PostHarvest'},
   {key: 'sprinkler', titleKey: 'features.sprinkler', icon: require('../assets/icons/sprinkler.png'), nav: 'WaterManagement'},
   {key: 'cropcare', titleKey: 'features.cropCare', icon: require('../assets/icons/crop.png'), nav: 'Crop Care'},
+  {key: 'cropsuggest', titleKey: 'features.cropSuggestion', icon: require('../assets/icons/crop.png'), nav: 'CropSuggestion'},
   {key: 'fertilize', titleKey: 'features.fertilize', icon: require('../assets/icons/fertilizers.png'), nav: 'Fertilizers'},
   {key: 'market', titleKey: 'features.market', icon: require('../assets/icons/market.png'), nav: 'Market'},
   {key: 'schemes', titleKey: 'features.schemes', icon: require('../assets/icons/scheme.png'), nav: 'Scheme'},
@@ -55,7 +56,7 @@ const Home = () => {
     const load = async () => {
       if (!hasPlace) {
         setLoadingWeather(false);
-        setWeatherError(t('HomePage.errors.weatherLocationFetch'));
+        setWeatherError(t('HomePage.errors.addVillage'));
         return;
       }
       try {
@@ -151,7 +152,7 @@ const Home = () => {
             <Text style={styles.greet}>{getGreeting(t)}</Text>
             <Text style={styles.name} numberOfLines={1}>{firstName}</Text>
             <Text style={styles.place} numberOfLines={1}>
-              {place || t('HomePage.errors.weatherLocationFetch')}
+              {place || t('HomePage.errors.addVillage')}
             </Text>
           </View>
         </TouchableOpacity>
@@ -179,7 +180,14 @@ const Home = () => {
           {loadingWeather ? (
             <ActivityIndicator color={theme.paddy} />
           ) : weatherError && !weather ? (
-            <Text style={styles.meta}>{weatherError}</Text>
+            <>
+              <Text style={styles.meta}>{weatherError}</Text>
+              {!hasPlace ? (
+                <TouchableOpacity onPress={() => navigation.navigate('UpdateProfile')} accessibilityRole="button">
+                  <Text style={styles.callout}>{t('HomePage.errors.openProfile')}</Text>
+                </TouchableOpacity>
+              ) : null}
+            </>
           ) : (
             <>
               <View style={styles.row}>

@@ -17,6 +17,8 @@ import Toast from 'react-native-toast-message';
 import { theme } from '../theme.config';
 import { adviceFetch } from '../utils/api';
 import { UserContext } from '../context/UserContext';
+import { adviceLang } from '../utils/lang';
+import { hasMapPoint } from '../utils/place';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
@@ -25,7 +27,7 @@ const API_PATH = '/postharvest';
 
 const PostHarvest = () => {
   const { user } = useContext(UserContext);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [crop, setCrop] = useState('');
   const [harvestDate, setHarvestDate] = useState('');
   const [region, setRegion] = useState(user?.location?.state || '');
@@ -69,6 +71,14 @@ const PostHarvest = () => {
       });
       return;
     }
+    if (!hasMapPoint(user)) {
+      Toast.show({
+        type: 'error',
+        text1: t('postHarvest.results.error'),
+        text2: t('HomePage.errors.addVillage'),
+      });
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -80,7 +90,7 @@ const PostHarvest = () => {
         region,
         latitude,
         longitude,
-        lang,
+        lang: adviceLang(i18n.language, lang),
       };
       const res = await adviceFetch(API_PATH, {
         method: 'POST',

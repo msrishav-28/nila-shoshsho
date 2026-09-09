@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from dotenv import load_dotenv
 from app.security import check_rate_limit, cors_origins
 
 def create_app():
+    load_dotenv()
     app = Flask(__name__)
     app.config["MAX_CONTENT_LENGTH"] = 12 * 1024 * 1024
     origins = cors_origins()

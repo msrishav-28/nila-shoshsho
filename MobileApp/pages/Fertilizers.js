@@ -16,13 +16,15 @@ import Toast from 'react-native-toast-message';
 import {theme} from '../theme.config';
 import {adviceFetch} from '../utils/api';
 import {UserContext} from '../context/UserContext';
+import {adviceLang} from '../utils/lang';
+import {hasMapPoint} from '../utils/place';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 
 const API_PATH = '/api/fertilizer_recommendation';
 
 const Fertilizers = () => {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const {user} = useContext(UserContext);
   const [crop, setCrop] = useState('');
   const [soilPh, setSoilPh] = useState('');
@@ -62,6 +64,14 @@ const Fertilizers = () => {
       });
       return;
     }
+    if (!hasMapPoint(user)) {
+      Toast.show({
+        type: 'error',
+        text1: t('fertilizer.errors.invalidInput'),
+        text2: t('HomePage.errors.addVillage'),
+      });
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -72,7 +82,7 @@ const Fertilizers = () => {
         crop: crop.trim(),
         lat: user?.location?.lat,
         lon: user?.location?.lon,
-        lang: lang,
+        lang: adviceLang(i18n.language, lang),
         region: user?.location?.state || user?.location?.city || '',
       };
       const cardPh = parseOptionalNumber(soilPh);

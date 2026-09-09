@@ -16,6 +16,7 @@ import {theme} from '../theme.config';
 import Header from '../components/Header';
 import VoicePlayer from '../components/VoicePlayer';
 import {adviceFetch} from '../utils/api';
+import {adviceLang} from '../utils/lang';
 
 const Chatbot = () => {
   const scrollRef = useRef(null);
@@ -44,7 +45,7 @@ const Chatbot = () => {
     try {
       const res = await adviceFetch('/chatbot/ask', {
         method: 'POST',
-        body: JSON.stringify({question: q, lang: i18n.language, has_image: false}),
+        body: JSON.stringify({question: q, lang: adviceLang(i18n.language), has_image: false}),
       });
       const data = await res.json();
       if (!res.ok) {

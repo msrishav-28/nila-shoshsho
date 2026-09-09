@@ -6,8 +6,8 @@
 
 ## Documentation Index
 
-- [Current architecture](./ARCHITECTURE.md) — boxes, arrows, and what is left to launch
-- [Design system](./DESIGN.md)
+- [Current architecture](./ARCHITECTURE.md) — how the live system is wired
+- [Design system](./DESIGN.md) — visual tokens, not a live-screen report
 - [Agentic AI Strategy 2027](./AGENTIC_AI_STRATEGY_2027.md) — future notes, not the live system
 - [Backend Elevation Plan](./BACKEND_ELEVATION_PLAN.md) — future notes, not the live system
 
@@ -58,12 +58,12 @@ Agriculture forms the backbone of India’s economy, yet smallholder farmers lac
 -  **Phone app UI** in eight languages, with read-aloud on some advice screens.
 -  **Farming chatbot** on the advice server (login required). Perplexity, ChatGPT, or Gemini, grounded in live mandi/weather when the profile has a location.
 -  **Crop disease detection:** upload a plant photo for health analysis (advice server).
--  **Fertilizer recommendations** from crop, location, and soil/weather lookups.
+-  **Fertilizer recommendations** from crop, location, and a Soil Health Card if typed. If typical soil near the map point cannot be read, the farmer is asked for card numbers. No invented lab values.
+-  **Crop calendar** on Home: official season windows plus a 7-day weather overlay.
 -  **Post-harvest planning** as an in-app plan. There is no Google Calendar sync.
 -  **Market prices** from data.gov.in, with compare and insights reports on the advice server. Nearby stores come from OpenStreetMap plus mandi lists.
--  **Crop suggest / calendar:** official season windows (not a fake score table), plus a 7-day weather overlay.
 -  **Schemes** screen lists myScheme titles and links, or opens myscheme.gov.in if the catalogue is not configured.
--  **Weather** from Open-Meteo and IMD (`GET /weather`) when IMD is reachable.
+-  **Weather** from Open-Meteo and IMD (`GET /weather`) when IMD is reachable. In-app weather notices are stored only for heat, cold, or high wind, once per day.
 -  **News** through the advice server (requires a SerpAPI key on that server).
 
 ---
@@ -151,12 +151,13 @@ Nila Shoshsho supports **8 languages**:
 ### Requirements:
 
 - Node.js v18+
-- Python 3.11.0
-- A Neon project with Auth turned on (manual). Copy the database URL, Auth URL, and JWKS URL into `backend/.env`.
+- Python 3.11+
+- A Neon project with Auth turned on. Copy the database URL, Auth URL, and JWKS URL into `backend/.env`.
 - Keys for the **servers only**: SerpAPI, data.gov.in, Perplexity, OpenAI, Gemini, Sarvam, Cloudinary, optional myScheme and IMD. Never put those in the phone app.
-- In the Neon SQL editor, run `backend/src/db/schema.sql`.
-- Copy `backend/.env.example` to `backend/.env` and `AiBackend/.env.example` to `AiBackend/.env`.
+- Copy `backend/.env.example` to `backend/.env` and `AiBackend/.env.example` to `AiBackend/.env`. Do not commit those files.
+- Create farmer tables once with `npm run db:setup` in `backend` (or run `backend/src/db/schema.sql` in the Neon SQL editor). That also clears leftover farmer phone numbers.
 - Set `ACCOUNT_URL` on the advice server to the account server (default `http://127.0.0.1:5001`) so advice can use the farmer's saved location.
+- On Windows PowerShell, use `npm.cmd` instead of `npm` if scripts are blocked.
 
 Phone server addresses live in `MobileApp/backendConfig.js` (no secrets). The defaults talk to an Android emulator (`10.0.2.2`). Use `localhost` for an iOS simulator, or your computer's LAN IP for a physical phone.
 
@@ -190,6 +191,9 @@ This listens on port 5001 when `PORT` is set from `.env.example`.
 
 ```bash
 cd ../AiBackend
+python -m venv venv
+# Windows: .\venv\Scripts\python.exe -m pip install -r requirements.txt
+# Windows: .\venv\Scripts\python.exe run.py
 pip install -r requirements.txt
 python run.py
 ```
@@ -204,7 +208,7 @@ Create a government-ID lock key (this scrambles Aadhaar-style numbers in the dat
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
-Put that value in `backend/.env` as `GOV_ID_KEY`. Do not commit it. The farmer still sees their own number in the app; staff looking at the raw database do not.
+Put that value in `backend/.env` as `GOV_ID_KEY`. Do not commit it. The phone shows a masked ID (last four characters). The full number stays locked in the database.
 After `npm install` in `backend`:
 ```bash
 npm test
@@ -214,7 +218,7 @@ Start both servers first, then run the load test. It knocks on `/health` 200 tim
 
 Advice-server routes (all except `/health` need a login token): `/chatbot/ask`, `/search`, `/stores/nearby`, `/weather`, `/api/market-prices`, `/api/market-compare`, `/api/market-analysis`, `/market/insights`, `/voice/stt`, `/voice/tts`, `/govscheme`, `/plant-disease`, `/api/fertilizer_recommendation`, `/crop_calendar`, `/crop_suggestion`, `/water_management`, `/postharvest`, `/news`, `/translate`. Missing keys return 503, not invented data.
 
-Account-server routes: `/api/auth/signup`, `/login-email`, `/me`, `/update-profile`, `/update-password`, `/api/notifications`, `/api/notifications/weather-check`, `/api/logistics/jobs`, `/api/logistics/jobs/:id/accept`, `/cancel`, `/done`. Sign-in is email and password only. Running `backend/src/db/schema.sql` (or `npm run db:setup`) clears any leftover farmer phone numbers in the database.
+Account-server routes: `/api/auth/signup`, `/login-email`, `/logout`, `/me`, `/update-profile`, `/update-password`, `/api/notifications`, `/api/notifications/weather-check`, `/api/logistics/jobs`, `/api/logistics/jobs/:id/accept`, `/cancel`, `/done`. Sign-in is email and password only. `weather-check` stores a notice only for heat, cold, or high wind, and skips a duplicate of the same title on the same UTC day.
 
 ---
 

@@ -83,7 +83,10 @@ const MainNavigator = ({isConnected}) => {
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
-      } catch {
+      } catch (err) {
+        await AsyncStorage.removeItem('user');
+        await AsyncStorage.removeItem('accessToken');
+        setUser(null);
       } finally {
         setLoadingStorage(false);
       }

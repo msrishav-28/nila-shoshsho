@@ -15,6 +15,8 @@ import Animated, {
 import {useTranslation} from 'react-i18next';
 import {theme} from '../theme.config';
 import {adviceFetch} from '../utils/api';
+import {audioPart} from '../utils/audioPart';
+import {adviceLang} from '../utils/lang';
 
 const VoiceSeed = () => {
   const navigation = useNavigation();
@@ -62,8 +64,9 @@ const VoiceSeed = () => {
         return;
       }
       const form = new FormData();
-      form.append('audio', {uri, name: 'speech.wav', type: 'audio/wav'});
-      form.append('lang', i18n.language || 'en');
+      const part = audioPart(uri);
+      form.append('audio', {uri, name: part.name, type: part.type});
+      form.append('lang', adviceLang(i18n.language));
       const res = await adviceFetch('/voice/stt', {method: 'POST', body: form});
       const data = await res.json();
       if (!res.ok) {

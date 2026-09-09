@@ -4,7 +4,7 @@ This is the farmer phone app (React Native 0.79). It is not a blank starter proj
 
 Sign-in is email and password. There is no phone login and no SMS. Paid API keys stay on the servers, never in this folder.
 
-Root setup, keys, and leftover launch steps: [../README.md](../README.md) and [../ARCHITECTURE.md](../ARCHITECTURE.md).
+Root setup, keys, and leftover launch steps: [../README.md](../README.md) and [../ARCHITECTURE.md](../ARCHITECTURE.md). On Windows PowerShell use `npm.cmd` if `npm` is blocked.
 
 ## Talk to the servers
 
@@ -40,7 +40,7 @@ npx react-native run-ios
 
 Bottom tabs: Home, Scheme, Crop Care, Market, News.
 
-Other screens from Home or Settings: Fertilize, Suggest / calendar, Water, Post harvest, Documents, Alerts, Jobs, Chat, Profile.
+Other screens from Home or Settings: Fertilize, Crop calendar, Water, Post harvest, Documents, Alerts, Jobs, Chat, Profile.
 
 Home search jumps to a tool in this app. It is not a web search.
 

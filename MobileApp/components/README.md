@@ -11,4 +11,4 @@ These components are wired in the live app. Do not add a second card or animatio
 - `StatusChip.js` — logistics job status
 - `CustomToast.js` — toasts
 
-Talk to servers only through `MobileApp/utils/api.js`. Visual tokens live in `theme.config.js`. Product contract: `FRONTEND.md`.
+Talk to servers only through `MobileApp/utils/api.js`. Visual tokens live in `theme.config.js`. Live wiring: [../../ARCHITECTURE.md](../../ARCHITECTURE.md).

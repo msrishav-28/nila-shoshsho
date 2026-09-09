@@ -1,12 +1,9 @@
 # Nila Shoshsho — current architecture
 
-This file describes the system **as the code works today**. It is not a wish list.
+This file describes the system **as the code works today**. It is not a wish list. The running code is the source of truth.
 
-- Live HTTP contract: `FRONTEND.md`
-- Visual / UX system: `DESIGN.md`
+- Visual / UX system: `DESIGN.md` (tokens, not a live-screen report)
 - Future notes, left unchanged: `AGENTIC_AI_STRATEGY_2027.md`, `BACKEND_ELEVATION_PLAN.md`
-
-If this file disagrees with `FRONTEND.md` on a path, body, or status code, **FRONTEND.md wins**.
 
 ## What the product does
 
@@ -76,10 +73,10 @@ sequenceDiagram
 | --- | --- |
 | Auth | Signup, email login, logout, me, profile, password, profile picture |
 | Documents | PDF upload to Cloudinary |
-| Notifications | In-app rows. `POST /api/notifications/weather-check` writes one Open-Meteo alert when lat/lon exist |
+| Notifications | In-app rows. `POST /api/notifications/weather-check` reads Open-Meteo. It stores a row only for heat (≥40°C), cold (≤5°C), or wind (≥50 km/h), and skips the same title on the same UTC day |
 | Logistics | Farmer posts a pickup; logistics role accepts and marks done |
 
-`GOV_ID_KEY` scrambles government-ID numbers in the database. The farmer still sees their own number in the app.
+`GOV_ID_KEY` scrambles government-ID numbers in the database. The phone receives a masked value (last four characters). Saving a profile does not overwrite a real map point with 0,0.
 
 Run `backend/src/db/schema.sql` once on Neon (or `npm run db:setup`). That also clears leftover farmer phone numbers from older builds.
 
@@ -95,8 +92,8 @@ Every route except `/health` needs a Bearer token.
 | Market compare / insight | `/api/market-compare`, `/market/insights`, `/api/market-analysis` | Same mandi rows. No invented two-week forecast |
 | Nearby stores | `GET /stores/nearby` | OpenStreetMap + mandi list |
 | Schemes | `POST /govscheme` | myScheme titles/links, or 503 + open myscheme.gov.in |
-| Fertilize | `POST /api/fertilizer_recommendation` | Soil Health Card numbers if entered, else OpenEPI grid. Always `soil_source` |
-| Suggest / calendar | `/crop_suggestion`, `/crop_calendar` | Official month windows + 7-day weather |
+| Fertilize | `POST /api/fertilizer_recommendation` | Soil Health Card numbers if entered, else OpenEPI grid. Always `soil_source`. **422** if typical soil cannot be read |
+| Suggest / calendar | `/crop_suggestion`, `/crop_calendar` | Official month windows + 7-day weather. Crop calendar is also a Home tile |
 | Water / post-harvest | `/water_management`, `/postharvest` | Open-Meteo plus advice, not a sensor |
 | Leaf scan | `POST /plant-disease` | Gemini vision. Low confidence is 422; ask KVK |
 | Chat | `POST /chatbot/ask` | Perplexity / ChatGPT / Gemini, grounded in live feeds when place exists |
@@ -104,7 +101,7 @@ Every route except `/health` needs a Bearer token.
 | News | `GET /news` | SerpAPI |
 | PDF explain | `POST /translate` | Farmer-language explanation, not a certified translation |
 
-Missing keys return **503**. Dead upstream feeds return **502**. The phone must not fill those gaps with demo data.
+Missing keys return **503**. Dead upstream feeds return **502**. News accepts remaining Indian states and short language codes (`en`, `hi`, …). Voice listen should send the real recording type (often `audio/m4a`), not always wav. The phone must not fill those gaps with demo data.
 
 ## Phone app
 
@@ -112,7 +109,7 @@ Bottom tabs (route names locked): Home, Scheme, Crop Care, Market, News.
 
 Stack screens include Settings, Profile, Fertilizers, CropSuggestion, WaterManagement, PostHarvest, Documents, Notifications, Logistics, Chatbot.
 
-Voice Seed sits above the tab bar. Listen uses `POST /voice/tts` and plays audio with `expo-av`.
+Voice Seed sits above the tab bar. Speak uses `POST /voice/stt`. Listen uses `POST /voice/tts` and plays audio with `expo-av`. Android needs microphone, camera, and photo permissions in the manifest.
 
 ## Keys and env files (servers only)
 
@@ -133,7 +130,7 @@ Never put those values in the phone app or in git.
 
 ## What is left after the farmer-tool honesty pass
 
-Code for the farmer tools named above is wired to live payloads. **Launch is not “keys only”.** Ops still needs:
+Farmer tools named above are wired to live payloads. A local emulator test still needs keys in the two `.env` files. Public launch still needs:
 
 1. Create/fill the two `.env` files. Do not commit them.
 2. Neon project with Auth on. Run `schema.sql` once.
@@ -150,7 +147,6 @@ Not in this launch slice: satellite moisture, device push, offline sync, or the 
 | --- | --- |
 | `README.md` | How to run, languages, public checklist, screenshots |
 | `ARCHITECTURE.md` | This file. Current boxes and arrows |
-| `FRONTEND.md` | Phone ↔ server HTTP contract (kept in the repo; not listed on the public README) |
 | `DESIGN.md` | Visual system. Not a live-screen report |
 | `MobileApp/README.md` | How to run the phone app. No secrets |
 | `MobileApp/components/README.md` | UI pieces that are actually wired |

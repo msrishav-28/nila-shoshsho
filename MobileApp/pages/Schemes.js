@@ -128,7 +128,9 @@ const Schemes = () => {
       if (storedLang) {
         setLang(storedLang);
         const storedLangVal = await AsyncStorage.getItem('appLanguageValue');
-        i18n.changeLanguage(storedLangVal);
+        if (storedLangVal) {
+          i18n.changeLanguage(storedLangVal);
+        }
       }
     };
 

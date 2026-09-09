@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {theme} from '../theme.config';
 import {useTranslation} from 'react-i18next';
 import {adviceFetch} from '../utils/api';
+import {adviceLang} from '../utils/lang';
 import Toast from 'react-native-toast-message';
 
 const VoicePlayer = ({text, lang}) => {
@@ -33,7 +34,10 @@ const VoicePlayer = ({text, lang}) => {
       setPlaying(true);
       const res = await adviceFetch('/voice/tts', {
         method: 'POST',
-        body: JSON.stringify({text: String(text).slice(0, 2400), lang: lang || i18n.language}),
+        body: JSON.stringify({
+          text: String(text).slice(0, 2400),
+          lang: adviceLang(lang, i18n.language),
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.audio_base64) {

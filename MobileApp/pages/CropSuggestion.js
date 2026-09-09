@@ -15,6 +15,8 @@ import Toast from 'react-native-toast-message';
 import { theme } from '../theme.config';
 import { adviceFetch } from '../utils/api';
 import { UserContext } from '../context/UserContext';
+import { adviceLang } from '../utils/lang';
+import { hasMapPoint } from '../utils/place';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 
@@ -22,10 +24,10 @@ const API_PATH = '/crop_suggestion';
 const CALENDAR_API_PATH = '/crop_calendar';
 
 const CropSuggestion = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useContext(UserContext);
-  const [city, setCity] = useState(user.location?.city || '');
-  const [state, setState] = useState(user.location?.state || '');
+  const [city, setCity] = useState(user?.location?.city || '');
+  const [state, setState] = useState(user?.location?.state || '');
   const [landAcres, setLandAcres] = useState('');
   const [loading, setLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
@@ -60,6 +62,14 @@ const CropSuggestion = () => {
       });
       return;
     }
+    if (!hasMapPoint(user)) {
+      Toast.show({
+        type: 'error',
+        text1: t('cropSuggestion.errors.invalidInput'),
+        text2: t('HomePage.errors.addVillage'),
+      });
+      return;
+    }
 
     if (isNaN(landAcres) || parseFloat(landAcres) <= 0) {
       Toast.show({
@@ -80,7 +90,7 @@ const CropSuggestion = () => {
         longitude: location.lon,
         region: `${city.trim()}, ${state.trim()}`,
         land_acres: parseFloat(landAcres),
-        lang,
+        lang: adviceLang(i18n.language, lang),
       };
 
       const res = await adviceFetch(API_PATH, {
@@ -141,7 +151,7 @@ const CropSuggestion = () => {
         region: `${city.trim()}, ${state.trim()}`,
         latitude: location.lat,
         longitude: location.lon,
-        lang,
+        lang: adviceLang(i18n.language, lang),
       };
 
       const res = await adviceFetch(CALENDAR_API_PATH, {

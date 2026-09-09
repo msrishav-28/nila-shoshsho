@@ -1,4 +1,8 @@
 import { getSql } from "../lib/db.js";
+import {
+  classifyWeather,
+  shouldStoreWeatherAlert,
+} from "../lib/weatherAlert.js";
 
 export const listNotifications = async (req, res) => {
   try {
@@ -72,29 +76,32 @@ export const ingestWeatherAlert = async (req, res) => {
       return res.status(502).json({ success: false, message: "Weather service is unavailable" });
     }
 
-    let title = "Weather update";
-    let body = `Current temperature is ${temperature}°C.`;
-    let kind = "update";
-    if (temperature >= 40) {
-      title = "Heat alert";
-      body = `High temperature of ${temperature}°C. Protect workers and irrigate if needed.`;
-      kind = "heat";
-    } else if (temperature <= 5) {
-      title = "Cold alert";
-      body = `Low temperature of ${temperature}°C. Watch sensitive crops.`;
-      kind = "cold";
-    } else if (windspeed >= 50) {
-      title = "Wind alert";
-      body = `High wind speed of ${windspeed} km/h.`;
-      kind = "wind";
+    const classified = classifyWeather({
+      temperature,
+      windspeed: Number(windspeed) || 0,
+    });
+    if (shouldStoreWeatherAlert(classified.kind)) {
+      const existing = await getSql()`
+        SELECT notification_id
+        FROM notifications
+        WHERE farmer_id = ${req.user.neon_user_id}
+          AND title = ${classified.title}
+          AND created_at >= date_trunc('day', timezone('utc', now()))
+        LIMIT 1
+      `;
+      if (!existing[0]) {
+        await createNotification(
+          req.user.neon_user_id,
+          classified.title,
+          classified.body
+        );
+      }
     }
-
-    await createNotification(req.user.neon_user_id, title, body);
     return res.json({
       success: true,
-      title,
-      body,
-      kind,
+      title: classified.title,
+      body: classified.body,
+      kind: classified.kind,
       source: "Open-Meteo",
       asOf: new Date().toISOString(),
     });

@@ -11,6 +11,7 @@ pids
 .eslintcache
 .node_repl_history
 .env
+FRONTEND.md
 
 # === React Native (MobileApp) ===
 MobileApp/node_modules/

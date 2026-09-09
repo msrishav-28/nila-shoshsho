@@ -14,6 +14,7 @@ import Markdown from 'react-native-markdown-display';
 import Header from '../components/Header';
 import { theme } from '../theme.config';
 import { adviceFetch } from '../utils/api';
+import { adviceLang } from '../utils/lang';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import VoicePlayer from '../components/VoicePlayer';
@@ -26,19 +27,21 @@ const HealthBar = ({ status, t }) => {
     dead: { percent: 0, color: theme.alert },
   };
 
-  const health = healthLevels[status.toLowerCase()] || {
+  const key = String(status || '').toLowerCase();
+  const health = healthLevels[key] || {
     percent: 50,
     color: '#9e9e9e',
   };
 
-  const getTranslatedStatus = (status) => {
+  const getTranslatedStatus = (raw) => {
+    const statusKey = String(raw || '').toLowerCase();
     const statusMap = {
       healthy: t('cropCare.health.statuses.healthy'),
       'mildly affected': t('cropCare.health.statuses.mildlyAffected'),
       'severely affected': t('cropCare.health.statuses.severelyAffected'),
       dead: t('cropCare.health.statuses.dead'),
     };
-    return statusMap[status.toLowerCase()] || status;
+    return statusMap[statusKey] || raw;
   };
 
   return (
@@ -149,7 +152,7 @@ const Cropcare = () => {
         name: img.fileName || 'photo.jpg',
         type: img.type || 'image/jpeg',
       });
-      formData.append('lang', i18n.language || lang); // Use i18n.language
+      formData.append('lang', adviceLang(i18n.language, lang));
 
       const res = await adviceFetch('/plant-disease', {
         method: 'POST',

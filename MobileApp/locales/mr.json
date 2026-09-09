@@ -128,7 +128,8 @@
       "schemes": "योजना",
       "fertilize": "खत देणे",
       "news": "News",
-      "sprinkler": "पाणी व्यवस्थापन"
+      "sprinkler": "पाणी व्यवस्थापन",
+      "cropSuggestion": "पीक दिनदर्शिका"
     },
     "suggestion": {
       "title": "कोणती पिके घ्यावीत याबद्दल सूचना हव्या आहेत?",
@@ -136,7 +137,7 @@
     },
     "chatbot": {
       "needHelp": "अॅप एक्सप्लोर करण्यासाठी मदत हवी आहे? आमच्या स्मार्ट सहाय्यकाला विचारा!",
-      "chatButton": "सहाय्यकाशी चॅट करा"
+      "chatButton": "नीला ला विचारा"
     },
     "branding": {
       "nilaName": "नीला",
@@ -150,7 +151,9 @@
       "weatherPermission": "स्थान वापरण्याची परवानगी नाकारली गेली",
       "weatherFetch": "हवामान माहिती मिळवू शकलो नाही.",
       "locationError": "स्थान त्रुटी: ",
-      "weatherLocationFetch": "हवामान/स्थान माहिती मिळवू शकलो नाही."
+      "weatherLocationFetch": "हवामान/स्थान माहिती मिळवू शकलो नाही.",
+      "addVillage": "Update Profile मध्ये आपले गाव जोडा.",
+      "openProfile": "Update Profile उघडा"
     },
     "forecast": {
       "rain": "पाऊस",
@@ -158,8 +161,8 @@
     }
   },
   "chatbot": {
-    "headerTitle": "चॅटबॉट मदतनीस",
-    "initialMessage": "तुम्हाला कुठे जायचे आहे?",
+    "headerTitle": "नीला ला विचारा",
+    "initialMessage": "हवामान, योजना, पीक किंवा मंडी भावाबद्दल विचारा.",
     "loadingMessage": "थांबा, आम्ही तुम्हाला तिथे घेऊन जात आहोत...",
     "prompts": {
       "schemes": "कोणत्या सरकारी योजना छोट्या शेतकऱ्याला मदत करतात?",
