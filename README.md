@@ -224,9 +224,9 @@ Account-server routes: `/api/auth/signup`, `/login-email`, `/me`, `/update-profi
 - Expansion to Bangladesh, Nepal, Sri Lanka (regional adaptations).
 - **Blockchain for Data Privacy:** A long-term vision to secure farmer data.
 - **Offline Support:** Access critical information even without an active internet connection through periodic syncing.
-- **Push Notifications:** Receive timely alerts for market price changes, weather warnings, and crop calendar reminders.
-- **Enhanced Personalization:** A user profile section to tailor content based on your specific crops and preferences.
-- **Improved Accessibility (a11y):** Full support for screen readers and other assistive technologies.
+- **Device alerts:** Weather and market warnings on the phone itself, beyond the in-app Alerts list.
+- **Deeper personalization:** Advice that uses saved crops and field history, not only the profile place.
+- **Improved Accessibility (a11y):** Fuller support for screen readers and other assistive technologies.
 ---
 
 ##  Resources / Credits

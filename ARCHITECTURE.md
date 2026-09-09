@@ -142,7 +142,7 @@ Code for the farmer tools named above is wired to live payloads. **Launch is not
 5. Point `MobileApp/backendConfig.js` at those HTTPS addresses for a real phone. Emulator defaults stay `10.0.2.2`.
 6. Click through Schemes, Fertilize, Suggest, Market, and Alerts on a signed-in farmer with a saved village.
 
-Not in this launch slice (and not required for the honesty pass): satellite moisture, Firebase device push, Soil Health Card scraping, CEDA, offline sync, or the 2027 agent roadmap.
+Not in this launch slice: satellite moisture, device push, offline sync, or the 2027 agent roadmap.
 
 ## Documentation map
 

@@ -207,7 +207,7 @@ Job object:
 
 `PUT /api/logistics/jobs/:id/done` Logistics who accepted it, only while ACCEPTED.
 
-The account API is live. The phone still needs a Logistics screen that calls these.
+The phone Jobs screen (`Logistics`) already calls these routes from Settings.
 
 ## Advice server (port 5002)
 
@@ -514,8 +514,6 @@ Logistics jobs and `/voice/tts` playback are already in the app. Remaining phone
 ## What you must never ship in the app
 
 - Perplexity, OpenAI, Gemini, Sarvam, data.gov, SerpAPI, Cloudinary, IMD, myScheme, Neon, or `GOV_ID_KEY` secrets
-- Groq
-- SMS login
 - Invented pesticide brands or doses
 - Mock mandi prices
 
