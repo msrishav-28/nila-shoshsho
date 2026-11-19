@@ -1,3 +1,5 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
+
 # Resolve react_native_pods.rb with node to allow for hoisting
 require Pod::Executable.execute_command('node', ['-p',
   'require.resolve(
@@ -15,7 +17,15 @@ if linkage != nil
 end
 
 target 'MobileApp' do
-  config = use_native_modules!
+  use_expo_modules!
+  config = use_native_modules!([
+    'npx',
+    'expo-modules-autolinking',
+    'react-native-config',
+    '--json',
+    '--platform',
+    'ios'
+  ])
 
   use_react_native!(
     :path => config[:reactNativePath],

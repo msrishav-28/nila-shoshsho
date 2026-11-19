@@ -1,198 +1,225 @@
-import React, {useEffect, useState, useContext} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {StatusBar} from 'react-native';
 import {
-  StatusBar,
-  ActivityIndicator,
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
-import {SafeAreaProvider, useSafeAreaInsets} from 'react-native-safe-area-context';
-import {PaperProvider, MD3LightTheme} from 'react-native-paper';
-import Signup from './pages/Signup';
-import Toast from 'react-native-toast-message';
-import Welcome from './pages/Welcome';
-import CustomToast from './components/CustomToast';
-import Login from './pages/Login';
-import {UserProvider, UserContext} from './context/UserContext';
+  NavigationContainer,
+  DefaultTheme,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {theme} from './theme.config';
-import changeNavigationBarColor from 'react-native-navigation-bar-color';
 import NetInfo from '@react-native-community/netinfo';
-import BottomTabNavigator from './components/BottomTabNavigator';
-import Settings from './pages/Settings';
-import UpdateProfile from './pages/UpdateProfile';
-import PostHarvest from './pages/PostHarvest';
-import Chatbot from './pages/Chatbot';
-import Profile from './pages/Profile';
-import LanguageChange from './pages/LanguageChange';
-import './i18n'; // Important: Must come before anything else using translations
-import {I18nextProvider, useTranslation} from 'react-i18next';
-import i18n from './i18n';
-import Notifications from './pages/Notifications';
-import Fertilizers from './pages/Fertilizers';
-import News from './pages/News';
-import CropSuggestion from './pages/CropSuggestion';
-import Documents from './pages/Documents';
-import PasswordChange from './pages/PasswordChange';
-import WaterManagement from './pages/WaterManagement';
-import Logistics from './pages/Logistics';
+import './i18n';
+import {UserContext, UserProvider} from './context/UserContext';
+import {theme} from './theme.config';
+import {AccountScreen} from './refined/AccountScreens';
+import {MarketScreen} from './refined/MarketScreens';
+import {TaskScreen} from './refined/TaskScreens';
+import {HomeScreen, StartupScreen} from './refined/HomeScreen';
+import {AskNilaScreen} from './refined/AskNilaScreen';
+import {CropCareScreen} from './refined/CropCareScreen';
 
-const Stack = createNativeStackNavigator();
-
-const toastConfig = {
-  success: props => <CustomToast {...props} />,
-  error: props => <CustomToast {...props} />,
-  info: props => <CustomToast {...props} />,
-};
-
-const paperTheme = {
-  ...MD3LightTheme,
+const Navigator = createNativeStackNavigator();
+const SessionContext = React.createContext(null);
+const navigationTheme = {
+  ...DefaultTheme,
   colors: {
-    ...MD3LightTheme.colors,
+    ...DefaultTheme.colors,
     primary: theme.paddy,
-    secondary: theme.turmeric,
     background: theme.canvas,
-    surface: theme.surface,
-    error: theme.alert,
-    onPrimary: theme.inkInverse,
-    onSurface: theme.ink,
+    text: theme.ink,
+    card: theme.surface,
   },
 };
-
-const OfflineBanner = () => {
-  const {t} = useTranslation();
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[styles.offlineBanner, {paddingTop: insets.top + 8}]}>
-      <Text style={styles.offlineText}>{t('offlineBanner.text')}</Text>
-    </View>
-  );
+const primaryRoutes = ['Home', 'Schemes', 'CropCare', 'Market', 'News'];
+const routes = {
+  Home: HomeScreen,
+  Schemes: MarketScreen,
+  CropCare: CropCareScreen,
+  Market: MarketScreen,
+  News: MarketScreen,
+  AskNila: AskNilaScreen,
+  Settings: AccountScreen,
+  Profile: AccountScreen,
+  UpdateProfile: AccountScreen,
+  LanguageChange: AccountScreen,
+  PasswordChange: AccountScreen,
+  Notifications: AccountScreen,
+  NotificationPreferences: AccountScreen,
+  ChooseProfilePicture: AccountScreen,
+  CropPlanning: TaskScreen,
+  WaterSoil: TaskScreen,
+  AfterHarvest: TaskScreen,
+  Documents: TaskScreen,
+  DocumentTranslate: TaskScreen,
+  TransportJobs: TaskScreen,
+  FarmSetup: TaskScreen,
+  FarmMonitoring: TaskScreen,
+};
+const authRoutes = ['Welcome', 'Login', 'Signup'];
+const screenOptions = {
+  headerShown: false,
+  contentStyle: {backgroundColor: theme.canvas},
 };
 
-// Main Navigator that loads after user state is determined
-const MainNavigator = ({isConnected}) => {
+function RoutedScreen() {
+  const {name: screen, params} = useRoute();
+  const navigation = useNavigation();
   const {user, setUser} = useContext(UserContext);
-  const [loadingStorage, setLoadingStorage] = useState(true);
-
-  useEffect(() => {
-    const loadUserFromStorage = async () => {
-      try {
-        const storedUser = await AsyncStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (err) {
-        await AsyncStorage.removeItem('user');
-        await AsyncStorage.removeItem('accessToken');
-        setUser(null);
-      } finally {
-        setLoadingStorage(false);
+  const session = useContext(SessionContext);
+  const go = useCallback(
+    (target, values) => {
+      if (target === screen && !values) {
+        return;
       }
-    };
-    loadUserFromStorage();
-  }, []);
-
-  if (loadingStorage) {
-    return (
-      <View style={styles.loaderContainer}>
-        <StatusBar
-          translucent
-          backgroundColor={'transparent'}
-          barStyle="dark-content"
-        />
-        <ActivityIndicator size={45} color={theme.paddy} />
-      </View>
-    );
-  }
-
-  return (
-    <>
-      <NavigationContainer>
-        <StatusBar
-          translucent
-          backgroundColor={'transparent'}
-          barStyle="dark-content"
-        />
-        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName={user ? 'MainApp' : 'Welcome'}>
-          {user ? (
-            <Stack.Screen name="MainApp" component={BottomTabNavigator} />
-          ) : null}
-          {user ? <Stack.Screen name="Settings" component={Settings} /> : null}
-          {user ? <Stack.Screen name="UpdateProfile" component={UpdateProfile} /> : null}
-          <Stack.Screen name="Welcome" component={Welcome} />
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Signup" component={Signup} />
-          {user ? <Stack.Screen name="PostHarvest" component={PostHarvest} /> : null}
-          {user ? <Stack.Screen name="Profile" component={Profile} /> : null}
-          {user ? <Stack.Screen name="Chatbot" component={Chatbot} /> : null}
-          {user ? <Stack.Screen name="LanguageChange" component={LanguageChange} /> : null}
-          {user ? <Stack.Screen name="Notifications" component={Notifications} /> : null}
-          {user ? <Stack.Screen name="Fertilizers" component={Fertilizers} /> : null}
-          {user ? <Stack.Screen name="CropSuggestion" component={CropSuggestion} /> : null}
-          {user ? <Stack.Screen name="Documents" component={Documents} /> : null}
-          {user ? <Stack.Screen name="PasswordChange" component={PasswordChange} /> : null}
-          {user ? <Stack.Screen name="WaterManagement" component={WaterManagement} /> : null}
-          {user ? <Stack.Screen name="Logistics" component={Logistics} /> : null}
-        </Stack.Navigator>
-      </NavigationContainer>
-      {!isConnected && <OfflineBanner />}
-    </>
+      if (target === 'Home' && !values) {
+        navigation.popToTop();
+      } else if (
+        primaryRoutes.includes(target) &&
+        primaryRoutes.includes(screen)
+      ) {
+        if (screen === 'Home') {
+          navigation.navigate(target, values);
+        } else {
+          navigation.replace(target, values);
+        }
+      } else if (target === 'Welcome' && !values) {
+        navigation.popToTop();
+      } else {
+        navigation.navigate(target, values);
+      }
+    },
+    [navigation, screen],
   );
-};
+  const back = useCallback(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else if (user && screen !== 'Home') {
+      navigation.replace('Home');
+    } else if (!user && screen !== 'Welcome') {
+      navigation.replace('Welcome');
+    }
+  }, [navigation, screen, user]);
+  const Component = routes[screen] || AccountScreen;
+  return (
+    <Component {...session} {...{screen, params, go, back, user, setUser}} />
+  );
+}
 
-const App = () => {
-  const [isConnected, setIsConnected] = useState(true);
+function SessionApp() {
+  const {user, setUser} = useContext(UserContext);
+  const [booting, setBooting] = useState(true);
+  const [offline, setOffline] = useState(false);
+  const [savedFarm, setSavedFarm] = useState(null);
+  const [draft, setDraft] = useState(null);
+  const id = user?.id || user?._id || user?.email;
+  const farmKey = id ? `refined.farm.${id}` : null;
+  const farm = farmKey && savedFarm?.key === farmKey ? savedFarm.value : null;
+  const voiceDraft = id && draft?.id === id ? draft.text : '';
+  const setVoiceDraft = useCallback(
+    text => setDraft(text ? {id, text} : null),
+    [id],
+  );
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
-      const status = state.isConnected;
-      setIsConnected(status);
-      changeNavigationBarColor(status ? theme.surface : theme.monsoon, true);
-    });
+    let active = true;
+    async function restore() {
+      try {
+        const value = await AsyncStorage.getItem('user');
+        const session = value ? JSON.parse(value) : null;
+        if (active && session && typeof session === 'object') {
+          setUser(session);
+        }
+      } catch {
+        await AsyncStorage.multiRemove(['user', 'accessToken']).catch(() => {});
+      } finally {
+        if (active) {
+          setBooting(false);
+        }
+      }
+    }
+    restore();
+    return () => {
+      active = false;
+    };
+  }, [setUser]);
 
-    return () => unsubscribe();
-  }, []);
+  useEffect(
+    () =>
+      NetInfo.addEventListener(state => {
+        setOffline(
+          state.isConnected === false || state.isInternetReachable === false,
+        );
+      }),
+    [],
+  );
 
+  useEffect(() => {
+    let active = true;
+    if (farmKey) {
+      AsyncStorage.getItem(farmKey)
+        .then(value => {
+          if (active) {
+            setSavedFarm(previous =>
+              previous?.key === farmKey
+                ? previous
+                : {key: farmKey, value: value ? JSON.parse(value) : null},
+            );
+          }
+        })
+        .catch(() => {});
+    } else {
+      setSavedFarm(null);
+      setDraft(null);
+    }
+    return () => {
+      active = false;
+    };
+  }, [farmKey]);
+
+  const setFarm = useCallback(
+    async value => {
+      if (!farmKey) {
+        throw new Error('Sign in to save your farm.');
+      }
+      if (value) {
+        await AsyncStorage.setItem(farmKey, JSON.stringify(value));
+      } else {
+        await AsyncStorage.removeItem(farmKey);
+      }
+      setSavedFarm({key: farmKey, value});
+    },
+    [farmKey],
+  );
+
+  if (booting) {
+    return <StartupScreen />;
+  }
+  const names = user ? Object.keys(routes) : authRoutes;
+  return (
+    <SessionContext.Provider
+      value={{offline, farm, setFarm, voiceDraft, setVoiceDraft}}>
+      <NavigationContainer theme={navigationTheme}>
+        <Navigator.Navigator
+          key={user ? `signed-in:${id}` : 'signed-out'}
+          screenOptions={screenOptions}>
+          {names.map(name => (
+            <Navigator.Screen key={name} name={name} component={RoutedScreen} />
+          ))}
+        </Navigator.Navigator>
+      </NavigationContainer>
+    </SessionContext.Provider>
+  );
+}
+
+export default function App() {
   return (
     <SafeAreaProvider>
-      <PaperProvider theme={paperTheme}>
-        <I18nextProvider i18n={i18n}>
-          <UserProvider>
-            <MainNavigator isConnected={isConnected} />
-            <Toast config={toastConfig} />
-          </UserProvider>
-        </I18nextProvider>
-      </PaperProvider>
+      <StatusBar barStyle="dark-content" />
+      <UserProvider>
+        <SessionApp />
+      </UserProvider>
     </SafeAreaProvider>
   );
-};
-
-const styles = StyleSheet.create({
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-    backgroundColor: theme.canvas,
-  },
-  offlineBanner: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: theme.monsoon,
-    zIndex: 40,
-    alignItems: 'center',
-    paddingBottom: 10,
-  },
-  offlineText: {
-    color: theme.inkInverse,
-    fontSize: 15,
-    fontFamily: theme.font.semi,
-  },
-});
-
-export default App;
+}
