@@ -47,6 +47,7 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
         "SARVAM_API_KEY": "fixture",
         "SERP_API_KEY": "fixture",
         "MYSCHEME_API_KEY": "fixture",
+        "IMD_API_KEY": "fixture",
     }.items():
         monkeypatch.setenv(name, value)
     token = jwt.encode(
@@ -97,6 +98,8 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
             return Reply({"user": profile})
         if "open-meteo" in url:
             if "current" in kwargs["params"]:
+                if kwargs["params"]["latitude"] == 21:
+                    return Reply({})
                 return Reply(
                     {
                         "current": {
@@ -114,8 +117,6 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
             )
         if "data.gov.in" in url:
             return Reply({"records": [market], "total": 1})
-        if "api.imd.gov.in" in url:
-            return Reply([])
         if "serpapi" in url:
             return Reply(
                 {
@@ -181,6 +182,12 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
         assert client.get("/search").status_code == 404
         client.environ_base["HTTP_X_STAGING_KEY"] = "advice-fixture-stage-key" * 2
         client.environ_base["HTTP_AUTHORIZATION"] = "Bearer " + token
+        assert client.get("/weather?lat=21").status_code == 400
+        assert client.get("/weather?lat=&lon=76").status_code == 400
+        forecast = client.get("/weather?lat=21&lon=76").get_json()
+        assert forecast["imd"] is None and forecast["warnings"] is None
+        assert forecast["open_meteo"]["current"] is None
+        assert forecast["open_meteo"]["daily"]["source"] == "Open-Meteo"
         payloads = {
             "/chatbot/ask": {"question": "rice price"},
             "/govscheme": {"query": "farmer"},

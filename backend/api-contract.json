@@ -235,7 +235,7 @@
       "caller": "Home",
       "input": "lat?,lon?",
       "successFields": ["imd", "open_meteo", "warnings"],
-      "dependency": "profile, IMD and Open-Meteo"
+      "dependency": "profile and Open-Meteo"
     },
     {
       "service": "advice",

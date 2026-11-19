@@ -5353,7 +5353,7 @@
       "get": {
         "operationId": "advice_get_weather",
         "tags": ["advice"],
-        "description": "Consumer Home. Access bearer. Dependencies profile, IMD and Open-Meteo.",
+        "description": "Consumer Home. Access bearer. Uses Open-Meteo. Supply both coordinates or use the signed-in profile's saved location by omitting both.",
         "security": [
           {
             "bearerAuth": []
@@ -5362,6 +5362,18 @@
         "servers": [
           {
             "url": "http://localhost:5002"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "schema": { "type": "number", "minimum": -90, "maximum": 90 }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "schema": { "type": "number", "minimum": -180, "maximum": 180 }
           }
         ],
         "responses": {
@@ -5373,7 +5385,8 @@
                   "type": "object",
                   "properties": {
                     "imd": {
-                      "type": ["object", "null"]
+                      "type": ["object", "null"],
+                      "description": "Reserved for verified IMD forecasts. Currently null."
                     },
                     "open_meteo": {
                       "type": "object",
@@ -5387,7 +5400,8 @@
                       }
                     },
                     "warnings": {
-                      "type": ["object", "null"]
+                      "type": ["object", "null"],
+                      "description": "Reserved for verified official warnings. Currently null."
                     }
                   },
                   "required": ["imd", "open_meteo", "warnings"]

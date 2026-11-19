@@ -58,7 +58,6 @@ services:
       SERP_API_KEY: ${SERP_API_KEY:-}
       DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
       MYSCHEME_API_KEY: ${MYSCHEME_API_KEY:-}
-      IMD_API_KEY: ${IMD_API_KEY:-}
     ports:
       - "${ADVICE_PORT:-5002}:5002"
     init: true

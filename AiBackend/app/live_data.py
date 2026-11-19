@@ -166,18 +166,6 @@ def live_facts(question, profile):
             )
     if any(word in text for word in ("weather", "rain", "temperature", "heat", "cold")):
         if lat and lon:
-            from app.imd import fetch_imd_forecast, fetch_imd_warnings
-
-            imd = fetch_imd_forecast(lat, lon)
-            if imd:
-                chunks.append(f"IMD forecast: {imd}")
-                sources.append({"source": imd["source"], "asOf": imd.get("asOf")})
-            warnings = fetch_imd_warnings(state)
-            if warnings:
-                chunks.append(f"IMD warnings: {warnings}")
-                sources.append(
-                    {"source": warnings["source"], "asOf": warnings.get("asOf")}
-                )
             weather = fetch_current_weather(lat, lon)
             if weather:
                 chunks.append(f"Open-Meteo now: {weather}")

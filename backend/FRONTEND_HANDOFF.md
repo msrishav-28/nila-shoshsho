@@ -42,6 +42,7 @@ Read configuration names from the root .env.example. Keys belong in the root .en
 ## Advice and sources
 
 - Show source and observation dates supplied by price and weather responses. Provider outages, empty datasets and insufficient evidence are distinct states. An empty market result cannot establish that a commodity is unavailable locally.
+- `GET /weather` accepts `lat` and `lon` together. With neither supplied, it uses the signed-in profile's coordinates. Current conditions and the daily forecast can each be unavailable. The reserved `imd` and `warnings` fields currently return null. Display official-warning coverage as unavailable.
 - Submitted market analysis is labelled Submitted market records. Mandi insight commentary uses the retrieved rows. Future prices are not generated.
 - Treat crop-photo results as an assessment requiring human judgment. Confidence is a model score, not measured diagnostic accuracy. An uncertain photo returns 422 with a safe next step.
 - Fertilizer responses include rate_available=false until reviewed field guidance is available. Render the returned explanation and soil provenance. Estimated mapped soil is distinct from a measured field sample.
