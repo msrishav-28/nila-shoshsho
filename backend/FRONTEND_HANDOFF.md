@@ -12,6 +12,8 @@ To request a pilot call, send POST /api/voice-callbacks with an Idempotency-Key 
 
 Import openapi.json for the two local API origins, and use api-contract.json for the caller/dependency inventory. Configure production HTTPS origins in the frontend release environment. API schemas describe integration boundaries. Read source and acceptance tests for additional business rules.
 
+Both Render staging APIs use isolated synthetic data and require the operator's `X-Staging-Key` in addition to ordinary authentication. Keep this key in trusted test tooling or a server-side integration proxy. The `RELEASE.md` record lists the staging health URLs and the journeys verified there.
+
 The account service runs on port 5001 and advice on 5002. Advice requests also require the account service to be reachable through ACCOUNT_URL. All application routes require a signed access token except signup and email login. Health remains public.
 
 Read configuration names from the root .env.example. Keys belong in the root .env.local or server secret storage. Set the expected identity issuer and audience for both services to match the actual deployed identity contract. STAFF_USER_IDS contains the UUIDs of staff accounts authorized to make review decisions. Create normal accounts first, then configure this server-side allowlist.

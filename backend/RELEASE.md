@@ -8,7 +8,7 @@ In backend/, use Node 22, run npm ci, npm run lint, npm run format:check and npm
 
 In AiBackend/, use a Python 3.11 virtual environment, install requirements-test.txt, run python -m ruff check app run.py readiness.py sarvam_check.py --select F, python -m ruff format --check app run.py readiness.py sarvam_check.py, python -m pytest -q app and python -m pip check. python -m pip_audit -r requirements.txt checks the production dependency set. Constraints record the locally resolved versions.
 
-GitHub Actions ran these checks and built both Linux containers successfully for commit `37ae3a7`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44603807150)
+GitHub Actions ran these checks and built both Linux containers successfully for the deployed advice commit `f5effc3`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44607186534)
 
 ## Verification record — 20 November 2026
 
@@ -26,7 +26,10 @@ GitHub Actions ran these checks and built both Linux containers successfully for
 | Render staging | PASS. Workspace Blueprint validation and container startup completed. Both APIs returned health status 200, gated calls without the staging key returned 404, and gated calls without identity returned 401. |
 | Hosted identity and plots | PASS. Synthetic signup, sign-in, signed cross-service advice search, concurrent plot replay, update and deletion, and sign-out with revocation in both APIs. |
 | Hosted private media | PASS. The hosting account API uploaded a synthetic PDF and photo. Signed delivery returned both assets, a second account received no links, and unsigned originals and image variants returned 401. Both assets were removed. |
-| Public release | OPEN. Requires broader hosted provider journeys, production proxy and capacity verification, alerts, recovery and agricultural review for the enabled scope. |
+| Hosted Redis enforcement | PASS. From a clean staging window, 60 requests without a bearer token returned 401 and the next five returned 429 with Retry-After. No paid endpoint was called. |
+| Render advice rollback | PASS. Render returned advice to `37ae3a7`, where liveness, the staging gate and signed search passed. Render then deployed `f5effc3`; liveness, validation and session revocation passed. Account continued serving `dcfc3f9`. |
+| Hosted weather | BLOCKED. Open-Meteo returned HTTP 429 for current conditions and the daily forecast from Render. Both calls returned 200 when tested directly outside Render. The hosted API returned a controlled 502 and recorded provider, status and request ID without logging coordinates or the provider response. |
+| Public release | OPEN. Requires reliable hosted weather, broader hosted provider journeys, production proxy and capacity verification, alert delivery, deployed-data recovery and agricultural review for the enabled scope. |
 
 ## Configure a working demo
 
