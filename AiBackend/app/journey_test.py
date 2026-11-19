@@ -17,7 +17,9 @@ from app import create_app, auth, security, speech
 import requests
 
 
-def test_all_advice_routes_with_verified_identity_and_controlled_providers(monkeypatch):
+def test_all_advice_routes_with_verified_identity_and_controlled_providers(
+    monkeypatch, capsys
+):
     user_id = "00000000-0000-4000-8000-000000000001"
     key = Ed25519PrivateKey.generate()
     monkeypatch.setattr(
@@ -97,6 +99,10 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
             assert kwargs["headers"]["X-Staging-Key"] == "advice-fixture-stage-key" * 2
             return Reply({"user": profile})
         if "open-meteo" in url:
+            if kwargs["params"]["latitude"] == 22:
+                rejected = requests.Response()
+                rejected.status_code = 429
+                raise requests.HTTPError("private upstream detail", response=rejected)
             if "current" in kwargs["params"]:
                 if kwargs["params"]["latitude"] == 21:
                     return Reply({})
@@ -188,6 +194,11 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
         assert forecast["imd"] is None and forecast["warnings"] is None
         assert forecast["open_meteo"]["current"] is None
         assert forecast["open_meteo"]["daily"]["source"] == "Open-Meteo"
+        unavailable = client.get("/weather?lat=22&lon=76")
+        assert unavailable.status_code == 502
+        logs = capsys.readouterr().err
+        assert '"upstream_status": 429' in logs
+        assert "private upstream detail" not in logs
         payloads = {
             "/chatbot/ask": {"question": "rice price"},
             "/govscheme": {"query": "farmer"},

@@ -43,16 +43,17 @@ def log_advice_result(provider, outcome):
         )
 
 
-def log_failure(provider, error):
+def log_failure(provider, error, upstream_status=None):
     if has_request_context():
+        fields = {
+            "event": "provider_failure",
+            "provider": provider,
+            "error_class": type(error).__name__,
+            "request_id": g.get("request_id"),
+        }
+        if upstream_status is not None:
+            fields["upstream_status"] = upstream_status
         current_app.logger.warning(
             "provider_failure",
-            extra={
-                "event_fields": {
-                    "event": "provider_failure",
-                    "provider": provider,
-                    "error_class": type(error).__name__,
-                    "request_id": g.get("request_id"),
-                }
-            },
+            extra={"event_fields": fields},
         )

@@ -5,8 +5,30 @@ from app.deadline import provider_timeout
 
 from app.mandi import fetch_mandi_page
 from app.cache import cached_data
+from app.logging_config import log_failure
 
 TIMEOUT = 20
+FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+
+
+def _weather_data(kind, params):
+    try:
+        response = requests.get(
+            FORECAST_URL,
+            params=params,
+            timeout=provider_timeout(TIMEOUT),
+            allow_redirects=False,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        data = payload.get(kind) if isinstance(payload, dict) else None
+        return data if isinstance(data, dict) else None
+    except requests.HTTPError as error:
+        status = error.response.status_code if error.response is not None else None
+        log_failure(f"open_meteo_{kind}", error, status)
+    except (requests.RequestException, ValueError, TypeError) as error:
+        log_failure(f"open_meteo_{kind}", error)
+    return None
 
 
 def indian_season(month=None):
@@ -25,28 +47,21 @@ def fetch_daily_weather(lat, lon):
 
 
 def _daily_weather(lat, lon):
-    try:
-        response = requests.get(
-            "https://api.open-meteo.com/v1/forecast",
-            params={
-                "latitude": lat,
-                "longitude": lon,
-                "daily": (
-                    "temperature_2m_max,temperature_2m_min,precipitation_sum,"
-                    "wind_speed_10m_max,relative_humidity_2m_max,"
-                    "relative_humidity_2m_min,et0_fao_evapotranspiration"
-                ),
-                "forecast_days": 7,
-                "timezone": "auto",
-            },
-            timeout=provider_timeout(TIMEOUT),
-        )
-        response.raise_for_status()
-        payload = response.json()
-        daily = payload.get("daily") if isinstance(payload, dict) else None
-        if not isinstance(daily, dict):
-            return None
-    except (requests.RequestException, ValueError, TypeError):
+    daily = _weather_data(
+        "daily",
+        {
+            "latitude": lat,
+            "longitude": lon,
+            "daily": (
+                "temperature_2m_max,temperature_2m_min,precipitation_sum,"
+                "wind_speed_10m_max,relative_humidity_2m_max,"
+                "relative_humidity_2m_min,et0_fao_evapotranspiration"
+            ),
+            "forecast_days": 7,
+            "timezone": "auto",
+        },
+    )
+    if not daily:
         return None
     dates = daily.get("time") or []
     if not dates:
@@ -93,22 +108,15 @@ def fetch_current_weather(lat, lon):
 
 
 def _current_weather(lat, lon):
-    try:
-        response = requests.get(
-            "https://api.open-meteo.com/v1/forecast",
-            params={
-                "latitude": lat,
-                "longitude": lon,
-                "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
-            },
-            timeout=provider_timeout(TIMEOUT),
-        )
-        response.raise_for_status()
-        payload = response.json()
-    except (requests.RequestException, ValueError, TypeError):
-        return None
-    current = payload.get("current") if isinstance(payload, dict) else None
-    if not isinstance(current, dict) or type(current.get("temperature_2m")) not in (
+    current = _weather_data(
+        "current",
+        {
+            "latitude": lat,
+            "longitude": lon,
+            "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
+        },
+    )
+    if not current or type(current.get("temperature_2m")) not in (
         int,
         float,
     ):
