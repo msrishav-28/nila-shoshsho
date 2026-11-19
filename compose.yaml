@@ -1,0 +1,66 @@
+services:
+  account:
+    build: ./backend
+    environment:
+      ACCOUNT_PORT: "5001"
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-}
+      NEON_AUTH_BASE_URL: ${NEON_AUTH_BASE_URL:-}
+      NEON_AUTH_JWKS_URL: ${NEON_AUTH_JWKS_URL:-}
+      NEON_AUTH_ISSUER: ${NEON_AUTH_ISSUER:-}
+      NEON_AUTH_AUDIENCE: ${NEON_AUTH_AUDIENCE:-}
+      GOV_ID_KEY: ${GOV_ID_KEY:-}
+      STAFF_USER_IDS: ${STAFF_USER_IDS:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      BOLNA_CALLBACK_ENABLED: ${BOLNA_CALLBACK_ENABLED:-false}
+      BOLNA_API_KEY: ${BOLNA_API_KEY:-}
+      BOLNA_AGENT_ID: ${BOLNA_AGENT_ID:-}
+      BOLNA_FROM_PHONE_NUMBER: ${BOLNA_FROM_PHONE_NUMBER:-}
+      BOLNA_TEST_RECIPIENTS: ${BOLNA_TEST_RECIPIENTS:-}
+      BOLNA_DAILY_LIMIT: ${BOLNA_DAILY_LIMIT:-5}
+    ports:
+      - "${ACCOUNT_PORT:-5001}:5001"
+    init: true
+    stop_grace_period: 40s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+  advice:
+    build: ./AiBackend
+    environment:
+      ACCOUNT_URL: http://account:5001
+      ADVICE_PORT: "5002"
+      FLASK_ENV: ${FLASK_ENV:-development}
+      FLASK_DEBUG: "0"
+      NEON_AUTH_JWKS_URL: ${NEON_AUTH_JWKS_URL:-}
+      NEON_AUTH_ISSUER: ${NEON_AUTH_ISSUER:-}
+      NEON_AUTH_AUDIENCE: ${NEON_AUTH_AUDIENCE:-}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-}
+      PAID_REQUESTS_PER_DAY: ${PAID_REQUESTS_PER_DAY:-50}
+      DISABLED_ADVICE_PATHS: ${DISABLED_ADVICE_PATHS:-}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      SERP_API_KEY: ${SERP_API_KEY:-}
+      DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
+      MYSCHEME_API_KEY: ${MYSCHEME_API_KEY:-}
+      IMD_API_KEY: ${IMD_API_KEY:-}
+    ports:
+      - "${ADVICE_PORT:-5002}:5002"
+    init: true
+    stop_grace_period: 65s
+    depends_on:
+      account:
+        condition: service_healthy

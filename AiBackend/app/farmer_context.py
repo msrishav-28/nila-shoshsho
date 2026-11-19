@@ -1,26 +1,39 @@
 import os
 import requests
-from flask import request
+from app.deadline import provider_timeout
+from flask import g, request
+
+
+class ProfileUnavailable(Exception):
+    def __init__(self, status):
+        super().__init__(
+            "Account session unavailable" if status == 503 else "Session ended"
+        )
+        self.status = status
+
 
 TIMEOUT = 8
 
 
-def farmer_profile():
+def authenticated_profile():
     base = (os.getenv("ACCOUNT_URL") or "").rstrip("/")
     header = request.headers.get("Authorization") or ""
     if not base or not header.startswith("Bearer "):
-        return {}
+        raise ProfileUnavailable(503)
     try:
         response = requests.get(
             f"{base}/api/auth/me",
-            headers={"Authorization": header},
-            timeout=TIMEOUT,
+            headers={"Authorization": header, "X-Request-ID": g.request_id},
+            timeout=provider_timeout(TIMEOUT),
+            allow_redirects=False,
         )
         if response.status_code != 200:
-            return {}
+            raise ProfileUnavailable(401 if response.status_code == 401 else 503)
         user = (response.json() or {}).get("user") or {}
     except (requests.RequestException, ValueError, TypeError):
-        return {}
+        raise ProfileUnavailable(503) from None
+    if not isinstance(user, dict) or user.get("_id") != request.farmer_id:
+        raise ProfileUnavailable(503)
     location = user.get("location") or {}
     languages = user.get("languageSpoken") or []
     return {
@@ -30,3 +43,7 @@ def farmer_profile():
         "state": location.get("state") or "",
         "lang": languages[0] if languages else "",
     }
+
+
+def farmer_profile():
+    return g.farmer_profile

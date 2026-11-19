@@ -12,14 +12,20 @@ def crop_calendar():
     profile = farmer_profile()
     crop = data.get("crop")
     region = data.get("region") or profile.get("state") or profile.get("city")
-    lat = data.get("latitude") if data.get("latitude") is not None else profile.get("lat")
-    lon = data.get("longitude") if data.get("longitude") is not None else profile.get("lon")
+    lat = (
+        data.get("latitude") if data.get("latitude") is not None else profile.get("lat")
+    )
+    lon = (
+        data.get("longitude")
+        if data.get("longitude") is not None
+        else profile.get("lon")
+    )
 
     if not crop:
         return jsonify({"error": "Missing crop"}), 400
     window = find_window(crop)
     if not window:
-        return jsonify({"error": "No official sowing window for that crop"}), 404
+        return jsonify({"error": "No seasonal calendar for that crop"}), 404
 
     weather_info = None
     if lat not in (None, 0) and lon not in (None, 0):

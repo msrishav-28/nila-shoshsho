@@ -1,15 +1,14 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
+import "../lib/env.js";
+import { pathToFileURL } from "url";
 import { getSql } from "../lib/db.js";
-
-dotenv.config();
+import { neon } from "@neondatabase/serverless";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-async function main() {
-  const sql = getSql();
+export async function applySchema(sql) {
   const schemaPath = path.join(__dirname, "schema.sql");
   const schema = fs.readFileSync(schemaPath, "utf8");
   const statements = schema
@@ -17,13 +16,20 @@ async function main() {
     .map((part) => part.trim())
     .filter(Boolean);
 
-  for (const statement of statements) {
-    await sql.query(statement);
-  }
-  console.log("Farmer tables are ready.");
+  await sql.transaction(statements.map((statement) => sql.query(statement)));
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  const migrationUrl = process.env.DATABASE_MIGRATION_URL;
+  applySchema(migrationUrl ? neon(migrationUrl) : getSql())
+    .then(() => {
+      console.log("Farmer tables are ready.");
+    })
+    .catch(() => {
+      console.error("Database setup failed. The transaction was rolled back.");
+      process.exitCode = 1;
+    });
+}

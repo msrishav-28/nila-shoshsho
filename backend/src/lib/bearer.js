@@ -1,8 +1,5 @@
 export function readBearer(req) {
   const header = req.headers.authorization || "";
-  const [scheme, token] = header.split(" ");
-  if (scheme !== "Bearer" || !token) {
-    return null;
-  }
-  return token;
+  if (typeof header !== "string") return null;
+  return /^Bearer ([^\s]+)$/.exec(header)?.[1] || null;
 }

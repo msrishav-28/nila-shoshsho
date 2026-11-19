@@ -1,0 +1,76 @@
+services:
+  - type: web
+    name: nila-account
+    runtime: docker
+    plan: free
+    region: singapore
+    autoDeployTrigger: "off"
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NEON_AUTH_JWKS_URL
+        sync: false
+      - key: NEON_AUTH_ISSUER
+        sync: false
+      - key: NEON_AUTH_AUDIENCE
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: ACCOUNT_PORT
+        value: "5001"
+      - key: DATABASE_URL
+        sync: false
+      - key: NEON_AUTH_BASE_URL
+        sync: false
+      - key: GOV_ID_KEY
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: BOLNA_CALLBACK_ENABLED
+        value: "false"
+
+  - type: web
+    name: nila-advice
+    runtime: docker
+    plan: free
+    region: singapore
+    autoDeployTrigger: "off"
+    dockerContext: ./AiBackend
+    dockerfilePath: ./AiBackend/Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NEON_AUTH_JWKS_URL
+        sync: false
+      - key: NEON_AUTH_ISSUER
+        sync: false
+      - key: NEON_AUTH_AUDIENCE
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: PORT
+        value: "5002"
+      - key: ACCOUNT_URL
+        sync: false
+      - key: PAID_REQUESTS_PER_DAY
+        value: "50"
+      - key: GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: SERP_API_KEY
+        sync: false

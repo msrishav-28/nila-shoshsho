@@ -1,4 +1,5 @@
 import { decryptGovId } from "./pii.js";
+import { documentLinks, profileLink } from "./privateFiles.js";
 
 export function maskGovId(plain) {
   const text = String(plain || "");
@@ -12,7 +13,7 @@ export function maskGovId(plain) {
 }
 
 export function isMaskedGovId(value) {
-  return /^\*+\d{0,4}$/.test(String(value || "").trim());
+  return /^\*+[A-Za-z0-9]{0,4}$/.test(String(value || "").trim());
 }
 
 export function toUser(row, accessToken) {
@@ -21,8 +22,10 @@ export function toUser(row, accessToken) {
     username: row.username,
     email: row.email,
     role: row.role,
+    carrierApproved: row.carrier_approved === true,
+    profileVersion: Number(row.profile_version || 0),
     gender: row.gender,
-    profilePic: row.profile_pic || "",
+    profilePic: profileLink(row.profile_pic),
     dob: row.dob,
     age: row.age,
     location: {
@@ -44,8 +47,9 @@ export function toUser(row, accessToken) {
       facebook: row.facebook || "",
       instagram: row.instagram || "",
     },
-    documents: row.documents || [],
-    isVerified: Boolean(row.is_verified),
+    documents: documentLinks(row.documents || []),
+    documentLinksExpireInSeconds: 300,
+    isVerified: row.identity_approved === true,
     createdAt: row.created_at || null,
     updatedAt: row.updated_at || null,
   };
@@ -57,7 +61,11 @@ export function toUser(row, accessToken) {
 
 export async function getFarmerByNeonId(sql, neonUserId) {
   const rows = await sql`
-    SELECT * FROM farmers WHERE neon_user_id = ${neonUserId} LIMIT 1
+    SELECT f.*,
+      EXISTS (SELECT 1 FROM account_reviews r WHERE r.farmer_id=f.neon_user_id AND r.kind='carrier' AND r.approved) AS carrier_approved,
+      EXISTS (SELECT 1 FROM account_reviews r WHERE r.farmer_id=f.neon_user_id AND r.kind='identity' AND r.approved
+        AND r.reviewed_value=f.gov_id_name || ':' || f.gov_id_value AND f.gov_id_name<>'' AND f.gov_id_value LIKE 'enc:v1:%') AS identity_approved
+    FROM farmers f WHERE neon_user_id = ${neonUserId} LIMIT 1
   `;
   return rows[0] || null;
 }

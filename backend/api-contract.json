@@ -1,0 +1,525 @@
+{
+  "errorFields": {
+    "account": ["success", "message", "code"],
+    "advice": ["error", "code"]
+  },
+  "failureModes": {
+    "400": "Invalid input",
+    "401": "Sign-in required or rejected",
+    "403": "Access denied",
+    "404": "Resource or data unavailable",
+    "409": "Conflict",
+    "413": "Payload too large",
+    "422": "Insufficient evidence or incompatible data",
+    "429": "Request limit reached",
+    "500": "Internal failure",
+    "502": "Upstream failure",
+    "503": "Dependency, budget or configuration unavailable"
+  },
+  "routes": [
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/health",
+      "access": "public",
+      "caller": "Operations",
+      "input": "none",
+      "successFields": ["ok"],
+      "dependency": "process"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/auth/signup",
+      "access": "public",
+      "caller": "Signup",
+      "input": "username,email,password,gender,role",
+      "successFields": ["user", "success", "message"],
+      "dependency": "Neon Auth and PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/auth/login-email",
+      "access": "public",
+      "caller": "Login",
+      "input": "email,password",
+      "successFields": ["user", "success", "message"],
+      "dependency": "Neon Auth and PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "access": "bearer",
+      "caller": "Session",
+      "input": "none",
+      "successFields": ["success", "message"],
+      "dependency": "Neon Auth"
+    },
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "access": "owner",
+      "caller": "Advice profile lookup",
+      "input": "none",
+      "successFields": ["user", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/api/auth/profile-completion",
+      "access": "owner",
+      "caller": "Settings",
+      "input": "none",
+      "successFields": ["percentage", "filledFields", "totalFields"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/auth/update-profile",
+      "access": "owner",
+      "caller": "Update profile",
+      "input": "profile fields",
+      "successFields": ["user", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/auth/update-password",
+      "access": "owner",
+      "caller": "Password change",
+      "input": "currentPassword,newPassword",
+      "successFields": ["success", "message"],
+      "dependency": "Neon Auth"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/auth/update-profile-pic",
+      "access": "owner",
+      "caller": "Profile",
+      "input": "profilePic",
+      "successFields": ["user", "success"],
+      "dependency": "Cloudinary and PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/upload/upload-doc",
+      "access": "owner",
+      "caller": "Documents",
+      "input": "multipart document",
+      "successFields": ["user", "success", "message"],
+      "dependency": "Cloudinary and PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/api/notifications",
+      "access": "owner",
+      "caller": "Notifications",
+      "input": "none",
+      "successFields": ["notifications", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/notifications/weather-check",
+      "access": "owner",
+      "caller": "Home and Notifications",
+      "input": "none",
+      "successFields": ["title", "body", "kind", "source", "asOf", "success"],
+      "dependency": "Open-Meteo and PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/notifications/:id/read",
+      "access": "owner",
+      "caller": "Notifications",
+      "input": "id",
+      "successFields": ["success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/api/logistics/jobs",
+      "access": "owner or approved Logistics",
+      "caller": "Logistics",
+      "input": "none",
+      "successFields": ["jobs", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/logistics/jobs",
+      "access": "signed in",
+      "caller": "Logistics",
+      "input": "crop,quantityKg,pickupCity?,pickupState?",
+      "successFields": ["job", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/logistics/jobs/:id/accept",
+      "access": "approved Logistics",
+      "caller": "Logistics",
+      "input": "id of open job",
+      "successFields": ["job", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/logistics/jobs/:id/cancel",
+      "access": "job owner",
+      "caller": "Logistics",
+      "input": "id of open job",
+      "successFields": ["job", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/logistics/jobs/:id/done",
+      "access": "approved Logistics",
+      "caller": "Logistics",
+      "input": "id of accepted job",
+      "successFields": ["job", "success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/health",
+      "access": "public",
+      "caller": "Operations",
+      "input": "none",
+      "successFields": ["ok"],
+      "dependency": "process"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/chatbot/ask",
+      "access": "bearer",
+      "caller": "Chatbot",
+      "input": "question,lang?,has_image?",
+      "successFields": ["answer", "model", "sources"],
+      "dependency": "profile, farm feeds and language model"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/search",
+      "access": "bearer",
+      "caller": "Search bar",
+      "input": "q?",
+      "successFields": ["query", "results"],
+      "dependency": "feature catalog"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/weather",
+      "access": "bearer",
+      "caller": "Home",
+      "input": "lat?,lon?",
+      "successFields": ["imd", "open_meteo", "warnings"],
+      "dependency": "profile, IMD and Open-Meteo"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/govscheme",
+      "access": "bearer",
+      "caller": "Schemes",
+      "input": "query",
+      "successFields": [
+        "query",
+        "schemes",
+        "source",
+        "link",
+        "eligibility_verified"
+      ],
+      "dependency": "myScheme"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/news",
+      "access": "bearer",
+      "caller": "News",
+      "input": "category?,state?,search?,lang?",
+      "successFields": ["news_results"],
+      "dependency": "SerpAPI"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/stores/nearby",
+      "access": "bearer",
+      "caller": "Nearby stores",
+      "input": "lat?,lon?,state?",
+      "successFields": [
+        "stores",
+        "mandis",
+        "mandiError",
+        "state",
+        "storeSource",
+        "mandiSource"
+      ],
+      "dependency": "profile, Overpass, Nominatim and mandi feed"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/api/market-prices",
+      "access": "bearer",
+      "caller": "Home and market prices",
+      "input": "state?,district?,commodity?,offset?,limit?",
+      "successFields": ["records", "total", "source"],
+      "dependency": "mandi feed"
+    },
+    {
+      "service": "advice",
+      "method": "GET",
+      "path": "/api/market-compare",
+      "access": "bearer",
+      "caller": "Price comparison",
+      "input": "commodity,state_a,state_b",
+      "successFields": ["commodity", "state_a", "state_b", "unit", "source"],
+      "dependency": "mandi feed"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/api/market-analysis",
+      "access": "bearer",
+      "caller": "Market prices",
+      "input": "records",
+      "successFields": ["analysis", "model", "source", "asOf"],
+      "dependency": "submitted observations and optional language model commentary"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/market/insights",
+      "access": "bearer",
+      "caller": "Market insights",
+      "input": "crop,state?,lang?",
+      "successFields": ["insight", "records", "model", "source", "asOf"],
+      "dependency": "profile, mandi feed and language model"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/crop_calendar",
+      "access": "bearer",
+      "caller": "Crop suggestion",
+      "input": "crop,region?,latitude?,longitude?",
+      "successFields": ["crop", "region", "window", "weather", "note"],
+      "dependency": "profile, national windows and Open-Meteo"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/crop_suggestion",
+      "access": "bearer",
+      "caller": "Crop suggestion",
+      "input": "land_acres,latitude?,longitude?,region?",
+      "successFields": [
+        "season",
+        "region",
+        "land_acres",
+        "windows",
+        "weather",
+        "source"
+      ],
+      "dependency": "profile, national windows and Open-Meteo"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/api/fertilizer_recommendation",
+      "access": "bearer",
+      "caller": "Fertilizers",
+      "input": "crop,lat?,lon?,region?,soil_health_card?,lang?",
+      "successFields": [
+        "recommendation",
+        "rate_available",
+        "status",
+        "soil_data",
+        "soil_source",
+        "weather_data",
+        "location",
+        "crop"
+      ],
+      "dependency": "profile, farmer card or mapped soils, Open-Meteo"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/water_management",
+      "access": "bearer",
+      "caller": "Water management",
+      "input": "crop,field_size_acres,latitude?,longitude?,soil_type?,irrigation_method?,lang?",
+      "successFields": [
+        "crop",
+        "advice",
+        "weather",
+        "model",
+        "source",
+        "field_size_acres",
+        "irrigation_method",
+        "soil_type"
+      ],
+      "dependency": "profile, Open-Meteo and language model"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/postharvest",
+      "access": "bearer",
+      "caller": "Post harvest",
+      "input": "crop,harvest_date,region?,latitude?,longitude?,lang?",
+      "successFields": [
+        "advice",
+        "crop",
+        "harvest_date",
+        "region",
+        "weather",
+        "model",
+        "source"
+      ],
+      "dependency": "profile, Open-Meteo and language model"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/plant-disease",
+      "access": "bearer",
+      "caller": "Crop care",
+      "input": "multipart image and optional lang",
+      "successFields": [
+        "plant",
+        "disease",
+        "leaf_health",
+        "confidence",
+        "treatment_procedure",
+        "model",
+        "source"
+      ],
+      "dependency": "configured Gemini vision model"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/translate",
+      "access": "bearer",
+      "caller": "Documents",
+      "input": "multipart file and target_language",
+      "successFields": ["translated_document", "model", "partial"],
+      "dependency": "PDF extraction and language model"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/voice/stt",
+      "access": "bearer",
+      "caller": "Microphone",
+      "input": "multipart audio and optional lang",
+      "successFields": ["transcript"],
+      "dependency": "Sarvam speech recognition"
+    },
+    {
+      "service": "advice",
+      "method": "POST",
+      "path": "/voice/tts",
+      "access": "bearer",
+      "caller": "Voice player",
+      "input": "text,lang?",
+      "successFields": ["audio_base64", "language"],
+      "dependency": "Sarvam speech synthesis"
+    },
+    {
+      "service": "account",
+      "method": "PUT",
+      "path": "/api/reviews/:userId/:kind",
+      "access": "staff",
+      "caller": "Staff review console",
+      "input": "userId UUID, kind carrier|identity, approved boolean, reason",
+      "successFields": ["success"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/voice-callbacks",
+      "access": "owner",
+      "caller": "Opt-in telephone callback pilot",
+      "input": "consent:true and Idempotency-Key",
+      "successFields": ["callbackId", "status", "createdAt"],
+      "dependency": "PostgreSQL and Bolna"
+    },
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/api/voice-callbacks/:id",
+      "access": "owner",
+      "caller": "Opt-in telephone callback pilot",
+      "input": "callback UUID",
+      "successFields": ["callbackId", "status", "createdAt"],
+      "dependency": "PostgreSQL and Bolna"
+    },
+    {
+      "service": "account",
+      "method": "GET",
+      "path": "/api/plots",
+      "access": "owner",
+      "caller": "Farm plot management",
+      "input": "none",
+      "successFields": ["success", "plots"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "POST",
+      "path": "/api/plots",
+      "access": "owner",
+      "caller": "Farm plot management",
+      "input": "crop,lat,lon,areaAcres,sowingDate and Idempotency-Key",
+      "successFields": ["success", "plot"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "PATCH",
+      "path": "/api/plots/:plotId",
+      "access": "owner",
+      "caller": "Farm plot management",
+      "input": "plot UUID and one or more writable plot fields",
+      "successFields": ["success", "plot"],
+      "dependency": "PostgreSQL"
+    },
+    {
+      "service": "account",
+      "method": "DELETE",
+      "path": "/api/plots/:plotId",
+      "access": "owner",
+      "caller": "Farm plot management",
+      "input": "plot UUID",
+      "successFields": ["success"],
+      "dependency": "PostgreSQL"
+    }
+  ]
+}

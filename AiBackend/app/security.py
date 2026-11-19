@@ -1,40 +1,107 @@
+import hashlib
 import os
 import time
+from threading import Lock
+
+import requests
 from flask import jsonify, request
 
 _buckets = {}
-_HEAVY_PATHS = (
+_lock = Lock()
+_INCREMENT = "local n=redis.call('INCR',KEYS[1]); if n==1 then redis.call('EXPIRE',KEYS[1],ARGV[1]) end; return n"
+_PAID_PATHS = {
     "/chatbot/ask",
     "/voice/stt",
     "/voice/tts",
     "/plant-disease",
     "/translate",
-)
+    "/news",
+    "/market/insights",
+    "/api/market-analysis",
+    "/water_management",
+    "/postharvest",
+}
 
 
-def _key():
-    auth = (request.headers.get("Authorization") or "")[:40]
-    return f"{request.remote_addr}:{auth}:{request.path}"
+def production():
+    return "production" in (os.getenv("FLASK_ENV"), os.getenv("NODE_ENV"))
 
 
-def check_rate_limit():
-    now = time.time()
-    window = 60.0
-    max_hits = 20 if request.path in _HEAVY_PATHS else 60
-    key = _key()
-    start, count = _buckets.get(key, (now, 0))
-    if now - start > window:
-        _buckets[key] = (now, 1)
+def _increment(key, window):
+    url = os.getenv("UPSTASH_REDIS_REST_URL")
+    token = os.getenv("UPSTASH_REDIS_REST_TOKEN")
+    if url or token or production():
+        if not url or not url.startswith("https://") or not token:
+            raise ValueError("Unavailable counter configuration")
+        response = requests.post(
+            url,
+            json=["EVAL", _INCREMENT, 1, key, window],
+            headers={"Authorization": f"Bearer {token}"},
+            timeout=2,
+            allow_redirects=False,
+        )
+        response.raise_for_status()
+        payload = response.json()
+        result = payload.get("result") if isinstance(payload, dict) else None
+        if type(result) is not int or result < 1:
+            raise ValueError("Invalid counter response")
+        return result
+    now = time.monotonic()
+    with _lock:
+        if len(_buckets) >= 4096:
+            for expired in [k for k, (_, end) in _buckets.items() if end <= now]:
+                del _buckets[expired]
+            if key not in _buckets and len(_buckets) >= 4096:
+                raise ValueError("Local counter capacity reached")
+        count, end = _buckets.get(key, (0, now + window))
+        if end <= now:
+            count, end = 0, now + window
+        _buckets[key] = (count + 1, end)
+        return count + 1
+
+
+def check_rate_limit(user_id=None):
+    paid = request.path in _PAID_PATHS
+    if user_id and not paid:
         return None
-    count += 1
-    _buckets[key] = (start, count)
-    if count > max_hits:
-        return jsonify({"error": "Too many requests. Please wait and try again."}), 429
+    identity = str(user_id or request.remote_addr or "unknown")
+    subject = hashlib.sha256(identity.encode()).hexdigest()
+    namespace = "paid:" + request.path if user_id else "ip"
+    try:
+        if _increment(f"nila:advice:{namespace}:{subject}", 60) > (
+            20 if user_id else 60
+        ):
+            return (
+                jsonify(error="Too many requests", code="rate_limited"),
+                429,
+                {"Retry-After": "60"},
+            )
+        if user_id:
+            disabled = os.getenv("DISABLED_ADVICE_PATHS", "").split(",")
+            if request.path in {path.strip() for path in disabled}:
+                return jsonify(
+                    error="This feature is temporarily unavailable",
+                    code="feature_disabled",
+                ), 503
+            raw_limit = os.getenv("PAID_REQUESTS_PER_DAY")
+            if production() or raw_limit:
+                limit = int(raw_limit or "0")
+                if (
+                    limit <= 0
+                    or _increment(
+                        f"nila:advice:budget:{int(time.time()) // 86400}", 86400
+                    )
+                    > limit
+                ):
+                    return jsonify(
+                        error="Daily advisory allowance unavailable",
+                        code="budget_limit",
+                    ), 503
+    except (requests.RequestException, ValueError, TypeError):
+        return jsonify(
+            error="Request controls unavailable", code="counter_unavailable"
+        ), 503
     return None
-
-
-def public_error(message="Something went wrong. Please try again."):
-    return jsonify({"error": message}), 500
 
 
 def cors_origins():

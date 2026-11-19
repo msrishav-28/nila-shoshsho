@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timezone
 import requests
+from app.deadline import provider_timeout
 
 TIMEOUT = 15
 FORECAST_URL = "https://api.imd.gov.in/api/v1/cityforecastloc"
@@ -22,7 +23,7 @@ def fetch_imd_forecast(lat, lon):
             FORECAST_URL,
             params={"lat": lat, "lon": lon},
             headers=_headers(),
-            timeout=TIMEOUT,
+            timeout=provider_timeout(TIMEOUT),
         )
         if response.status_code != 200:
             return None
@@ -41,23 +42,41 @@ def fetch_imd_forecast(lat, lon):
         "min_temp": row.get("Todays_Forecast_Min_temp") or row.get("Today_Min_temp"),
         "rainfall_24h": row.get("Past_24_hrs_Rainfall"),
         "source": "IMD",
-        "asOf": row.get("Date") or datetime.now(timezone.utc).date().isoformat(),
-        "raw": {k: row.get(k) for k in ("Day_2_Forecast", "Day_3_Forecast") if row.get(k)},
+        "asOf": row.get("Date"),
+        "raw": {
+            k: row.get(k) for k in ("Day_2_Forecast", "Day_3_Forecast") if row.get(k)
+        },
     }
 
 
-def fetch_imd_warnings():
+def fetch_imd_warnings(state):
+    if not state:
+        return None
     try:
-        response = requests.get(WARNINGS_URL, headers=_headers(), timeout=TIMEOUT)
+        response = requests.get(
+            WARNINGS_URL, headers=_headers(), timeout=provider_timeout(TIMEOUT)
+        )
         if response.status_code != 200:
             return None
         payload = response.json()
     except (requests.RequestException, ValueError, TypeError):
         return None
-    if payload in (None, "", [], {}):
+    rows = payload if isinstance(payload, list) else [payload]
+    matches = [
+        row
+        for row in rows
+        if isinstance(row, dict)
+        and str(row.get("state") or row.get("State") or row.get("State_Name") or "")
+        .strip()
+        .casefold()
+        == state.strip().casefold()
+    ]
+    if not matches:
         return None
     return {
-        "warnings": payload,
+        "warnings": matches,
+        "region": state,
         "source": "IMD",
-        "asOf": datetime.now(timezone.utc).isoformat(),
+        "asOf": None,
+        "retrievedAt": datetime.now(timezone.utc).isoformat(),
     }
