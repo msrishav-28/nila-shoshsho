@@ -1,6 +1,18 @@
 import {PermissionsAndroid, Platform} from 'react-native';
-import {Audio} from 'expo-av';
-import * as FileSystem from 'expo-file-system';
+import {
+  AudioModule,
+  RecordingPresets,
+  createAudioPlayer,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from 'expo-audio';
+import {File, Paths} from 'expo-file-system';
+import {
+  Accuracy,
+  getCurrentPositionAsync,
+  getLastKnownPositionAsync,
+  requestForegroundPermissionsAsync,
+} from 'expo-location';
 import {
   errorCodes,
   isErrorWithCode,
@@ -9,7 +21,6 @@ import {
   types,
 } from '@react-native-documents/picker';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import Geolocation from 'react-native-geolocation-service';
 import {audioPart} from '../utils/audioPart';
 
 async function hasPermission(permission) {
@@ -82,27 +93,37 @@ export async function chooseDocument() {
   }
 }
 
+function cacheFile(prefix, extension) {
+  return new File(
+    Paths.cache,
+    `${prefix}-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}.${extension}`,
+  );
+}
+
+async function removeFile(file) {
+  if (file.exists) {
+    file.delete();
+  }
+}
+
 export async function readRemoteDocument(url, name = 'document.pdf') {
   if (typeof url !== 'string' || !url.startsWith('https://')) {
     throw new Error(
       'This saved document has no secure download link. Choose the original file to continue.',
     );
   }
-  const uri = `${
-    FileSystem.cacheDirectory
-  }translation-${Date.now()}-${Math.random().toString(36).slice(2)}.pdf`;
-  const cleanup = () => FileSystem.deleteAsync(uri, {idempotent: true});
+  const file = cacheFile('translation', 'pdf');
+  const cleanup = () => removeFile(file);
   try {
-    const result = await FileSystem.downloadAsync(url, uri);
-    if (result.status < 200 || result.status >= 300) {
-      throw new Error(
-        'Could not open the saved PDF. Choose the original file to continue.',
-      );
-    }
-    return {uri, name, type: 'application/pdf', cleanup};
-  } catch (error) {
+    const downloaded = await File.downloadFileAsync(url, file);
+    return {uri: downloaded.uri, name, type: 'application/pdf', cleanup};
+  } catch {
     await cleanup().catch(() => {});
-    throw error;
+    throw new Error(
+      'Could not open the saved PDF. Choose the original file to continue.',
+    );
   }
 }
 
@@ -111,51 +132,58 @@ export function appendFile(form, key, {uri, name, type}) {
 }
 
 export async function getLocation() {
-  if (Platform.OS === 'android') {
-    const {ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION} =
-      PermissionsAndroid.PERMISSIONS;
-    const results = await PermissionsAndroid.requestMultiple([
-      ACCESS_FINE_LOCATION,
-      ACCESS_COARSE_LOCATION,
-    ]);
-    if (!Object.values(results).includes(PermissionsAndroid.RESULTS.GRANTED)) {
-      throw new Error('Location permission was declined.');
-    }
-  } else if (
-    (await Geolocation.requestAuthorization('whenInUse')) !== 'granted'
-  ) {
+  const permission = await requestForegroundPermissionsAsync();
+  if (!permission.granted) {
     throw new Error('Location permission was declined.');
   }
-  return new Promise((resolve, reject) => {
-    Geolocation.getCurrentPosition(
-      ({coords}) => resolve(coords),
-      () =>
-        reject(
-          new Error('Current location is unavailable. Try again outdoors.'),
-        ),
-      {enableHighAccuracy: false, timeout: 12000, maximumAge: 60000},
-    );
-  });
+  let timeout;
+  try {
+    const lastKnown = await getLastKnownPositionAsync({maxAge: 60000});
+    if (lastKnown) {
+      return lastKnown.coords;
+    }
+    const deadline = new Promise((resolve, reject) => {
+      timeout = setTimeout(reject, 12000);
+    });
+    const {coords} = await Promise.race([
+      getCurrentPositionAsync({accuracy: Accuracy.Balanced}),
+      deadline,
+    ]);
+    return coords;
+  } catch {
+    throw new Error('Current location is unavailable. Try again outdoors.');
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function recordVoice() {
-  const permission = await Audio.requestPermissionsAsync();
+  const permission = await requestRecordingPermissionsAsync();
   if (!permission.granted) {
     throw new Error('Allow microphone access to speak, or type your question.');
   }
-  await Audio.setAudioModeAsync({
-    allowsRecordingIOS: true,
-    playsInSilentModeIOS: true,
-  });
-  let recording;
+  await setAudioModeAsync({allowsRecording: true, playsInSilentMode: true});
+  let recorder;
   try {
-    recording = (
-      await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      )
-    ).recording;
+    const {extension, sampleRate, numberOfChannels, bitRate, android, ios} =
+      RecordingPresets.HIGH_QUALITY;
+    recorder = new AudioModule.AudioRecorder({
+      extension,
+      sampleRate,
+      numberOfChannels,
+      bitRate,
+      isMeteringEnabled: false,
+      ...Platform.select({android, ios}),
+    });
+    await recorder.prepareToRecordAsync();
+    await recorder.record();
   } catch (error) {
-    await Audio.setAudioModeAsync({allowsRecordingIOS: false}).catch(() => {});
+    const uri = recorder?.uri;
+    recorder?.release();
+    if (uri) {
+      await removeFile(new File(uri)).catch(() => {});
+    }
+    await setAudioModeAsync({allowsRecording: false}).catch(() => {});
     throw error;
   }
   let finished = false;
@@ -165,19 +193,19 @@ export async function recordVoice() {
     }
     finished = true;
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
+      await recorder.stop();
+      const uri = recorder.uri;
       return uri
-        ? {
-            uri,
-            ...audioPart(uri),
-            cleanup: () => FileSystem.deleteAsync(uri, {idempotent: true}),
-          }
+        ? {uri, ...audioPart(uri), cleanup: () => removeFile(new File(uri))}
         : null;
+    } catch (error) {
+      if (recorder.uri) {
+        await removeFile(new File(recorder.uri)).catch(() => {});
+      }
+      throw error;
     } finally {
-      await Audio.setAudioModeAsync({allowsRecordingIOS: false}).catch(
-        () => {},
-      );
+      recorder.release();
+      await setAudioModeAsync({allowsRecording: false}).catch(() => {});
     }
   };
   return {
@@ -190,20 +218,34 @@ export async function recordVoice() {
 }
 
 export async function playVoice(base64, onFinish) {
-  const {sound} = await Audio.Sound.createAsync({
-    uri: `data:audio/wav;base64,${base64}`,
-  });
-  sound.setOnPlaybackStatusUpdate(status => {
-    if (status.didJustFinish) {
-      sound.unloadAsync().catch(() => {});
-      onFinish();
+  const file = cacheFile('read-aloud', 'wav');
+  let player;
+  let subscription;
+  let released = false;
+  const cleanup = () => {
+    if (released) {
+      return;
     }
-  });
+    released = true;
+    subscription?.remove();
+    player?.release();
+    removeFile(file).catch(() => {});
+  };
   try {
-    await sound.playAsync();
+    await setAudioModeAsync({playsInSilentMode: true});
+    file.create();
+    await file.write(base64, {encoding: 'base64'});
+    player = createAudioPlayer(file.uri);
+    subscription = player.addListener('playbackStatusUpdate', status => {
+      if (status.didJustFinish && !released) {
+        cleanup();
+        onFinish();
+      }
+    });
+    player.play();
+    return cleanup;
   } catch (error) {
-    await sound.unloadAsync().catch(() => {});
+    cleanup();
     throw error;
   }
-  return () => sound.unloadAsync().catch(() => {});
 }
