@@ -4,6 +4,54 @@ import {
   shouldStoreWeatherAlert,
 } from "../lib/weatherAlert.js";
 
+async function currentConditions(lat, lon) {
+  const key = process.env.OPEN_METEO_API_KEY;
+  const url = new URL(
+    key
+      ? "https://customer-api.open-meteo.com/v1/forecast"
+      : "https://api.open-meteo.com/v1/forecast",
+  );
+  url.search = new URLSearchParams({
+    latitude: lat,
+    longitude: lon,
+    current: "temperature_2m,wind_speed_10m",
+    timezone: "GMT",
+  });
+  if (key) url.searchParams.set("apikey", key);
+  try {
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      redirect: "error",
+    });
+    if (!response.ok) return null;
+    const { current } = await response.json();
+    const temperature = current?.temperature_2m;
+    const windspeed = current?.wind_speed_10m;
+    const time = current?.time;
+    if (
+      !Number.isFinite(temperature) ||
+      temperature < -100 ||
+      temperature > 65 ||
+      !Number.isFinite(windspeed) ||
+      windspeed < 0 ||
+      windspeed > 550 ||
+      typeof time !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(time)
+    )
+      return null;
+    const asOf = `${time}Z`;
+    const timestamp = Date.parse(asOf);
+    if (
+      !Number.isFinite(timestamp) ||
+      Math.abs(Date.now() - timestamp) > 90 * 60_000
+    )
+      return null;
+    return { temperature, windspeed, asOf };
+  } catch {
+    return null;
+  }
+}
+
 export const listNotifications = async (req, res) => {
   try {
     const sql = getSql();
@@ -81,28 +129,14 @@ export const ingestWeatherAlert = async (req, res) => {
       });
     }
 
-    const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`,
-      { signal: AbortSignal.timeout(8000) },
-    );
-    if (!response.ok) {
-      return res
-        .status(502)
-        .json({ success: false, message: "Weather service is unavailable" });
-    }
-    const data = await response.json();
-    const temperature = data.current_weather?.temperature;
-    const windspeed = data.current_weather?.windspeed;
-    if (!Number.isFinite(temperature) || !Number.isFinite(windspeed)) {
+    const conditions = await currentConditions(lat, lon);
+    if (!conditions) {
       return res
         .status(502)
         .json({ success: false, message: "Weather service is unavailable" });
     }
 
-    const classified = classifyWeather({
-      temperature,
-      windspeed,
-    });
+    const classified = classifyWeather(conditions);
     if (shouldStoreWeatherAlert(classified.kind)) {
       const farmerId = req.user.neon_user_id;
       // Requests for the same farmer serialize before the second statement takes its snapshot.
@@ -127,7 +161,7 @@ export const ingestWeatherAlert = async (req, res) => {
       body: classified.body,
       kind: classified.kind,
       source: "Open-Meteo",
-      asOf: data.current_weather?.time ? `${data.current_weather.time}Z` : null,
+      asOf: conditions.asOf,
     });
   } catch (err) {
     console.error(

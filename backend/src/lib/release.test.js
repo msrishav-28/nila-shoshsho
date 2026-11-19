@@ -42,6 +42,7 @@ test("protected account routes match the release inventory and reject anonymous 
     assert.equal(response.status, 401, entry.path);
     assert.equal((await response.json()).code, "unauthorized");
     assert.ok(response.headers.get("X-Request-ID"));
+    assert.equal(response.headers.get("Cache-Control"), "private, no-store");
   }
 });
 

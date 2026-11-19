@@ -2,6 +2,7 @@ services:
   account:
     build: ./backend
     environment:
+      OPEN_METEO_API_KEY: ${OPEN_METEO_API_KEY:-}
       STAGING_ACCESS_KEY: ${STAGING_ACCESS_KEY:-}
       ACCOUNT_PORT: "5001"
       NODE_ENV: ${NODE_ENV:-development}
@@ -57,6 +58,7 @@ services:
       GEMINI_MODEL: ${GEMINI_MODEL:-}
       SERP_API_KEY: ${SERP_API_KEY:-}
       MET_FORECAST_ENABLED: ${MET_FORECAST_ENABLED:-false}
+      OPEN_METEO_API_KEY: ${OPEN_METEO_API_KEY:-}
       DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
       MYSCHEME_API_KEY: ${MYSCHEME_API_KEY:-}
     ports:

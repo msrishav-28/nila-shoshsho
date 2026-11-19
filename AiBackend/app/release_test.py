@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import wave
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -26,6 +27,8 @@ def client(monkeypatch):
         "ACCOUNT_URL",
         "DISABLED_ADVICE_PATHS",
         "PAID_REQUESTS_PER_DAY",
+        "OPEN_METEO_API_KEY",
+        "MET_FORECAST_ENABLED",
     ):
         monkeypatch.setenv(name, "")
     for name in ("OPENAI_API_KEY", "PERPLEXITY_API_KEY", "GEMINI_API_KEY"):
@@ -122,6 +125,25 @@ def test_budget_and_switch(client, monkeypatch):
         client.post("/voice/tts", json={"text": "hello"}).json["code"]
         == "feature_disabled"
     )
+    monkeypatch.setenv("DISABLED_ADVICE_PATHS", "/weather")
+    unavailable = client.get("/weather?lat=12&lon=77")
+    assert unavailable.status_code == 503
+    assert unavailable.json["code"] == "feature_disabled"
+    assert unavailable.headers["Cache-Control"] == "private, no-store"
+
+
+def test_chat_does_not_call_a_model_to_replace_missing_live_data(client, monkeypatch):
+    monkeypatch.setenv("DATA_GOV_API_KEY", "")
+    monkeypatch.setattr(
+        "app.routes.chatbot.route_models",
+        lambda *_: pytest.fail("Ungrounded model request"),
+    )
+    reply = client.post(
+        "/chatbot/ask", json={"question": "Wheat price and weather tomorrow"}
+    )
+    assert reply.status_code == 503
+    assert reply.json["code"] == "live_data_unavailable"
+    assert reply.json["unavailable"] == ["market_prices", "weather"]
 
 
 class ProviderReply:
@@ -184,18 +206,29 @@ def test_submitted_prices_have_honest_dates_units_and_source(client):
 
 
 def test_current_weather_uses_one_observation(monkeypatch):
+    monkeypatch.setenv("OPEN_METEO_API_KEY", "fixture")
+    monkeypatch.setenv("UPSTASH_REDIS_REST_URL", "")
     data = {
         "current": {
-            "time": "2026-11-19T12:00",
+            "time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M"),
             "temperature_2m": 26,
             "relative_humidity_2m": 67,
             "precipitation": 0,
             "wind_speed_10m": 4,
         }
     }
-    monkeypatch.setattr(requests, "get", lambda *a, **kw: ProviderReply(data))
+
+    def get(url, *, params, **options):
+        assert url == "https://customer-api.open-meteo.com/v1/forecast"
+        assert params["apikey"] == "fixture"
+        assert options["allow_redirects"] is False
+        return ProviderReply(data)
+
+    monkeypatch.setattr(requests, "get", get)
     reply = fetch_current_weather(12, 77)
     assert (reply["humidity"], reply["asOf"]) == (67, data["current"]["time"])
+    data["current"]["time"] = "2000-01-01T00:00"
+    assert fetch_current_weather(12, 77) is None
 
 
 @pytest.mark.parametrize(

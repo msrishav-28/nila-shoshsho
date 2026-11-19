@@ -271,6 +271,46 @@ test("signed users complete account, carrier approval and private document journ
     409,
   );
   assert.equal(
+    (
+      await call("/api/auth/update-profile", 0, "PUT", {
+        location: { lat: 28.62, lon: 77.21 },
+      })
+    ).status,
+    200,
+  );
+  process.env.OPEN_METEO_API_KEY = "weather-fixture";
+  let weatherTime = "2000-01-01T00:00";
+  const weatherUpstream = mock.method(globalThis, "fetch", (url, options) => {
+    if (url instanceof URL && url.hostname === "customer-api.open-meteo.com") {
+      assert.equal(url.searchParams.get("apikey"), "weather-fixture");
+      assert.equal(options.redirect, "error");
+      return Promise.resolve(
+        Response.json({
+          current: { time: weatherTime, temperature_2m: 41, wind_speed_10m: 5 },
+        }),
+      );
+    }
+    return fetchReal(url, options);
+  });
+  const checkWeather = () =>
+    call("/api/notifications/weather-check", 0, "POST", {});
+  assert.equal((await checkWeather()).status, 502);
+  weatherTime = new Date().toISOString().slice(0, 16);
+  const weatherAlert = await checkWeather();
+  assert.equal(weatherAlert.status, 200);
+  assert.equal(weatherAlert.data.asOf, `${weatherTime}Z`);
+  assert.equal((await checkWeather()).status, 200);
+  assert.equal(
+    (
+      await database.query(
+        "SELECT count(*)::int AS n FROM notifications WHERE title='Heat alert'",
+      )
+    ).rows[0].n,
+    1,
+  );
+  weatherUpstream.mock.restore();
+  delete process.env.OPEN_METEO_API_KEY;
+  assert.equal(
     (await call("/api/auth/update-profile", 0, "PUT", { role: "Logistics" }))
       .status,
     403,

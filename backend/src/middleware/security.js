@@ -70,7 +70,6 @@ export function rateLimit({ namespace, windowMs, max }) {
 export function stagingAccess(req, res, next) {
   const key = process.env.STAGING_ACCESS_KEY;
   if (!key) return next();
-  res.setHeader("Cache-Control", "private, no-store");
   const expected = Buffer.from(key);
   const provided = Buffer.from(req.get("X-Staging-Key") || "");
   if (
@@ -83,6 +82,7 @@ export function stagingAccess(req, res, next) {
 }
 
 export function securityHeaders(_req, res, next) {
+  res.setHeader("Cache-Control", "private, no-store");
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("Referrer-Policy", "no-referrer");

@@ -9,7 +9,12 @@ from werkzeug.exceptions import HTTPException
 from app.mandi import MarketError
 from app.farmer_context import ProfileUnavailable
 from app.logging_config import configure_logging
-from app.security import check_rate_limit, cors_origins, staging_authorized
+from app.security import (
+    check_rate_limit,
+    cors_origins,
+    disabled_advice_path,
+    staging_authorized,
+)
 
 
 def create_app():
@@ -89,11 +94,16 @@ def create_app():
         from app.farmer_context import authenticated_profile
 
         g.farmer_profile = authenticated_profile()
+        if disabled_advice_path():
+            return jsonify(
+                error="This feature is temporarily unavailable", code="feature_disabled"
+            ), 503
         return check_rate_limit(user_id)
 
     @app.after_request
     def add_security_headers(response):
         response.headers["X-Request-ID"] = g.request_id
+        response.headers["Cache-Control"] = "private, no-store"
         app.logger.info(
             "request",
             extra={

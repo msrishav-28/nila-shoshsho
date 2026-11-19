@@ -37,8 +37,6 @@ def suggest_crops():
 
     season = indian_season()
     weather_info = fetch_daily_weather(lat, lon)
-    if not weather_info:
-        return jsonify({"error": "Weather data is unavailable"}), 502
     return jsonify(
         {
             "season": season,
@@ -46,6 +44,10 @@ def suggest_crops():
             "land_acres": land_acres,
             "windows": windows_for_season(season),
             "weather": weather_info,
-            "source": "ICAR typical season windows plus Open-Meteo",
+            "source": (
+                "ICAR typical season windows plus Open-Meteo"
+                if weather_info
+                else "ICAR typical season windows"
+            ),
         }
     ), 200

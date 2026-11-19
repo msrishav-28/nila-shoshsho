@@ -5,7 +5,7 @@ export function classifyWeather({ temperature, windspeed }) {
     return {
       kind: "heat",
       title: "Heat alert",
-      body: `High temperature of ${temperature}°C. Protect workers and irrigate if needed.`,
+      body: `High model temperature of ${temperature}°C. Check local heat advisories and protect workers.`,
     };
   }
   if (temperature <= 5) {

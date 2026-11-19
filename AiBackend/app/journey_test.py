@@ -52,6 +52,7 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
         "MYSCHEME_API_KEY": "fixture",
         "IMD_API_KEY": "fixture",
         "MET_FORECAST_ENABLED": "false",
+        "OPEN_METEO_API_KEY": "",
     }.items():
         monkeypatch.setenv(name, value)
     token = jwt.encode(
@@ -113,7 +114,9 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
                 return Reply(
                     {
                         "current": {
-                            "time": "2026-11-19T12:00",
+                            "time": datetime.now(timezone.utc).strftime(
+                                "%Y-%m-%dT%H:%M"
+                            ),
                             "temperature_2m": 25,
                             "relative_humidity_2m": 60,
                             "precipitation": 0,
@@ -227,6 +230,13 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
         logs = capsys.readouterr().err
         assert '"upstream_status": 429' in logs
         assert "private upstream detail" not in logs
+        for path, payload in (
+            ("/crop_calendar", {"crop": "Paddy"}),
+            ("/crop_suggestion", {"land_acres": 2}),
+        ):
+            reply = client.post(path, json={**payload, "latitude": 22, "longitude": 76})
+            assert reply.status_code == 200
+            assert reply.get_json()["weather"] is None
         with monkeypatch.context() as fallback:
             fallback.setenv("MET_FORECAST_ENABLED", "true")
             fallback.setattr(

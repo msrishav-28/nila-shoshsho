@@ -90,12 +90,6 @@ def check_rate_limit(user_id=None):
                 {"Retry-After": "60"},
             )
         if user_id:
-            disabled = os.getenv("DISABLED_ADVICE_PATHS", "").split(",")
-            if request.path in {path.strip() for path in disabled}:
-                return jsonify(
-                    error="This feature is temporarily unavailable",
-                    code="feature_disabled",
-                ), 503
             raw_limit = os.getenv("PAID_REQUESTS_PER_DAY")
             if production() or raw_limit:
                 limit = int(raw_limit or "0")
@@ -115,6 +109,12 @@ def check_rate_limit(user_id=None):
             error="Request controls unavailable", code="counter_unavailable"
         ), 503
     return None
+
+
+def disabled_advice_path():
+    return request.path in {
+        path.strip() for path in os.getenv("DISABLED_ADVICE_PATHS", "").split(",")
+    }
 
 
 def cors_origins():

@@ -4806,7 +4806,7 @@
       "post": {
         "operationId": "advice_post_chatbot_ask",
         "tags": ["advice"],
-        "description": "Consumer Chatbot. Access bearer. Dependencies profile, farm feeds and language model.",
+        "description": "Consumer Chatbot. Access bearer. Recognized live weather and market queries return 503 with code live_data_unavailable when required evidence is missing. The unavailable array lists affected feeds. No model substitutes for the missing evidence.",
         "security": [
           {
             "bearerAuth": []

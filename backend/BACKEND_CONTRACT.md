@@ -10,6 +10,10 @@
 
 Obtain an access token from account signup or sign-in. Send `Authorization: Bearer <accessToken>` to private account and advice routes. Advice verifies the same token and checks the active account session. Successful logout invalidates that session on both services. Apply the account's server-reported review and ownership state in the client.
 
+Both services send `Cache-Control: private, no-store`, including on API errors. Keep offline behavior separate from network response caching and clear user-scoped state on account changes.
+
 Handle 400 for invalid input, 401 for missing or expired sessions, 403 for denied actions, 409 for conflicts, 429 for throttling and 502/503 for unavailable dependencies. Honor `Retry-After` when supplied. Use the same `Idempotency-Key` when retrying the same plot creation, logistics job or callback. Preserve a new key for a new user action. Signed file URLs expire after five minutes, so refresh profile data before retrying an old link.
 
 On `GET /weather`, `open_meteo` is the existing response key. Check each section's `source`. An enabled MET Norway fallback is marked `kind: "forecast"` with its valid time, issue time and attribution links. Daily data can be null. Official warnings and IMD forecasts stay unavailable until approved feeds are verified. A missing feed or a sandbox government result cannot establish a fact about a farmer, market or policy.
+
+`POST /crop_calendar` and `POST /crop_suggestion` still provide national season windows when `weather` is null. For recognized live-data questions, `POST /chatbot/ask` returns 503 with `code: "live_data_unavailable"` and identifies missing feeds in `unavailable`. An operator pause returns 503 `feature_disabled` after session verification.

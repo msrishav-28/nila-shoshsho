@@ -1,21 +1,31 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 import math
+import os
+import re
 import requests
 from app.deadline import provider_timeout
 
-from app.mandi import fetch_mandi_page
+from app.mandi import COMMODITY_ALIASES, MarketError, fetch_mandi_page
 from app.cache import cached_data
 from app.logging_config import log_failure
+from app.met_forecast import near_term_forecast
 
 TIMEOUT = 20
 FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+CUSTOMER_FORECAST_URL = "https://customer-api.open-meteo.com/v1/forecast"
+_MARKET_QUESTION = re.compile(r"\b(?:prices?|mandi|market rates?)\b|मंडी|भाव")
+_WEATHER_QUESTION = re.compile(
+    r"\b(?:weather|forecast)\b|\b(?:will it rain|rain today|rain tomorrow|temperature now)\b|मौसम|बारिश होगी"
+)
+_DAILY_QUESTION = re.compile(r"\b(?:tomorrow|next week|next \d+ days|this week)\b|कल")
 
 
 def _weather_data(kind, params):
+    key = os.getenv("OPEN_METEO_API_KEY")
     try:
         response = requests.get(
-            FORECAST_URL,
-            params=params,
+            CUSTOMER_FORECAST_URL if key else FORECAST_URL,
+            params={**params, "apikey": key} if key else params,
             timeout=provider_timeout(TIMEOUT),
             allow_redirects=False,
         )
@@ -42,7 +52,10 @@ def indian_season(month=None):
 
 def fetch_daily_weather(lat, lon):
     return cached_data(
-        "daily-weather", [lat, lon], lambda: _daily_weather(lat, lon), 900
+        "daily-weather",
+        [bool(os.getenv("OPEN_METEO_API_KEY")), lat, lon],
+        lambda: _daily_weather(lat, lon),
+        900,
     )
 
 
@@ -77,6 +90,12 @@ def _daily_weather(lat, lon):
     )
     if not isinstance(dates, list) or len(dates) > 7:
         return None
+    try:
+        days = [date.fromisoformat(day) for day in dates]
+    except (TypeError, ValueError):
+        return None
+    if any(right - left != timedelta(days=1) for left, right in zip(days, days[1:])):
+        return None
     for field in fields:
         values = daily.get(field)
         if not isinstance(values, list) or len(values) != len(dates):
@@ -103,7 +122,10 @@ def _daily_weather(lat, lon):
 
 def fetch_current_weather(lat, lon):
     return cached_data(
-        "current-weather", [lat, lon], lambda: _current_weather(lat, lon), 300
+        "current-weather",
+        [bool(os.getenv("OPEN_METEO_API_KEY")), lat, lon],
+        lambda: _current_weather(lat, lon),
+        300,
     )
 
 
@@ -114,12 +136,21 @@ def _current_weather(lat, lon):
             "latitude": lat,
             "longitude": lon,
             "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
+            "timezone": "GMT",
         },
     )
     if not current or type(current.get("temperature_2m")) not in (
         int,
         float,
     ):
+        return None
+    try:
+        observation = datetime.strptime(current.get("time"), "%Y-%m-%dT%H:%M").replace(
+            tzinfo=timezone.utc
+        )
+    except (TypeError, ValueError):
+        return None
+    if abs(datetime.now(timezone.utc) - observation) > timedelta(minutes=90):
         return None
     for field in (
         "temperature_2m",
@@ -161,23 +192,54 @@ def live_facts(question, profile):
     text = (question or "").lower()
     chunks = []
     sources = []
+    unavailable = []
     state = (profile or {}).get("state") or ""
     lat = (profile or {}).get("lat") or 0
     lon = (profile or {}).get("lon") or 0
-    if state and any(word in text for word in ("price", "mandi", "rate", "sell")):
-        records = fetch_mandi_page(state=state, limit=8)["records"]
+    if _MARKET_QUESTION.search(text):
+        records = []
+        if state:
+            commodity = next(
+                (
+                    alias
+                    for alias in COMMODITY_ALIASES
+                    if re.search(rf"\b{alias}\b", text)
+                ),
+                None,
+            )
+            try:
+                rows = fetch_mandi_page(commodity=commodity, state=state, limit=8)[
+                    "records"
+                ]
+                records = [
+                    row
+                    for row in rows
+                    if row["asOf"] and row["modal_price"] not in (None, "")
+                ]
+            except MarketError as error:
+                log_failure("agmarknet", error)
         if records:
-            chunks.append(f"Mandi records: {records[:8]}")
+            chunks.append(
+                f"Dated mandi observations for saved state {state}: {records[:8]}"
+            )
             sources.extend(
                 {"source": "AGMARKNET via data.gov.in", "asOf": day}
                 for day in sorted({r["asOf"] for r in records})
             )
-    if any(word in text for word in ("weather", "rain", "temperature", "heat", "cold")):
+        else:
+            unavailable.append("market_prices")
+    if _WEATHER_QUESTION.search(text):
+        weather = None
         if lat and lon:
-            weather = fetch_current_weather(lat, lon)
-            if weather:
-                chunks.append(f"Open-Meteo now: {weather}")
-                sources.append(
-                    {"source": weather["source"], "asOf": weather.get("asOf")}
+            if _DAILY_QUESTION.search(text):
+                weather = fetch_daily_weather(lat, lon)
+            else:
+                weather = fetch_current_weather(lat, lon) or near_term_forecast(
+                    lat, lon
                 )
-    return "\n".join(chunks), sources
+        if weather and weather.get("asOf"):
+            chunks.append(f"Weather data for the saved location: {weather}")
+            sources.append({"source": weather["source"], "asOf": weather["asOf"]})
+        else:
+            unavailable.append("weather")
+    return "\n".join(chunks), sources, unavailable

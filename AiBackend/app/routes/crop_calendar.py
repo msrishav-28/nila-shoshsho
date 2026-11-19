@@ -30,8 +30,6 @@ def crop_calendar():
     weather_info = None
     if lat not in (None, 0) and lon not in (None, 0):
         weather_info = fetch_daily_weather(lat, lon)
-        if not weather_info:
-            return jsonify({"error": "Weather data is unavailable"}), 502
 
     return jsonify(
         {
