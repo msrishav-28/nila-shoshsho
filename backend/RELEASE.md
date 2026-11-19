@@ -8,13 +8,13 @@ In backend/, use Node 22, run npm ci, npm run lint, npm run format:check and npm
 
 In AiBackend/, use a Python 3.11 virtual environment, install requirements-test.txt, run python -m ruff check app run.py readiness.py sarvam_check.py --select F, python -m ruff format --check app run.py readiness.py sarvam_check.py, python -m pytest -q app and python -m pip check. python -m pip_audit -r requirements.txt checks the production dependency set. Constraints record the locally resolved versions.
 
-GitHub Actions ran these checks and built both Linux containers successfully for the deployed advice commit `f5effc3`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44607186534)
+GitHub Actions ran these checks and built both Linux containers successfully for the deployed `main` commit `be5ea37`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44609095471)
 
 ## Verification record — 20 November 2026
 
 | Gate | Evidence |
 | --- | --- |
-| Local tests and quality checks | PASS. 26 Node and 56 Python tests, configured lint and formatting, OpenAPI validation, and Python dependency consistency. Both production dependency audits found zero known vulnerabilities at the time of the run. |
+| Local tests and quality checks | PASS. 26 Node and 57 Python tests, configured lint and formatting, OpenAPI validation, and Python dependency consistency. Both production dependency audits found zero known vulnerabilities at the time of the run. |
 | Signed fixture load | PASS. 220 health requests per service and 12 signed reads per service at up to 12 in flight. Of 220 unsigned advice requests, 48 were rejected with 401 and 172 were throttled with 429. No paid endpoints were used. |
 | Live provider checks | PASS for Neon synthetic sign-in and logout across both APIs, one Sarvam synthesis, and one Gemini synthetic-image schema check. Other enabled provider journeys still need a staging smoke test. |
 | Neon data recovery | PASS for restoring a snapshot to an isolated branch and reading synthetic records with restricted runtime permissions. |
@@ -26,10 +26,12 @@ GitHub Actions ran these checks and built both Linux containers successfully for
 | Render staging | PASS. Workspace Blueprint validation and container startup completed. Both APIs returned health status 200, gated calls without the staging key returned 404, and gated calls without identity returned 401. |
 | Hosted identity and plots | PASS. Synthetic signup, sign-in, signed cross-service advice search, concurrent plot replay, update and deletion, and sign-out with revocation in both APIs. |
 | Hosted private media | PASS. The hosting account API uploaded a synthetic PDF and photo. Signed delivery returned both assets, a second account received no links, and unsigned originals and image variants returned 401. Both assets were removed. |
+| Hosted staff and transport | PASS. Staff approval and revocation controlled carrier access. A job retry kept the same record and conflicting content returned 409. Exactly one of two approved carriers claimed the job. The other carrier was denied completion. The winner's completion replay succeeded. The original staff environment setting was restored and verified live. |
 | Hosted Redis enforcement | PASS. From a clean staging window, 60 requests without a bearer token returned 401 and the next five returned 429 with Retry-After. No paid endpoint was called. |
-| Render advice rollback | PASS. Render returned advice to `37ae3a7`, where liveness, the staging gate and signed search passed. Render then deployed `f5effc3`; liveness, validation and session revocation passed. Account continued serving `dcfc3f9`. |
-| Hosted weather | BLOCKED. Open-Meteo returned HTTP 429 for current conditions and the daily forecast from Render. Both calls returned 200 when tested directly outside Render. The hosted API returned a controlled 502 and recorded provider, status and request ID without logging coordinates or the provider response. |
-| Public release | OPEN. Requires reliable hosted weather, broader hosted provider journeys, production proxy and capacity verification, alert delivery, deployed-data recovery and agricultural review for the enabled scope. |
+| Render advice rollback | PASS. Render returned advice to `37ae3a7`, where liveness, the staging gate and signed search passed. Subsequent deploys restored the latest behavior. Both services now use protected staging on `main`. |
+| Hosted dashboard weather | PASS with partial coverage. Render directly observed Open-Meteo HTTP 429 for current and daily requests. With the MET Norway fallback enabled, two authenticated checks returned 200, reported the near-term forecast source and timestamps, and left daily data null. Daily weather and advice that requires it still need verified hosted supply. |
+| Vercel PWA configuration | Preview variables saved and verified on `nila-shoshsho-pwa`. Evaluating the existing project config produced the expected `/api` and `/advice` rewrites. An authenticated preview needs a trusted staging relay, and Production requires the approved public API origins. |
+| Public release | OPEN. Requires reliable hosted daily weather for the released routes, broader hosted provider journeys, production proxy and capacity verification, alert delivery, deployed-data recovery and agricultural review for the enabled scope. |
 
 ## Configure a working demo
 
@@ -61,7 +63,7 @@ The root render.yaml describes two Singapore Docker web services on a free stagi
 
 The staging deployment uses a separate Neon Auth and PostgreSQL branch, its own restricted application role, and a separate encryption key. Keep the staging key in local or server-side tooling. [Account liveness](https://nila-shoshsho-account-staging.onrender.com/health) · [Advice liveness](https://nila-shoshsho-advice-staging.onrender.com/health)
 
-For a Vercel-hosted web/PWA, point the client to the two Render HTTPS origins and allow its Vercel origin on both APIs. The existing file sizes can exceed Vercel Functions' 4.5 MB payload limit. A migration of these upload routes to Vercel Functions would need its own upload and download design. [Vercel Functions limits](https://vercel.com/docs/functions/limitations#request-body-size)
+For a Vercel-hosted web/PWA, use the Preview settings and routing instructions in [FULL_STACK_HANDOFF.md](FULL_STACK_HANDOFF.md). When using either API directly from the browser, allow the actual Vercel origin. The existing file sizes can exceed Vercel Functions' 4.5 MB payload limit. Verify ingress limits for the chosen upload path. [Vercel Functions limits](https://vercel.com/docs/functions/limitations#request-body-size)
 
 ## Public-release acceptance
 
