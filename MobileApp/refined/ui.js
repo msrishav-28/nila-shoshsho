@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
-import Feather from 'react-native-vector-icons/Feather';
+import Feather from '@expo/vector-icons/Feather';
 import {SvgXml} from 'react-native-svg';
 import {theme} from '../theme.config';
 import {illustrations} from './assets/illustrations';
