@@ -31,6 +31,7 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
         "NEON_AUTH_ISSUER": "fixture",
         "NEON_AUTH_AUDIENCE": "fixture",
         "NEON_AUTH_JWKS_URL": "https://identity.fixture/jwks",
+        "STAGING_ACCESS_KEY": "advice-fixture-stage-key" * 2,
         "ACCOUNT_URL": "https://account.fixture",
         "UPSTASH_REDIS_REST_URL": "",
         "UPSTASH_REDIS_REST_TOKEN": "",
@@ -92,6 +93,7 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
     def get(url, **kwargs):
         if url.endswith("/api/auth/me"):
             assert kwargs["headers"]["Authorization"] == "Bearer " + token
+            assert kwargs["headers"]["X-Staging-Key"] == "advice-fixture-stage-key" * 2
             return Reply({"user": profile})
         if "open-meteo" in url:
             if "current" in kwargs["params"]:
@@ -175,6 +177,9 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(monke
         )
         security._buckets.clear()
         client = create_app().test_client()
+        assert client.get("/health").status_code == 200
+        assert client.get("/search").status_code == 404
+        client.environ_base["HTTP_X_STAGING_KEY"] = "advice-fixture-stage-key" * 2
         client.environ_base["HTTP_AUTHORIZATION"] = "Bearer " + token
         payloads = {
             "/chatbot/ask": {"question": "rice price"},

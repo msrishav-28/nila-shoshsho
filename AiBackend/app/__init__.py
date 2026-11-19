@@ -9,7 +9,7 @@ from werkzeug.exceptions import HTTPException
 from app.mandi import MarketError
 from app.farmer_context import ProfileUnavailable
 from app.logging_config import configure_logging
-from app.security import check_rate_limit, cors_origins
+from app.security import check_rate_limit, cors_origins, staging_authorized
 
 
 def create_app():
@@ -24,7 +24,7 @@ def create_app():
         app,
         supports_credentials=True,
         origins=origins,
-        allow_headers=["Content-Type", "Authorization"],
+        allow_headers=["Content-Type", "Authorization", "X-Staging-Key"],
     )
 
     @app.get("/health")
@@ -39,6 +39,8 @@ def create_app():
             return None
         if request.path in ("/health", "/"):
             return None
+        if not staging_authorized():
+            return jsonify(error="Not found", code="not_found"), 404
         limited = check_rate_limit()
         if limited:
             return limited

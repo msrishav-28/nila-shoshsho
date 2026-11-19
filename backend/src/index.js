@@ -15,6 +15,7 @@ import {
   corsOrigin,
   rateLimit,
   securityHeaders,
+  stagingAccess,
 } from "./middleware/security.js";
 
 export const app = express();
@@ -70,6 +71,7 @@ app.use(
       "Authorization",
       "Idempotency-Key",
       "X-Request-ID",
+      "X-Staging-Key",
     ],
   }),
 );
@@ -78,6 +80,7 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
+app.use(stagingAccess);
 app.use(rateLimit({ namespace: "global", windowMs: 60_000, max: 80 }));
 
 app.use(

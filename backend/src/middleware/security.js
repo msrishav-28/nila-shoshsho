@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 const incrementScript =
   "local n=redis.call('INCR',KEYS[1]); if n==1 then redis.call('PEXPIRE',KEYS[1],ARGV[1]) end; return n";
@@ -47,7 +47,8 @@ export function rateLimit({ namespace, windowMs, max }) {
       const subject = createHash("sha256")
         .update(req.ip || "unknown")
         .digest("hex");
-      if ((await increment(`nila:account:${namespace}:${subject}`)) > max) {
+      const scope = process.env.STAGING_ACCESS_KEY ? "nila:staging" : "nila";
+      if ((await increment(`${scope}:account:${namespace}:${subject}`)) > max) {
         res.setHeader("Retry-After", String(Math.ceil(windowMs / 1000)));
         return res.status(429).json({
           success: false,
@@ -64,6 +65,21 @@ export function rateLimit({ namespace, windowMs, max }) {
     }
     next();
   };
+}
+
+export function stagingAccess(req, res, next) {
+  const key = process.env.STAGING_ACCESS_KEY;
+  if (!key) return next();
+  res.setHeader("Cache-Control", "private, no-store");
+  const expected = Buffer.from(key);
+  const provided = Buffer.from(req.get("X-Staging-Key") || "");
+  if (
+    expected.length >= 32 &&
+    expected.length === provided.length &&
+    timingSafeEqual(expected, provided)
+  )
+    return next();
+  return res.status(404).json({ success: false, message: "Not found" });
 }
 
 export function securityHeaders(_req, res, next) {

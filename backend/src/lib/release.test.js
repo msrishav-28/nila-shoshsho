@@ -69,3 +69,23 @@ test("separate local policies retain independent windows and ignore unverified h
   assert.equal(limited.headers.get("Retry-After"), "900");
   assert.equal((await fetch(origin + "/login")).status, 200);
 });
+
+test("staging hides account routes until the deployment key is supplied", async (t) => {
+  const previous = process.env.STAGING_ACCESS_KEY;
+  process.env.STAGING_ACCESS_KEY = "account-fixture-stage-key".repeat(2);
+  t.after(() => {
+    if (previous === undefined) delete process.env.STAGING_ACCESS_KEY;
+    else process.env.STAGING_ACCESS_KEY = previous;
+  });
+  const origin = await localServer(t, app);
+  assert.equal((await fetch(origin + "/health")).status, 200);
+  assert.equal((await fetch(origin + "/api/auth/me")).status, 404);
+  assert.equal(
+    (
+      await fetch(origin + "/api/auth/me", {
+        headers: { "X-Staging-Key": process.env.STAGING_ACCESS_KEY },
+      })
+    ).status,
+    401,
+  );
+});

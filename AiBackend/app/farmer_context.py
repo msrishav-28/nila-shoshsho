@@ -20,10 +20,13 @@ def authenticated_profile():
     header = request.headers.get("Authorization") or ""
     if not base or not header.startswith("Bearer "):
         raise ProfileUnavailable(503)
+    headers = {"Authorization": header, "X-Request-ID": g.request_id}
+    if os.getenv("STAGING_ACCESS_KEY"):
+        headers["X-Staging-Key"] = os.environ["STAGING_ACCESS_KEY"]
     try:
         response = requests.get(
             f"{base}/api/auth/me",
-            headers={"Authorization": header, "X-Request-ID": g.request_id},
+            headers=headers,
             timeout=provider_timeout(TIMEOUT),
             allow_redirects=False,
         )

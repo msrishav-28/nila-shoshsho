@@ -1,10 +1,12 @@
 import hashlib
+import hmac
 import os
 import time
 from threading import Lock
 
 import requests
 from flask import jsonify, request
+from app.config import redis_namespace
 
 _buckets = {}
 _lock = Lock()
@@ -25,6 +27,16 @@ _PAID_PATHS = {
 
 def production():
     return "production" in (os.getenv("FLASK_ENV"), os.getenv("NODE_ENV"))
+
+
+def staging_authorized():
+    key = os.getenv("STAGING_ACCESS_KEY")
+    return not key or (
+        len(key) >= 32
+        and hmac.compare_digest(
+            key.encode(), request.headers.get("X-Staging-Key", "").encode()
+        )
+    )
 
 
 def _increment(key, window):
@@ -68,7 +80,8 @@ def check_rate_limit(user_id=None):
     subject = hashlib.sha256(identity.encode()).hexdigest()
     namespace = "paid:" + request.path if user_id else "ip"
     try:
-        if _increment(f"nila:advice:{namespace}:{subject}", 60) > (
+        scope = redis_namespace()
+        if _increment(f"{scope}:advice:{namespace}:{subject}", 60) > (
             20 if user_id else 60
         ):
             return (
@@ -89,7 +102,7 @@ def check_rate_limit(user_id=None):
                 if (
                     limit <= 0
                     or _increment(
-                        f"nila:advice:budget:{int(time.time()) // 86400}", 86400
+                        f"{scope}:advice:budget:{int(time.time()) // 86400}", 86400
                     )
                     > limit
                 ):

@@ -4,6 +4,7 @@ import logging
 import os
 
 import requests
+from app.config import redis_namespace
 from app.deadline import provider_timeout
 
 
@@ -13,7 +14,7 @@ def cached_data(namespace, parameters, loader, ttl):
     if not url or not token:
         return loader()
     digest = hashlib.sha256(json.dumps(parameters, sort_keys=True).encode()).hexdigest()
-    key = f"nila:cache:{namespace}:{digest}"
+    key = f"{redis_namespace()}:cache:{namespace}:{digest}"
 
     def command(parts):
         response = requests.post(
