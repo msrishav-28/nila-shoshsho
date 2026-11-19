@@ -5,10 +5,11 @@ import {accountFetch, setUnauthorizedHandler} from '../utils/api';
 export const UserContext = createContext();
 
 const persistSession = async nextUser => {
+  const values = [['user', JSON.stringify(nextUser)]];
   if (nextUser?.accessToken) {
-    await AsyncStorage.setItem('accessToken', nextUser.accessToken);
+    values.push(['accessToken', nextUser.accessToken]);
   }
-  await AsyncStorage.setItem('user', JSON.stringify(nextUser));
+  await AsyncStorage.multiSet(values);
 };
 
 export const UserProvider = ({children}) => {
@@ -18,9 +19,9 @@ export const UserProvider = ({children}) => {
   useEffect(() => {
     setUnauthorizedHandler(async () => {
       setUser(null);
-      await AsyncStorage.removeItem('user');
-      await AsyncStorage.removeItem('accessToken');
+      await AsyncStorage.multiRemove(['user', 'accessToken']);
     });
+    return () => setUnauthorizedHandler(null);
   }, []);
 
   const signup = async userData => {
@@ -33,8 +34,8 @@ export const UserProvider = ({children}) => {
 
       const data = await res.json();
       if (data.success) {
-        setUser(data.user);
         await persistSession(data.user);
+        setUser(data.user);
         return {success: true, message: 'Signup Successful!'};
       } else {
         return {success: false, message: data.error || data.message};
@@ -55,8 +56,8 @@ export const UserProvider = ({children}) => {
       });
       const data = await res.json();
       if (data.success) {
-        setUser(data.user);
         await persistSession(data.user);
+        setUser(data.user);
         return {success: true, message: 'Login Successful!'};
       } else {
         return {success: false, message: data.message};
@@ -130,8 +131,8 @@ export const UserProvider = ({children}) => {
 
       const data = await response.json();
       if (data.success) {
-        setUser(data.user);
         await persistSession(data.user);
+        setUser(data.user);
         return {
           success: true,
           message: 'Profile picture updated successfully',

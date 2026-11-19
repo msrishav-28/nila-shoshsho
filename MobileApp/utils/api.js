@@ -27,21 +27,27 @@ export async function getAccessToken() {
 export async function authHeaders(extra = {}, multipart = false) {
   const token = await getAccessToken();
   return {
-    ...(multipart || extra['Content-Type'] ? {} : {'Content-Type': 'application/json'}),
+    ...(multipart || extra['Content-Type']
+      ? {}
+      : {'Content-Type': 'application/json'}),
     ...(token ? {Authorization: `Bearer ${token}`} : {}),
     ...extra,
   };
 }
 
 async function withAuth(url, options = {}) {
-  const multipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const multipart =
+    typeof FormData !== 'undefined' && options.body instanceof FormData;
   const headers = await authHeaders(options.headers || {}, multipart);
   if (multipart && headers['Content-Type']) {
     delete headers['Content-Type'];
   }
   const response = await fetch(url, {...options, headers});
-  if (response.status === 401 && onUnauthorized) {
-    onUnauthorized();
+  if (response.status === 401 && onUnauthorized && headers.Authorization) {
+    const current = await getAccessToken();
+    if (current && headers.Authorization === `Bearer ${current}`) {
+      await onUnauthorized();
+    }
   }
   return response;
 }

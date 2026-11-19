@@ -1,5 +1,10 @@
-// Android emulator reaches this Windows machine at 10.0.2.2.
-// iOS simulator: http://localhost:5001/api and http://localhost:5002
-// Physical phone: replace 10.0.2.2 with your computer's LAN IP.
-export const BACKEND_URL = 'http://10.0.2.2:5001/api';
-export const AIBACKEND_URL = 'http://10.0.2.2:5002';
+import {Platform} from 'react-native';
+
+const localHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+
+export const BACKEND_URL = (
+  process.env.EXPO_PUBLIC_ACCOUNT_API_URL || `http://${localHost}:5001/api`
+).replace(/\/+$/, '');
+export const AIBACKEND_URL = (
+  process.env.EXPO_PUBLIC_ADVICE_API_URL || `http://${localHost}:5002`
+).replace(/\/+$/, '');
