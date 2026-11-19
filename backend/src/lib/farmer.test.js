@@ -7,6 +7,7 @@ test("masks a government id and keeps the last four characters", () => {
   assert.equal(maskGovId(""), "");
   assert.equal(isMaskedGovId("********1234"), true);
   assert.equal(isMaskedGovId("123412341234"), false);
+  assert.equal(isMaskedGovId("********AB12"), true);
 });
 
 test("toUser does not put the full government id on the phone payload", () => {
@@ -38,7 +39,7 @@ test("toUser does not put the full government id on the phone payload", () => {
       documents: [],
       is_verified: false,
     },
-    "tok"
+    "tok",
   );
   assert.equal(user.governmentId.idName, "Aadhaar");
   assert.equal(user.governmentId.idValue.includes("123412341234"), false);

@@ -6,9 +6,12 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
+    "ready": "node scripts/readiness.mjs",
     "db:setup": "node src/db/applySchema.js",
-    "test": "node --test src/lib/verifyToken.test.js src/lib/pii.test.js src/lib/weatherAlert.test.js src/lib/farmer.test.js",
-    "loadtest": "node scripts/load-test.mjs"
+    "test": "node --experimental-test-module-mocks --test src/lib/*.test.js",
+    "loadtest": "node scripts/load-test.mjs",
+    "lint": "eslint src scripts eslint.config.js",
+    "format:check": "prettier --check src scripts eslint.config.js package.json api-contract.json openapi.json"
   },
   "keywords": [],
   "author": "",
@@ -21,9 +24,16 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jose": "^6.1.0",
-    "multer": "^1.4.5-lts.2"
+    "multer": "^1.4.5-lts.2",
+    "pdf-lib": "1.17.1",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@electric-sql/pglite": "0.5.16",
+    "@eslint/js": "10.0.1",
+    "eslint": "10.15.0",
+    "globals": "17.14.0",
+    "nodemon": "^3.1.9",
+    "prettier": "3.10.1"
   }
 }

@@ -14,13 +14,18 @@ def weather():
         lon = float(request.args.get("lon") or profile.get("lon") or 0)
     except (TypeError, ValueError):
         return jsonify({"error": "lat and lon are required numbers"}), 400
-    if not lat or not lon:
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180) or (lat == 0 and lon == 0):
         return jsonify({"error": "lat and lon are required numbers"}), 400
 
     imd = fetch_imd_forecast(lat, lon)
     current = fetch_current_weather(lat, lon)
     daily = fetch_daily_weather(lat, lon)
-    warnings = fetch_imd_warnings()
+    warning_state = (
+        profile.get("state")
+        if (lat, lon) == (profile.get("lat"), profile.get("lon"))
+        else None
+    )
+    warnings = fetch_imd_warnings(warning_state)
     if not imd and not current:
         return jsonify({"error": "Weather data is unavailable"}), 502
     return jsonify(

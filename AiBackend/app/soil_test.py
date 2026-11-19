@@ -48,3 +48,20 @@ def test_parses_legacy_property_list():
 def test_rejects_incomplete_payload():
     assert parse_soil_payload({"properties": {"layers": []}}) is None
     assert parse_soil_payload("<html>nope</html>") is None
+
+
+def test_small_values_use_conversion_factors_and_stock_is_not_density():
+    payload = {
+        "layers": [
+            {"name": "phh2o", "unit_measure": {"d_factor": 10}, "mean": 62},
+            {"name": "soc", "unit_measure": {"d_factor": 10}, "mean": 20},
+            {"name": "nitrogen", "unit_measure": {"d_factor": 100}, "mean": 40},
+            {"name": "clay", "unit_measure": {"d_factor": 10}, "mean": 28},
+            {"name": "ocd", "mean": 90},
+        ]
+    }
+    parsed = parse_soil_payload(payload)
+    assert parsed["soil_organic_carbon"] == 0.2
+    assert parsed["soil_nitrogen"] == 0.04
+    assert parsed["soil_clay"] == 2.8
+    assert parsed["soil_organic_carbon_stock"] is None

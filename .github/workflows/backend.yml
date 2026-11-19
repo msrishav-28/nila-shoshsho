@@ -1,0 +1,51 @@
+name: Backend verification
+on:
+  pull_request:
+    paths: ['backend/**', 'AiBackend/**', '.env.example', 'compose.yaml', 'AGENTS.md', '.github/workflows/backend.yml']
+  push:
+    paths: ['backend/**', 'AiBackend/**', '.env.example', 'compose.yaml', 'AGENTS.md', '.github/workflows/backend.yml']
+permissions:
+  contents: read
+jobs:
+  account:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=moderate
+      - run: docker build -t nila-account .
+  advice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: AiBackend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: |
+            AiBackend/requirements.txt
+            AiBackend/requirements-test.txt
+            AiBackend/constraints.txt
+      - run: python -m pip install -r requirements-test.txt
+      - run: python -m pip check
+      - run: python -m ruff check app run.py readiness.py sarvam_check.py --select F
+      - run: python -m ruff format --check app run.py readiness.py sarvam_check.py
+      - run: python -m pytest -q app
+      - run: python -m pip_audit -r requirements.txt --progress-spinner off
+      - run: docker build -t nila-advice .
