@@ -3,6 +3,7 @@ import io
 import json
 import time
 import wave
+from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -13,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from PIL import Image
 from sarvamai import SarvamAI
 
-from app import create_app, auth, security, speech
+from app import create_app, auth, met_forecast, security, speech
 import requests
 
 
@@ -50,6 +51,7 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
         "SERP_API_KEY": "fixture",
         "MYSCHEME_API_KEY": "fixture",
         "IMD_API_KEY": "fixture",
+        "MET_FORECAST_ENABLED": "false",
     }.items():
         monkeypatch.setenv(name, value)
     token = jwt.encode(
@@ -103,6 +105,8 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
                 rejected = requests.Response()
                 rejected.status_code = 429
                 raise requests.HTTPError("private upstream detail", response=rejected)
+            if 23 <= kwargs["params"]["latitude"] < 24:
+                return Reply({})
             if "current" in kwargs["params"]:
                 if kwargs["params"]["latitude"] == 21:
                     return Reply({})
@@ -120,6 +124,30 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
             fields = kwargs["params"]["daily"].split(",")
             return Reply(
                 {"daily": {"time": ["2026-11-19"], **{field: [1] for field in fields}}}
+            )
+        if "api.met.no" in url:
+            assert kwargs["params"] == {"lat": 23.12, "lon": 76.13}
+            assert "nila-shoshsho" in kwargs["headers"]["User-Agent"]
+            now = datetime.now(timezone.utc).isoformat()
+            return Reply(
+                {
+                    "properties": {
+                        "meta": {"updated_at": now},
+                        "timeseries": [
+                            {
+                                "time": now,
+                                "data": {
+                                    "instant": {
+                                        "details": {
+                                            "air_temperature": 19.5,
+                                            "wind_speed": 5,
+                                        }
+                                    }
+                                },
+                            }
+                        ],
+                    }
+                }
             )
         if "data.gov.in" in url:
             return Reply({"records": [market], "total": 1})
@@ -199,6 +227,20 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
         logs = capsys.readouterr().err
         assert '"upstream_status": 429' in logs
         assert "private upstream detail" not in logs
+        with monkeypatch.context() as fallback:
+            fallback.setenv("MET_FORECAST_ENABLED", "true")
+            fallback.setattr(
+                met_forecast, "cached_data", lambda *args, **kwargs: args[2]()
+            )
+            reply = client.get("/weather?lat=23.123&lon=76.134")
+            assert reply.status_code == 200
+            weather = reply.get_json()["open_meteo"]
+            assert weather["current"]["source"] == "MET Norway forecast"
+            assert weather["current"]["kind"] == "forecast"
+            assert weather["current"]["windspeed"] == 18
+            assert (
+                weather["current"]["precipitation"] is None and weather["daily"] is None
+            )
         payloads = {
             "/chatbot/ask": {"question": "rice price"},
             "/govscheme": {"query": "farmer"},

@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 from app.farmer_context import farmer_profile
 from app.live_data import fetch_current_weather, fetch_daily_weather
+from app.met_forecast import near_term_forecast
 
 weather_bp = Blueprint("weather", __name__)
 
@@ -19,7 +20,7 @@ def weather():
     if not (-90 <= lat <= 90 and -180 <= lon <= 180) or (lat == 0 and lon == 0):
         return jsonify({"error": "lat and lon are required numbers"}), 400
 
-    current = fetch_current_weather(lat, lon)
+    current = fetch_current_weather(lat, lon) or near_term_forecast(lat, lon)
     daily = fetch_daily_weather(lat, lon)
     if not current and not daily:
         return jsonify({"error": "Weather data is unavailable"}), 502

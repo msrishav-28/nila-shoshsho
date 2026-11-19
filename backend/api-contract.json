@@ -235,7 +235,7 @@
       "caller": "Home",
       "input": "lat?,lon?",
       "successFields": ["imd", "open_meteo", "warnings"],
-      "dependency": "profile and Open-Meteo"
+      "dependency": "profile, Open-Meteo and optional MET Norway through shared Redis"
     },
     {
       "service": "advice",

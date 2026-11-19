@@ -5353,7 +5353,7 @@
       "get": {
         "operationId": "advice_get_weather",
         "tags": ["advice"],
-        "description": "Consumer Home. Access bearer. Uses Open-Meteo. Supply both coordinates or use the signed-in profile's saved location by omitting both.",
+        "description": "Consumer Home, bearer access. Supply both coordinates or omit both to use the signed-in profile. Open-Meteo supplies current and daily values. An enabled MET Norway fallback may supply one labeled near-term forecast in the historical current field.",
         "security": [
           {
             "bearerAuth": []
@@ -5390,9 +5390,26 @@
                     },
                     "open_meteo": {
                       "type": "object",
+                      "description": "Historical response key. Read the source on each section.",
                       "properties": {
                         "current": {
-                          "type": ["object", "null"]
+                          "type": ["object", "null"],
+                          "description": "Current model conditions or a MET Norway near-term forecast. In the latter case kind is forecast, asOf is valid time and issuedAt is the model issue time.",
+                          "properties": {
+                            "temperature": { "type": "number" },
+                            "humidity": { "type": ["number", "null"] },
+                            "precipitation": { "type": ["number", "null"] },
+                            "windspeed": { "type": ["number", "null"] },
+                            "source": { "type": "string" },
+                            "asOf": { "type": ["string", "null"] },
+                            "issuedAt": {
+                              "type": "string",
+                              "format": "date-time"
+                            },
+                            "kind": { "const": "forecast" },
+                            "sourceUrl": { "type": "string", "format": "uri" },
+                            "licenseUrl": { "type": "string", "format": "uri" }
+                          }
                         },
                         "daily": {
                           "type": ["object", "null"]

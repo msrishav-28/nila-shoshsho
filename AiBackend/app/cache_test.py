@@ -47,3 +47,39 @@ def test_failed_provider_result_is_never_cached(monkeypatch):
 
     with pytest.raises(ValueError):
         cache.cached_data("market", [], failed, 3600)
+
+
+def test_protected_provider_requires_a_shared_refresh_reservation(monkeypatch):
+    monkeypatch.setenv("UPSTASH_REDIS_REST_URL", "https://fixture.invalid")
+    monkeypatch.setenv("UPSTASH_REDIS_REST_TOKEN", "fixture")
+    replies = iter([None, 1, "OK", None, 0])
+    commands = []
+
+    class Reply:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return {"result": next(replies)}
+
+    def post(url, **kwargs):
+        commands.append(kwargs["json"])
+        return Reply()
+
+    monkeypatch.setattr(cache.requests, "post", post)
+    assert cache.cached_data(
+        "met", [12, 77], lambda: [1], 21600, reserve_refresh=True
+    ) == [1]
+
+    def denied():
+        pytest.fail("refresh should be denied")
+
+    assert (
+        cache.cached_data("met", [12, 77], denied, 21600, reserve_refresh=True) is None
+    )
+    assert commands[1][0] == "EVAL" and commands[1][-1] == 21600
+    assert commands[1][-3].endswith(":refresh") and commands[1][-2].endswith(":rate")
+    monkeypatch.delenv("UPSTASH_REDIS_REST_TOKEN")
+    assert (
+        cache.cached_data("met", [12, 77], denied, 21600, reserve_refresh=True) is None
+    )
