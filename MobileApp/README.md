@@ -19,7 +19,7 @@ All calls go through utils/api.js. On **401**, the farmer is sent to login. On *
 
 ## Run locally
 
-Start both servers first (account on 5001, advice on 5002), then:
+Use Node.js 24 and install the locked packages with `npm ci`. Expo SDK 58 uses React Native 0.88, React 19.3, and React Native Web 0.21. The iOS target is 16.4 or later. Start the account server on port 5001 and the advice server on port 5002 before signing in.
 
 ```sh
 cd MobileApp
@@ -32,17 +32,29 @@ iOS:
 ```sh
 cd MobileApp
 npm ci
-(cd ios && bundle exec pod install)
 npm run ios
 ```
 
-## Run and deploy the PWA
+## Develop the PWA
 
-From this directory, run `npm ci`, then `npm run web` to develop with Expo Metro. For local API access, set `EXPO_PUBLIC_ACCOUNT_API_URL=http://localhost:5001/api` and `EXPO_PUBLIC_ADVICE_API_URL=http://localhost:5002` before starting the dev server.
+Run `npm ci` and `npm run web` from `MobileApp`. To call local services, set `EXPO_PUBLIC_ACCOUNT_API_URL=http://localhost:5001/api` and `EXPO_PUBLIC_ADVICE_API_URL=http://localhost:5002` before starting Expo. Direct browser access to another origin requires that service to allow the web app origin and its authenticated requests.
 
-Run `npm run build:web` and serve `dist/` from the root of an HTTPS origin. With the default API URLs, proxy `/api/*` to the account server, preserving the path. Proxy `/advice/*` to the advice server after removing `/advice` from the request path. Builds that use separate API origins can set the same two public URL variables at build time. Those origins must allow the PWA origin and its authenticated requests over CORS. Keep service credentials on the servers.
+`npm run build:web` exports the static PWA to `dist/`. Its service worker precaches the app shell and excludes API traffic. For an offline smoke test, load it online, wait for the worker to install, switch offline, then reopen the app.
 
-Serve `sw.js` with `Cache-Control: no-cache`. After one successful online visit, the service worker can supply the app shell and bundled assets offline. The service worker leaves API traffic with the browser. To verify a release on a device, install the PWA, switch the device offline, and reopen it after the first online load.
+## Deploy the PWA to Vercel
+
+Import the GitHub repo in Vercel and set the **Root Directory** to `MobileApp`. Select **Other** for the Framework Preset and **24.x** for Node.js. `vercel.mjs` sets `npm ci`, the web build, the `dist` output, the API rewrites and the cache headers.
+
+Add these environment variables to **Preview** and **Production**, using a staging service for Preview if available. Apply changes with a new deployment.
+
+| Variable | Example |
+| --- | --- |
+| `ACCOUNT_API_BASE_URL` | `https://account.example.com/api` |
+| `ADVICE_API_BASE_URL` | `https://advice.example.com` |
+
+Set HTTPS base URLs without credentials, query strings or fragments. Include the account server's `/api` prefix. Vercel forwards browser requests under `/api/` to the account API and `/advice/` to the advice API. The app uses same-origin paths on Vercel. Service tokens belong on the account and advice servers.
+
+On the first preview, verify sign-in, a photo or PDF upload, Ask Nila recording and playback, and an offline reopen after installation. Test on iOS Safari and Android Chrome as well as desktop. The two backend services must be reachable over HTTPS from Vercel.
 
 ## What farmers can open
 
@@ -52,7 +64,7 @@ Other screens from Home or Settings: Fertilize, Crop calendar, Water, Post harve
 
 Home search jumps to a tool in this app. It is not a web search.
 
-Listen uses POST /voice/tts and plays with expo-av. Speak uses Sarvam through the advice server.
+Ask Nila sends recorded speech to the advice server for transcription. Read-aloud uses `/voice/tts` with Expo Audio on Android and iOS and browser audio on the PWA.
 
 UI languages: English, Hindi, Marathi, Tamil, Bengali, Kannada, Telugu, Malayalam.
 
