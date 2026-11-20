@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import {useTranslation} from 'react-i18next';
 import {hasMapPoint} from '../utils/place';
-import {request} from './data';
+import {message, request} from './data';
 import {httpUrl} from './marketData';
 import {openLink} from './marketUi';
 import {
@@ -96,15 +96,81 @@ const extraTools = [
   },
 ];
 
+const searchDestinations = {
+  schemes: {route: 'Schemes', icon: 'layers'},
+  'crop-care': {route: 'CropCare', icon: 'feather'},
+  market: {route: 'Market', icon: 'shopping-bag'},
+  stores: {route: 'Market', tab: 'Stores', icon: 'map-pin'},
+  compare: {route: 'Market', tab: 'Compare', icon: 'trending-up'},
+  insights: {route: 'Market', tab: 'Outlook', icon: 'bar-chart-2'},
+  news: {route: 'News', icon: 'rss'},
+  fertilizer: {route: 'WaterSoil', tab: 'Nutrients', icon: 'droplet'},
+  water: {route: 'WaterSoil', icon: 'droplet'},
+  harvest: {route: 'AfterHarvest', icon: 'package'},
+  calendar: {route: 'CropPlanning', tab: 'Calendar', icon: 'calendar'},
+  chatbot: {route: 'AskNila', icon: 'message-circle'},
+  documents: {route: 'Documents', icon: 'file-text'},
+  logistics: {route: 'TransportJobs', icon: 'truck'},
+  weather: {route: 'Home', icon: 'cloud'},
+  notifications: {route: 'Notifications', icon: 'bell'},
+};
+
+const toolKey = tool => `${tool.route}:${tool.tab || ''}`;
+
+function useToolSearch(query, offline) {
+  const [result, setResult] = useState(null);
+  useEffect(() => {
+    if (!query || offline) {
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const data = await request(
+          'advice',
+          `/search?q=${encodeURIComponent(query)}`,
+          {signal: controller.signal},
+        );
+        if (!Array.isArray(data?.results)) {
+          throw new Error('Tool search returned an unreadable response.');
+        }
+        const matching = data.results.flatMap(item => {
+          const destination =
+            Object.hasOwn(searchDestinations, item?.id) &&
+            searchDestinations[item.id];
+          return destination && typeof item.title === 'string'
+            ? [{...destination, title: item.title}]
+            : [];
+        });
+        if (!controller.signal.aborted) {
+          setResult({query, matching});
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setResult({query, error});
+        }
+      }
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query, offline]);
+
+  return query && result?.query === query ? result : null;
+}
+
 function useLocalPicture(user, farm, offline) {
   const [picture, setPicture] = useState(null);
   const id = user?.id || user?._id || user?.email;
   const farmLat = farm?.location?.lat ?? farm?.latitude;
   const farmLon = farm?.location?.lon ?? farm?.longitude;
   const hasFarmPoint = hasMapPoint({location: {lat: farmLat, lon: farmLon}});
-  const lat = hasFarmPoint ? farmLat : user?.location?.lat;
-  const lon = hasFarmPoint ? farmLon : user?.location?.lon;
-  const state = farm?.state || farm?.location?.state || user?.location?.state;
+  const lat = hasFarmPoint || farm?.plotId ? farmLat : user?.location?.lat;
+  const lon = hasFarmPoint || farm?.plotId ? farmLon : user?.location?.lon;
+  const state = farm?.plotId
+    ? farm.location?.state
+    : farm?.state || farm?.location?.state || user?.location?.state;
   const hasWeatherLocation = hasMapPoint({location: {lat, lon}});
   const key =
     id && (hasWeatherLocation || state)
@@ -305,11 +371,17 @@ function LocalPicture({
 export function HomeScreen({user, farm, go, offline}) {
   const {t} = useTranslation();
   const [query, setQuery] = useState('');
-  const matching = [...tools, ...extraTools].filter(item =>
+  const term = query.trim();
+  const localMatches = [...tools, ...extraTools].filter(item =>
     `${item.title} ${item.description} ${item.terms}`
       .toLowerCase()
-      .includes(query.trim().toLowerCase()),
+      .includes(term.toLowerCase()),
   );
+  const search = useToolSearch(term, offline);
+  const matching = new Map(localMatches.map(item => [toolKey(item), item]));
+  for (const item of search?.matching || []) {
+    matching.set(toolKey(item), item);
+  }
   const {hasWeatherLocation, hasMarketLocation, picture} = useLocalPicture(
     user,
     farm,
@@ -318,17 +390,20 @@ export function HomeScreen({user, farm, go, offline}) {
   function toolRows(items) {
     return items.map(item => (
       <Row
-        key={item.route}
+        key={toolKey(item)}
         title={item.title}
         description={item.description}
         icon={item.icon}
         end={null}
-        onPress={() => go(item.route)}
+        onPress={() => {
+          setQuery('');
+          go(item.route, item.tab ? {tab: item.tab} : undefined);
+        }}
         style={styles.tool}
       />
     ));
   }
-  const farmAction = () => go(farm ? 'FarmMonitoring' : 'FarmSetup');
+  const farmAction = () => go('FarmMonitoring');
   return (
     <Screen
       title={t('refined.farmingDay', {defaultValue: 'Your farming day'})}
@@ -380,15 +455,23 @@ export function HomeScreen({user, farm, go, offline}) {
           value={query}
           onChangeText={setQuery}
           returnKeyType="search"
+          maxLength={80}
         />
       ) : null}
-      {query.trim() && !offline ? (
+      {term && !offline ? (
         <Card>
           <Text variant="section">Search results</Text>
-          {matching.length ? (
-            toolRows(matching)
+          {search?.error ? (
+            <Text tone="muted">
+              Online search is unavailable. Showing matches from this app.
+            </Text>
+          ) : null}
+          {matching.size ? (
+            toolRows(Array.from(matching.values()))
           ) : (
-            <Text tone="muted">No tools match this search.</Text>
+            <Text tone="muted">
+              {search ? 'No tools match this search.' : 'Searching farm tools…'}
+            </Text>
           )}
         </Card>
       ) : (
@@ -412,15 +495,26 @@ export function HomeScreen({user, farm, go, offline}) {
   );
 }
 
-export function StartupScreen() {
+export function StartupScreen({error, retry, forget}) {
   return (
     <Screen title="Nila Shoshsho" eyebrow="NILA SHOSSHO" kind="auth">
       <Stack gap={20} style={styles.startup} accessibilityLiveRegion="polite">
         <Illustration name="startup" style={styles.startupArt} />
-        <Text variant="section">Getting your farm ready…</Text>
-        <Text variant="small" tone="muted">
-          Your guidance will be here shortly.
-        </Text>
+        {error ? (
+          <Stack>
+            <Notice title="Could not verify your sign-in" tone="error">
+              {message(error)}
+            </Notice>
+            <Button label="Try again" onPress={retry} />
+            <Button
+              label="Clear saved sign-in on this device"
+              variant="secondary"
+              onPress={forget}
+            />
+          </Stack>
+        ) : (
+          <Text variant="section">Getting your farm ready…</Text>
+        )}
       </Stack>
     </Screen>
   );

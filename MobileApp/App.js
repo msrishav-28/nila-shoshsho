@@ -16,6 +16,13 @@ import {theme} from './theme.config';
 import {AccountScreen} from './refined/AccountScreens';
 import {MarketScreen} from './refined/MarketScreens';
 import {TaskScreen} from './refined/TaskScreens';
+import {FarmScreen} from './refined/FarmScreens';
+import {farmFromPlot, usePlots} from './refined/plots';
+import {
+  callbackPilot,
+  StaffReviewScreen,
+  VoiceCallbackScreen,
+} from './refined/OperatorScreens';
 import {HomeScreen, StartupScreen} from './refined/HomeScreen';
 import {AskNilaScreen} from './refined/AskNilaScreen';
 import {CropCareScreen} from './refined/CropCareScreen';
@@ -54,8 +61,10 @@ const routes = {
   Documents: TaskScreen,
   DocumentTranslate: TaskScreen,
   TransportJobs: TaskScreen,
-  FarmSetup: TaskScreen,
-  FarmMonitoring: TaskScreen,
+  FarmSetup: FarmScreen,
+  FarmMonitoring: FarmScreen,
+  StaffReview: StaffReviewScreen,
+  ...(callbackPilot ? {VoiceCallback: VoiceCallbackScreen} : {}),
 };
 const authRoutes = ['Welcome', 'Login', 'Signup'];
 const screenOptions = {
@@ -66,7 +75,7 @@ const screenOptions = {
 function RoutedScreen() {
   const {name: screen, params} = useRoute();
   const navigation = useNavigation();
-  const {user, setUser} = useContext(UserContext);
+  const {user} = useContext(UserContext);
   const session = useContext(SessionContext);
   const go = useCallback(
     (target, values) => {
@@ -102,48 +111,26 @@ function RoutedScreen() {
     }
   }, [navigation, screen, user]);
   const Component = routes[screen] || AccountScreen;
-  return (
-    <Component {...session} {...{screen, params, go, back, user, setUser}} />
-  );
+  return <Component {...session} {...{screen, params, go, back, user}} />;
 }
 
 function SessionApp() {
-  const {user, setUser} = useContext(UserContext);
-  const [booting, setBooting] = useState(true);
+  const {user, booting, restoreError, restoreSession, forgetSession} =
+    useContext(UserContext);
   const [offline, setOffline] = useState(false);
   const [savedFarm, setSavedFarm] = useState(null);
   const [draft, setDraft] = useState(null);
   const id = user?.id || user?._id || user?.email;
   const farmKey = id ? `refined.farm.${id}` : null;
-  const farm = farmKey && savedFarm?.key === farmKey ? savedFarm.value : null;
+  const legacyFarm =
+    farmKey && savedFarm?.key === farmKey ? savedFarm.value : null;
+  const plotState = usePlots(user?.role === 'Farmer' ? id : null, offline);
+  const farm = plotState.active ? farmFromPlot(plotState.active) : legacyFarm;
   const voiceDraft = id && draft?.id === id ? draft.text : '';
   const setVoiceDraft = useCallback(
     text => setDraft(text ? {id, text} : null),
     [id],
   );
-
-  useEffect(() => {
-    let active = true;
-    async function restore() {
-      try {
-        const value = await AsyncStorage.getItem('user');
-        const session = value ? JSON.parse(value) : null;
-        if (active && session && typeof session === 'object') {
-          setUser(session);
-        }
-      } catch {
-        await AsyncStorage.multiRemove(['user', 'accessToken']).catch(() => {});
-      } finally {
-        if (active) {
-          setBooting(false);
-        }
-      }
-    }
-    restore();
-    return () => {
-      active = false;
-    };
-  }, [setUser]);
 
   useEffect(
     () =>
@@ -178,28 +165,19 @@ function SessionApp() {
     };
   }, [farmKey]);
 
-  const setFarm = useCallback(
-    async value => {
-      if (!farmKey) {
-        throw new Error('Sign in to save your farm.');
-      }
-      if (value) {
-        await AsyncStorage.setItem(farmKey, JSON.stringify(value));
-      } else {
-        await AsyncStorage.removeItem(farmKey);
-      }
-      setSavedFarm({key: farmKey, value});
-    },
-    [farmKey],
-  );
-
-  if (booting) {
-    return <StartupScreen />;
+  if (booting || restoreError) {
+    return (
+      <StartupScreen
+        error={restoreError}
+        retry={restoreSession}
+        forget={forgetSession}
+      />
+    );
   }
   const names = user ? Object.keys(routes) : authRoutes;
   return (
     <SessionContext.Provider
-      value={{offline, farm, setFarm, voiceDraft, setVoiceDraft}}>
+      value={{offline, farm, legacyFarm, plotState, voiceDraft, setVoiceDraft}}>
       <NavigationContainer theme={navigationTheme}>
         <Navigator.Navigator
           key={user ? `signed-in:${id}` : 'signed-out'}

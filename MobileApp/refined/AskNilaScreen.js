@@ -12,6 +12,7 @@ import {adviceLang} from '../utils/lang';
 import {readVoicePreference} from './accountPreferences';
 import {appendFile, playVoice, recordVoice} from './device';
 import {message, request} from './data';
+import {callbackPilot} from './OperatorScreens';
 import {
   Button,
   Card,
@@ -154,6 +155,7 @@ function Answer({entry, lang}) {
 export function AskNilaScreen({
   params,
   back,
+  go,
   user,
   voiceDraft = '',
   setVoiceDraft,
@@ -577,6 +579,14 @@ export function AskNilaScreen({
             Review spoken words before sending. Answers show sources when
             available.
           </Notice>
+          {callbackPilot ? (
+            <Row
+              title="Telephone callback pilot"
+              description="Request one call on your enrolled number"
+              icon="phone"
+              onPress={() => go('VoiceCallback')}
+            />
+          ) : null}
         </Stack>
       </Columns>
     </Screen>

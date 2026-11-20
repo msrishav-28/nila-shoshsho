@@ -120,6 +120,9 @@ export function commodityValue(value) {
 }
 
 export function farmLocation(farm, user) {
+  if (farm?.plotId) {
+    return farm.location;
+  }
   const profileLocation = user?.location || {};
   const savedPlace = farm?.place || '';
   // A separately typed farm name is not evidence that its coordinates match the profile.

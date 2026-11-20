@@ -12,14 +12,25 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useTranslation} from 'react-i18next';
 import Markdown from 'react-native-markdown-display';
 import {UserContext} from '../context/UserContext';
 import {theme} from '../theme.config';
 import {adviceLang, adviceLangName} from '../utils/lang';
 import {hasMapPoint} from '../utils/place';
-import {appendFile, chooseDocument, readRemoteDocument} from './device';
+import {
+  appendFile,
+  chooseDocument,
+  openRemoteDocument,
+  readRemoteDocument,
+} from './device';
+import {
+  documentName,
+  freshDocumentUrl,
+  isHttpsDocument,
+  savedDocuments,
+} from './documents';
+import {submissionKey} from './plots';
 import {request, useAction} from './data';
 import {dataRows, INDIA_STATES, normalized} from './marketData';
 import {
@@ -77,7 +88,13 @@ function requirePositive(value, label) {
   return number;
 }
 
-function getPoint(user, go, place, region) {
+function getPoint(user, go, place, region, farm) {
+  if (farm?.plotId && hasMapPoint(farm)) {
+    return {
+      latitude: Number(farm.location.lat),
+      longitude: Number(farm.location.lon),
+    };
+  }
   const matchesRegion =
     !region ||
     !user?.location?.state ||
@@ -114,14 +131,6 @@ function dateValue(value) {
     throw new Error('Enter a valid calendar date.');
   }
   return result;
-}
-
-function formatDate(value) {
-  if (!value) {
-    return '';
-  }
-  const [year, month, day] = value.split('-');
-  return day && month && year ? `${day} / ${month} / ${year}` : '';
 }
 
 function useAdviceLocale() {
@@ -210,6 +219,11 @@ function AdviceResult({action, title}) {
           <Markdown style={markdownStyles} onLinkPress={isHttpsDocument}>
             {content}
           </Markdown>
+          {data.rate_available === false ? (
+            <Text variant="caption" tone="muted">
+              Field-specific application rates are unavailable.
+            </Text>
+          ) : null}
           {data.source || data.soil_source ? (
             <Text variant="caption" tone="muted">
               {data.source || data.soil_source}
@@ -316,9 +330,11 @@ function CropPlanning({back, farm, go, params, user}) {
     params?.tab === 'Calendar' ? 'Calendar' : 'Choose a crop',
   );
   const [city, setCity] = useState(
-    farm?.place || user?.location?.city || placeName(user),
+    farm?.plotId ? '' : farm?.place || user?.location?.city || placeName(user),
   );
-  const [state, setState] = useState(user?.location?.state || '');
+  const [state, setState] = useState(
+    farm?.plotId ? '' : user?.location?.state || '',
+  );
   const [acres, setAcres] = useState(String(farm?.acres || ''));
   const [crop, setCrop] = useState(params?.crop || farm?.crop || '');
   const suggestion = useAction();
@@ -333,7 +349,7 @@ function CropPlanning({back, farm, go, params, user}) {
       return request('advice', '/crop_suggestion', {
         method: 'POST',
         body: {
-          ...getPoint(user, go, place, region),
+          ...getPoint(user, go, place, region, farm),
           land_acres,
           lang,
           region,
@@ -344,9 +360,11 @@ function CropPlanning({back, farm, go, params, user}) {
   function loadCalendar(name) {
     return calendar.run(async () => {
       const selectedCrop = requireValue(name, 'a crop');
-      const location = user?.location;
+      const pointSource = farm?.plotId ? farm : user;
+      const location = pointSource?.location;
       const usePoint =
-        hasMapPoint(user) && (!farm?.place || samePlace(user, farm.place));
+        hasMapPoint(pointSource) &&
+        (!farm?.place || samePlace(user, farm.place));
       const result = await request('advice', '/crop_calendar', {
         method: 'POST',
         body: {
@@ -543,7 +561,7 @@ function WaterSoil({back, farm, go, params, user}) {
           throw new Error('Choose an irrigation method.');
         }
         return {
-          ...getPoint(user, go, farm?.place),
+          ...getPoint(user, go, farm?.place, undefined, farm),
           crop: selectedCrop,
           field_size_acres: area,
           irrigation_method: method,
@@ -575,13 +593,21 @@ function WaterSoil({back, farm, go, params, user}) {
         ) {
           throw new Error('Enter soil pH to use your Soil Health Card values.');
         }
-        const {latitude: lat, longitude: lon} = getPoint(user, go, farm?.place);
+        const {latitude: lat, longitude: lon} = getPoint(
+          user,
+          go,
+          farm?.place,
+          undefined,
+          farm,
+        );
         return {
           lat,
           lon,
           crop: selectedCrop,
           lang,
-          region: user.location.state || user.location.city,
+          region: farm?.plotId
+            ? undefined
+            : user?.location?.state || user?.location?.city,
           ...(soil_health_card.soil_ph == null ? {} : {soil_health_card}),
         };
       },
@@ -739,7 +765,9 @@ function AfterHarvest({back, farm, go, params, user}) {
   );
   const [crop, setCrop] = useState(farm?.crop || '');
   const [date, setDate] = useState('');
-  const [region, setRegion] = useState(user?.location?.state || '');
+  const [region, setRegion] = useState(
+    farm?.plotId ? '' : user?.location?.state || '',
+  );
   const storage = useAction();
   const lang = useAdviceLocale();
   const [hasOpenedTransport, setHasOpenedTransport] = useState(
@@ -761,7 +789,7 @@ function AfterHarvest({back, farm, go, params, user}) {
         const selectedCrop = requireValue(crop, 'a crop');
         const selectedRegion = requireValue(region, 'a region');
         return {
-          ...getPoint(user, go, farm?.place, selectedRegion),
+          ...getPoint(user, go, farm?.place, selectedRegion, farm),
           crop: selectedCrop,
           harvest_date,
           region: selectedRegion,
@@ -920,12 +948,7 @@ function JobsPanel({partner, user, farm}) {
         };
         const payload = JSON.stringify(body);
         if (postAttempt.current?.payload !== payload) {
-          const key =
-            global.crypto?.randomUUID?.() ||
-            [Date.now(), Math.random(), Math.random()]
-              .map(value => value.toString(36).replace('.', ''))
-              .join('-');
-          postAttempt.current = {payload, key};
+          postAttempt.current = {payload, key: submissionKey()};
         }
         const data = await request('account', '/logistics/jobs', {
           method: 'POST',
@@ -1156,33 +1179,10 @@ function TransportJobs({back, user, farm}) {
   );
 }
 
-function documentName(url) {
-  try {
-    const path = url.split(/[?#]/)[0];
-    const name = decodeURIComponent(path.split('/').pop() || '').replace(
-      /-\d{10,}$/,
-      '',
-    );
-    return name || 'Farm document.pdf';
-  } catch {
-    return 'Farm document.pdf';
-  }
-}
-
-function isHttpsDocument(url) {
-  return (
-    typeof url === 'string' &&
-    /^https:\/\/[^\s/?#@]+(?:[/?#][^\s]*)?$/.test(url)
+const openDocument = (id, refreshProfile, action) =>
+  action.run(() =>
+    openRemoteDocument(() => freshDocumentUrl(refreshProfile, id)),
   );
-}
-
-const openDocument = (url, open) =>
-  open.run(() => {
-    if (!isHttpsDocument(url)) {
-      throw new Error('The original document link is unavailable.');
-    }
-    return Linking.openURL(url);
-  });
 
 function ensurePdf(file, maxBytes) {
   if (file.type !== pdfType && !/\.pdf$/i.test(file.name || '')) {
@@ -1197,16 +1197,19 @@ function ensurePdf(file, maxBytes) {
 
 function Documents({back, go, user}) {
   const copy = useTaskText('documents');
-  const {setUser} = useContext(UserContext);
+  const {refreshProfile} = useContext(UserContext);
   const [selectedFile, setSelectedFile] = useState(null);
   const uploadController = useRef(null);
   useEffect(() => () => uploadController.current?.abort(), []);
   const pickFile = useAction();
   const upload = useAction();
   const open = useAction();
-  const urls = Array.isArray(user?.documents)
-    ? user.documents.filter(isHttpsDocument)
-    : [];
+  const list = useAction();
+  const reload = list.run;
+  useEffect(() => {
+    reload(refreshProfile);
+  }, [reload, refreshProfile]);
+  const ids = savedDocuments(user);
 
   const choose = () =>
     pickFile.run(async () => {
@@ -1215,8 +1218,8 @@ function Documents({back, go, user}) {
         setSelectedFile(ensurePdf(file, 10 * 1024 * 1024));
       }
     });
-  const save = () =>
-    upload.run(async () => {
+  const save = async () => {
+    const result = await upload.run(async () => {
       if (!selectedFile) {
         throw new Error('Choose a PDF first.');
       }
@@ -1235,15 +1238,13 @@ function Documents({back, go, user}) {
       if (!data?.success || !Array.isArray(data.user?.documents)) {
         throw new Error('The service did not confirm the upload.');
       }
-      const updated = {...user, documents: data.user.documents};
-      setUser(updated);
       setSelectedFile(null);
-      // The server has saved the document even if the device storage is unavailable.
-      await AsyncStorage.setItem('user', JSON.stringify(updated)).catch(
-        () => {},
-      );
       return data;
     });
+    if (result) {
+      reload(refreshProfile);
+    }
+  };
 
   return (
     <Screen title={copy('title', 'Documents', 'documents.header')} back={back}>
@@ -1260,16 +1261,24 @@ function Documents({back, go, user}) {
           onPress={choose}
           disabled={pickFile.pending || upload.pending}
         />
-        {urls.length ? (
-          urls.map((url, index) => (
-            <Card key={`${url}-${index}`}>
+        <Result error={list.error} pending={list.pending} />
+        {list.error ? (
+          <Button
+            label="Refresh documents"
+            variant="secondary"
+            onPress={() => reload(refreshProfile)}
+          />
+        ) : null}
+        {ids.length ? (
+          ids.map(id => (
+            <Card key={id}>
               <Stack gap={8}>
-                <Text variant="label">{documentName(url)}</Text>
+                <Text variant="label">{documentName(id)}</Text>
                 <Pair>
                   <Button
                     label="Open original"
                     variant="secondary"
-                    onPress={() => openDocument(url, open)}
+                    onPress={() => openDocument(id, refreshProfile, open)}
                   />
                   <Button
                     label={copy(
@@ -1278,17 +1287,17 @@ function Documents({back, go, user}) {
                       'documents.translate.button',
                     )}
                     variant="secondary"
-                    onPress={() => go('DocumentTranslate', {url})}
+                    onPress={() => go('DocumentTranslate', {documentId: id})}
                   />
                 </Pair>
               </Stack>
             </Card>
           ))
-        ) : (
+        ) : !list.pending && !list.error ? (
           <Notice title="No documents yet" tone="default">
             Choose a file from your device.
           </Notice>
-        )}
+        ) : null}
         <Result error={open.error} pending={open.pending} />
         <Notice title="Translate from a document" tone="default">
           Open a saved file and choose Translate. You won’t need to upload it
@@ -1335,21 +1344,15 @@ function DocumentTranslate({back, params, user}) {
   const [file, setFile] = useState(null);
   const lang = useAdviceLocale();
   const [target, setTarget] = useState(() => adviceLangName(lang));
-  const [url, setUrl] = useState(() =>
-    params?.url &&
-    isHttpsDocument(params.url) &&
-    Array.isArray(user?.documents) &&
-    user.documents.includes(params.url)
-      ? params.url
-      : '',
+  const {refreshProfile} = useContext(UserContext);
+  const [id, setId] = useState(() =>
+    savedDocuments(user).includes(params?.documentId) ? params.documentId : '',
   );
   const [selecting, setSelecting] = useState(false);
   const pickFile = useAction();
   const translate = useAction();
   const open = useAction();
-  const urls = Array.isArray(user?.documents)
-    ? user.documents.filter(isHttpsDocument)
-    : [];
+  const ids = savedDocuments(user);
   const maxBytes = 8 * 1024 * 1024;
 
   const choose = () =>
@@ -1357,21 +1360,22 @@ function DocumentTranslate({back, params, user}) {
       const nextFile = await chooseDocument();
       if (nextFile) {
         setFile(ensurePdf(nextFile, maxBytes));
-        setUrl('');
+        setId('');
         setSelecting(false);
         translate.reset();
       }
     });
   const submit = () =>
     translate.run(async () => {
-      if (!file && !url) {
+      if (!file && !id) {
         throw new Error('Choose a saved or local PDF first.');
       }
       const targetLanguage = target || adviceLangName(lang);
       let remoteFile;
       try {
-        if (url) {
-          remoteFile = await readRemoteDocument(url, documentName(url));
+        if (id) {
+          const url = await freshDocumentUrl(refreshProfile, id);
+          remoteFile = await readRemoteDocument(url, documentName(id));
         }
         const source = ensurePdf(remoteFile || file, maxBytes);
         const form = new FormData();
@@ -1410,7 +1414,7 @@ function DocumentTranslate({back, params, user}) {
           <Button
             label={
               file?.name ||
-              (url ? documentName(url) : 'Choose saved file or upload')
+              (id ? documentName(id) : 'Choose saved file or upload')
             }
             icon="file-text"
             variant="secondary"
@@ -1421,13 +1425,13 @@ function DocumentTranslate({back, params, user}) {
         {selecting ? (
           <Card>
             <Stack gap={8}>
-              {urls.map((savedUrl, index) => (
+              {ids.map(savedId => (
                 <Row
-                  key={`${savedUrl}-${index}`}
-                  title={documentName(savedUrl)}
+                  key={savedId}
+                  title={documentName(savedId)}
                   icon="file-text"
                   onPress={() => {
-                    setUrl(savedUrl);
+                    setId(savedId);
                     setFile(null);
                     setSelecting(false);
                     translate.reset();
@@ -1471,11 +1475,11 @@ function DocumentTranslate({back, params, user}) {
         <Notice title="Keep the original" tone="default">
           Your original stays available beside its translation.
         </Notice>
-        {url ? (
+        {id ? (
           <Button
             label="Open original PDF"
             variant="secondary"
-            onPress={() => openDocument(url, open)}
+            onPress={() => openDocument(id, refreshProfile, open)}
           />
         ) : null}
         <Result error={open.error} pending={open.pending} />
@@ -1488,163 +1492,6 @@ function DocumentTranslate({back, params, user}) {
   );
 }
 
-function FarmSetup({back, farm, go, setFarm, user}) {
-  const copy = useTaskText('farm');
-  const [name, setName] = useState(farm?.name || '');
-  const [place, setPlace] = useState(farm?.place || placeName(user));
-  const [crop, setCrop] = useState(farm?.crop || '');
-  const [area, setArea] = useState(String(farm?.acres || ''));
-  const [date, setDate] = useState(formatDate(farm?.sowingDate));
-  const save = useAction();
-
-  const submit = () =>
-    save.run(async () => {
-      const next = {
-        name: requireValue(name, 'a plot name'),
-        place: requireValue(place, 'a village or town'),
-        crop: requireValue(crop, 'a crop'),
-        acres: requirePositive(area, 'area'),
-        sowingDate: date.trim() ? dateValue(date) : null,
-      };
-      await setFarm(next);
-      back();
-      return next;
-    });
-
-  return (
-    <Screen title={farm ? 'Edit your farm' : 'Add your farm'} back={back}>
-      <Stack>
-        <Stack gap={4}>
-          <Text variant="heading">Tell us about your plot</Text>
-          <Text variant="small" tone="muted">
-            Use these details across crop care, weather and markets.
-          </Text>
-        </Stack>
-        <Field
-          label={copy('plot', 'Plot name')}
-          placeholder="For example, East field"
-          value={name}
-          onChangeText={setName}
-        />
-        <Field
-          label={copy('place', 'Village or town')}
-          placeholder="Enter your place"
-          value={place}
-          onChangeText={setPlace}
-        />
-        <Field
-          label={copy('crop', 'Crop', 'cropSuggestion.inputs.cropName')}
-          placeholder="Choose a crop"
-          value={crop}
-          onChangeText={setCrop}
-        />
-        <Pair>
-          <Field
-            label={copy(
-              'area',
-              'Area in acres',
-              'cropSuggestion.inputs.landAcres',
-            )}
-            placeholder="Enter area"
-            keyboardType="decimal-pad"
-            value={area}
-            onChangeText={setArea}
-          />
-          <ControlDate
-            label={copy('sowingDate', 'Sowing date')}
-            value={date}
-            onChangeText={setDate}
-          />
-        </Pair>
-        <Text variant="small" tone="muted">
-          Farm details are saved on this device.
-        </Text>
-        {!(hasMapPoint(user) && samePlace(user, place)) && place.trim() ? (
-          <Row
-            title="Add a map location"
-            icon="map-pin"
-            description="Weather-based tools need a saved map location for this place"
-            onPress={() => go('UpdateProfile', {section: 'address'})}
-          />
-        ) : null}
-        <Button
-          label={copy('save', 'Save farm')}
-          onPress={submit}
-          disabled={save.pending}
-        />
-        <Button
-          label={copy('later', 'Do this later')}
-          variant="secondary"
-          onPress={back}
-          disabled={save.pending}
-        />
-        <Result error={save.error} pending={save.pending} />
-      </Stack>
-    </Screen>
-  );
-}
-
-function FarmMonitoring({back, farm, go}) {
-  const copy = useTaskText('farm');
-  const [tab, setTab] = useState('Overview');
-  const farmSummary =
-    farm &&
-    [farm.crop, farm.place, `${farm.acres} acres`, formatDate(farm.sowingDate)]
-      .filter(Boolean)
-      .join(' · ');
-
-  return (
-    <Screen title={copy('title', 'Your farm')} back={back}>
-      <Stack>
-        <Text variant="heading">{farm?.name || 'Your plot at a glance'}</Text>
-        <Row
-          title={farm ? 'Plot details' : 'Add your farm'}
-          description={farmSummary || 'Crop, location, area and sowing date'}
-          icon="edit-3"
-          onPress={() => go('FarmSetup')}
-        />
-        <Tabs
-          items={['Overview', 'Observations']}
-          value={tab}
-          onChange={setTab}
-        />
-        <Notice title="No recent observation" tone="info">
-          Crop monitoring will appear when a usable satellite observation is
-          available.
-        </Notice>
-        <Stack gap={4}>
-          <Text variant="heading">Check the crop in person</Text>
-          <Text variant="small" tone="muted">
-            Satellite observations can be delayed or obscured by clouds. A photo
-            can help you investigate what you see.
-          </Text>
-        </Stack>
-        <Button
-          label={copy('cropPhoto', 'Check a crop photo', 'navigation.cropCare')}
-          icon="camera"
-          onPress={() => go('CropCare')}
-        />
-        {tab === 'Overview' ? (
-          <>
-            <Row
-              title="Weather guidance"
-              description="View available rain and wind information"
-              icon="cloud"
-              onPress={() => go('Home')}
-            />
-            <Row
-              title="Market outlook"
-              description="See prices and available forecasts"
-              icon="shopping-bag"
-              onPress={() => go('Market', {tab: 'Outlook'})}
-            />
-          </>
-        ) : null}
-      </Stack>
-    </Screen>
-  );
-}
-
 const screens = {
   CropPlanning,
   WaterSoil,
@@ -1652,8 +1499,6 @@ const screens = {
   Documents,
   DocumentTranslate,
   TransportJobs,
-  FarmSetup,
-  FarmMonitoring,
 };
 
 export function TaskScreen({screen, ...props}) {

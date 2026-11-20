@@ -1,4 +1,4 @@
-import {PermissionsAndroid, Platform} from 'react-native';
+import {Linking, PermissionsAndroid, Platform} from 'react-native';
 import {
   AudioModule,
   RecordingPresets,
@@ -106,6 +106,10 @@ async function removeFile(file) {
   if (file.exists) {
     file.delete();
   }
+}
+
+export async function openRemoteDocument(loadUrl) {
+  await Linking.openURL(await loadUrl());
 }
 
 export async function readRemoteDocument(url, name = 'document.pdf') {

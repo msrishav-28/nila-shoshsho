@@ -129,6 +129,7 @@ function PriceRows({rows, source}) {
 function MarketPrices({farm, location}) {
   const {t} = useTranslation();
   const action = useAction();
+  const analysis = useAction();
   const [state, setState] = useState(location.state || '');
   const [district, setDistrict] = useState('');
   const [customDistrict, setCustomDistrict] = useState('');
@@ -143,6 +144,7 @@ function MarketPrices({farm, location}) {
     offset + PAGE_SIZE < Math.min(Number(action.data?.total) || 0, 10000);
 
   function load(filters, nextOffset) {
+    analysis.reset();
     setOffset(nextOffset);
     action.run(() =>
       request(
@@ -154,6 +156,22 @@ function MarketPrices({farm, location}) {
         })}`,
       ),
     );
+  }
+
+  function analyzePage() {
+    return analysis.run(async () => {
+      const records = rows.filter(
+        row => row.modal_price != null && row.modal_price !== '',
+      );
+      const result = await request('advice', '/api/market-analysis', {
+        method: 'POST',
+        body: {records},
+      });
+      if (typeof result?.analysis !== 'string' || !result.analysis.trim()) {
+        throw new Error('The server did not return a market analysis.');
+      }
+      return result;
+    });
   }
 
   function submit() {
@@ -266,6 +284,30 @@ function MarketPrices({farm, location}) {
                 {t('marketPrices.errors.noData')}
               </Notice>
             )}
+            {rows.some(
+              row => row.modal_price != null && row.modal_price !== '',
+            ) ? (
+              <Stack>
+                <Button
+                  label="Analyze prices on this page"
+                  variant="secondary"
+                  onPress={analyzePage}
+                  disabled={analysis.pending}
+                />
+                <Progress action={analysis} />
+                {analysis.data ? (
+                  <Card>
+                    <Text variant="label">
+                      {analysis.data.source || 'Submitted market records'}
+                    </Text>
+                    {analysis.data.asOf ? (
+                      <Text variant="caption">{analysis.data.asOf}</Text>
+                    ) : null}
+                    <Text>{analysis.data.analysis}</Text>
+                  </Card>
+                ) : null}
+              </Stack>
+            ) : null}
             {(offset > 0 || canContinue) && (
               <Pair>
                 <Button
@@ -544,8 +586,8 @@ function NearbyStores({farm, location}) {
   const action = useAction();
   const [validation, setValidation] = useState('');
 
-  function findStores(useDevice) {
-    if (!useDevice && !place.trim()) {
+  function findStores(source) {
+    if (source === 'place' && !place.trim()) {
       setValidation(
         t('refined.market.enterPlace', {
           defaultValue: 'Enter your saved village or town.',
@@ -557,9 +599,11 @@ function NearbyStores({farm, location}) {
     action.run(async () => {
       let coordinates;
       let state;
-      if (useDevice) {
+      if (source === 'device') {
         const point = await getLocation();
         coordinates = {lat: point.latitude, lon: point.longitude};
+      } else if (source === 'plot' && hasMapPoint({location})) {
+        coordinates = {lat: location.lat, lon: location.lon};
       } else if (
         hasMapPoint({location}) &&
         [location.village, location.city, farm?.place].some(
@@ -611,10 +655,18 @@ function NearbyStores({farm, location}) {
         />
         <Button
           label={t('refined.market.findStores', {defaultValue: 'Find stores'})}
-          onPress={() => findStores(false)}
+          onPress={() => findStores('place')}
           disabled={action.pending}
         />
         <Validation text={validation} />
+        {farm?.plotId && hasMapPoint({location}) ? (
+          <Row
+            title="Use active plot"
+            description={farm.crop}
+            icon="map-pin"
+            onPress={action.pending ? undefined : () => findStores('plot')}
+          />
+        ) : null}
         <Row
           title={t('refined.market.useLocation', {
             defaultValue: 'Use current location',
@@ -623,7 +675,7 @@ function NearbyStores({farm, location}) {
             defaultValue: 'Location is requested only when you choose this',
           })}
           icon="crosshair"
-          onPress={action.pending ? undefined : () => findStores(true)}
+          onPress={action.pending ? undefined : () => findStores('device')}
         />
       </Stack>
       <Stack gap={12}>
