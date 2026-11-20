@@ -1,6 +1,6 @@
 # Backend release execution
 
-The backend is available on protected Render staging for synthetic integration testing. Use FRONTEND_HANDOFF.md and openapi.json as the integration handoff. The public-release acceptance checks below remain in effect.
+The backend is ready for the protected hackathon demo and frontend integration. The account and advice services run on Render with synthetic staging data. The private Vercel gateway is configured and tested. Use [the frontend handoff](FRONTEND_HANDOFF.md) and [the end-to-end handoff](FULL_STACK_HANDOFF.md) for integration. The public-release acceptance checks below remain open.
 
 ## Local verification
 
@@ -8,13 +8,13 @@ In backend/, use Node 22, run npm ci, npm run lint, npm run format:check and npm
 
 In AiBackend/, use a Python 3.11 virtual environment, install requirements-test.txt, run python -m ruff check app run.py readiness.py sarvam_check.py --select F, python -m ruff format --check app run.py readiness.py sarvam_check.py, python -m pytest -q app and python -m pip check. python -m pip_audit -r requirements.txt checks the production dependency set. Constraints record the locally resolved versions.
 
-GitHub Actions ran these checks and built both Linux containers successfully for the deployed `main` commit `be5ea37`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44609095471)
+GitHub Actions ran these checks and built both Linux containers successfully for the deployed `main` commit `63fdb7f`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44612601376)
 
 ## Verification record — 20 November 2026
 
 | Gate | Evidence |
 | --- | --- |
-| Local tests and quality checks | PASS. 26 Node and 57 Python tests, configured lint and formatting, OpenAPI validation, and Python dependency consistency. Both production dependency audits found zero known vulnerabilities at the time of the run. |
+| Local tests and quality checks | PASS. 26 Node and 58 Python tests, configured lint and formatting, OpenAPI validation, and Python dependency consistency. Both production dependency audits found zero known vulnerabilities at the time of the run. |
 | Signed fixture load | PASS. 220 health requests per service and 12 signed reads per service at up to 12 in flight. Of 220 unsigned advice requests, 48 were rejected with 401 and 172 were throttled with 429. No paid endpoints were used. |
 | Live provider checks | PASS for Neon synthetic sign-in and logout across both APIs, one Sarvam synthesis, and one Gemini synthetic-image schema check. Other enabled provider journeys still need a staging smoke test. |
 | Neon data recovery | PASS for restoring a snapshot to an isolated branch and reading synthetic records with restricted runtime permissions. |
@@ -22,7 +22,7 @@ GitHub Actions ran these checks and built both Linux containers successfully for
 | Cloudinary upload and delivery | PASS against Cloudinary via the real account handlers with synthetic users. Signed files downloaded, expired links were rejected, another account received no file links, and unsigned originals and image variants were blocked. Synthetic provider assets were removed. |
 | Bolna pilot | PASS for account access and dedicated agent provisioning. The provider reported the agent processed. A call to a consenting enrolled recipient is still pending. |
 | Saved farm plots | PASS through the account routes on the Neon demo database using the restricted runtime role. Concurrent requests with one idempotency key returned the same plot. The synthetic plot was updated and removed. |
-| Clean Linux verification | PASS for clean dependency installs, lint, formatting and all 81 tests in an isolated Ubuntu scratch directory with no production configuration. |
+| Clean Linux verification | PASS. GitHub Actions installed dependencies, ran both complete suites and built both Docker images from the deployed commit. |
 | Render staging | PASS. Workspace Blueprint validation and container startup completed. Both APIs returned health status 200, gated calls without the staging key returned 404, and gated calls without identity returned 401. |
 | Hosted identity and plots | PASS. Synthetic signup, sign-in, signed cross-service advice search, concurrent plot replay, update and deletion, and sign-out with revocation in both APIs. |
 | Hosted private media | PASS. The hosting account API uploaded a synthetic PDF and photo. Signed delivery returned both assets, a second account received no links, and unsigned originals and image variants returned 401. Both assets were removed. |
@@ -30,10 +30,13 @@ GitHub Actions ran these checks and built both Linux containers successfully for
 | Hosted Redis enforcement | PASS. From a clean staging window, 60 requests without a bearer token returned 401 and the next five returned 429 with Retry-After. No paid endpoint was called. |
 | Render advice rollback | PASS. Render returned advice to `37ae3a7`, where liveness, the staging gate and signed search passed. Subsequent deploys restored the latest behavior. Both services now use protected staging on `main`. |
 | Hosted dashboard weather | PASS with partial coverage. Render directly observed Open-Meteo HTTP 429 for current and daily requests. With the MET Norway fallback enabled, two authenticated checks returned 200, reported the near-term forecast source and timestamps, and left daily data null. Daily weather and advice that requires it still need verified hosted supply. |
-| Vercel PWA configuration | Preview variables saved and verified on `nila-shoshsho-pwa`. Evaluating the existing project config produced the expected `/api` and `/advice` rewrites. An authenticated preview needs a trusted staging relay, and Production requires the approved public API origins. |
+| Protected Render demo | PASS. `AiBackend/demo_smoke.py` verified both staging gates, account signup, advice access, dashboard weather, crop calendar, plot retry and removal, and revocation on both services. |
+| Vercel PWA gateway | PASS with a protected cloud-built verification deployment. Browser-origin signup, signed calls to both APIs, logout and revocation passed via `/api` and `/advice`. A cross-origin signup was denied. A five MiB multipart request reached Render's PDF validation and was rejected without storage. Preview and Production variables are configured for the private demo. The new frontend can use this project once its repository is linked. |
 | Public release | OPEN. Requires reliable hosted daily weather for the released routes, broader hosted provider journeys, production proxy and capacity verification, alert delivery, deployed-data recovery and agricultural review for the enabled scope. |
 
 ## Configure a working demo
+
+From the repository root, run `python AiBackend/demo_smoke.py` using the advice virtual environment and the existing ignored `.env.local`. The command creates a synthetic account in protected staging, removes its test plot, and revokes its session. Start it before the demo so the free Render services have time to wake up.
 
 1. The project's Neon database is initialized and .env.local contains the serving role and Auth configuration. Use the owner credential DATABASE_MIGRATION_URL only for an explicit schema setup. On a new environment, apply the schema before starting services and grant the runtime role the required table and sequence privileges.
 2. Supply GOV_ID_KEY as a securely generated encryption key and configure Cloudinary. Apply the schema before hosting so it accepts authenticated image cleanup reservations. The live demo database already has that constraint. Add actual staff account UUIDs to STAFF_USER_IDS. Use the review endpoint to approve synthetic carriers. Keep all credentials out of source, screenshots and logs.

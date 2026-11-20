@@ -5,7 +5,7 @@
 | Surface | Routing |
 | --- | --- |
 | Android and iOS | Account base ends in `/api`. Advice base has no path prefix. Set `EXPO_PUBLIC_ACCOUNT_API_URL` and `EXPO_PUBLIC_ADVICE_API_URL` to the approved origins. |
-| Vercel PWA | The build uses relative paths `/api` and `/advice`. Vercel's `ACCOUNT_API_BASE_URL` ends in `/api` and `ADVICE_API_BASE_URL` has no path prefix. |
+| Vercel PWA | The build uses relative paths `/api` and `/advice`. The protected demo gateway injects the Render staging credential on the server. Vercel's `ACCOUNT_API_BASE_URL` ends in `/api` and `ADVICE_API_BASE_URL` has no path prefix. |
 | Protected Render staging | Account and advice both require `X-Staging-Key` on application routes. Keep this key in a private integration runner or server-side relay. `/health` is public and checks process liveness. |
 
 Obtain an access token from account signup or sign-in. Send `Authorization: Bearer <accessToken>` to private account and advice routes. Advice verifies the same token and checks the active account session. Successful logout invalidates that session on both services. Apply the account's server-reported review and ownership state in the client.
