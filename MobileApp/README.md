@@ -62,9 +62,11 @@ Home, Schemes, Crop Care, Market and News are the primary destinations. They use
 
 Other screens from Home or Settings: Fertilize, Crop calendar, Water, Post harvest, Documents, Alerts, Jobs, Chat, Profile.
 
-Home search jumps to a tool in this app. It is not a web search.
+Home search uses the advice service's feature catalog and opens the matching tool in the app.
 
 Ask Nila sends recorded speech to the advice server for transcription. Read-aloud uses `/voice/tts` with Expo Audio on Android and iOS and browser audio on the PWA.
+
+The telephone callback pilot is visible only in builds with `EXPO_PUBLIC_VOICE_CALLBACK_PILOT=true`. Backend enablement and account enrollment are required before requesting a live call.
 
 UI languages: English, Hindi, Marathi, Tamil, Bengali, Kannada, Telugu, Malayalam.
 

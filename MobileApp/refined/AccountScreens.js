@@ -313,7 +313,7 @@ function Toggle({title, description, value, onChange, disabled}) {
   );
 }
 
-function Settings({go, back}) {
+function Settings({go, back, user}) {
   const {t} = useTranslation();
   const {logout} = useContext(UserContext);
   const action = useAction();
@@ -325,6 +325,11 @@ function Settings({go, back}) {
           description="Photo, personal details and languages"
           onPress={() => go('Profile')}
         />
+        {user?.role === 'Logistics' && user.carrierApproved === false ? (
+          <Notice title="Carrier approval required">
+            A staff review is needed before you can view or accept pickups.
+          </Notice>
+        ) : null}
         <Stack gap={0}>
           <Text variant="heading">Your farm and work</Text>
           <Row
@@ -343,6 +348,11 @@ function Settings({go, back}) {
             onPress={() => go('TransportJobs')}
           />
         </Stack>
+        <Row
+          title="Staff review"
+          description="For authorized reviewers"
+          onPress={() => go('StaffReview')}
+        />
         <Stack gap={0}>
           <Text variant="heading">Preferences</Text>
           <Row
@@ -467,6 +477,18 @@ const profileSections = [
 ];
 
 function Profile({go, back, user, portrait}) {
+  const focused = useIsFocused();
+  const {refreshProfile} = useContext(UserContext);
+  const profile = useAction();
+  const completion = useAction();
+  const loadProfile = profile.run;
+  const loadCompletion = completion.run;
+  useEffect(() => {
+    if (focused) {
+      loadProfile(refreshProfile);
+      loadCompletion(() => request('account', '/auth/profile-completion'));
+    }
+  }, [focused, loadCompletion, loadProfile, refreshProfile]);
   return (
     <Screen title="Your profile" back={back}>
       <Stack gap={16}>
@@ -477,6 +499,12 @@ function Profile({go, back, user, portrait}) {
             <Text variant="small">Photo or illustration is optional</Text>
           </Stack>
         </View>
+        {Number.isFinite(completion.data?.percentage) ? (
+          <Text variant="small">
+            Profile {completion.data.percentage}% complete
+          </Text>
+        ) : null}
+        <InlineError error={profile.error || completion.error} />
         <Button
           variant="secondary"
           label="Edit profile"
@@ -535,7 +563,6 @@ function validBirthday(value) {
 function initialProfile(user) {
   return {
     username: user?.username || '',
-    role: user?.role || '',
     gender: user?.gender || '',
     birthday: displayDate(user?.dob),
     bio: user?.bio || '',
@@ -560,14 +587,17 @@ function initialProfile(user) {
 
 function ProfileEdit({go, back, user, portrait, params}) {
   const {t} = useTranslation();
-  const {updateUser} = useContext(UserContext);
-  const {roles, genders} = authOptions(t);
+  const {refreshProfile, updateUser} = useContext(UserContext);
+  const {genders} = authOptions(t);
   const [values, setValues] = useState(() => initialProfile(user));
+  const [profileVersion, setProfileVersion] = useState(user?.profileVersion);
+  const [conflict, setConflict] = useState(false);
   const [opened, setOpened] = useState(params?.section || 'personal');
   const [locationFix, setLocationFix] = useState(null);
   const [removeId, setRemoveId] = useState(false);
   const action = useAction();
   const locate = useAction();
+  const reload = useAction();
   const change = name => next =>
     setValues(previous => ({...previous, [name]: next}));
   const changeGroup = (group, name) => next =>
@@ -624,17 +654,36 @@ function ProfileEdit({go, back, user, portrait, params}) {
       const nextId = removeId
         ? {idName: '', idValue: ''}
         : {idName: governmentId.idName.trim(), idValue: enteredId};
-      const result = await updateUser({
-        ...form,
-        username: changedName ? username : undefined,
-        location: changedLocation ? {...location, ...locationFix} : undefined,
-        dob: validBirthday(birthday),
-        ...(changedId && {governmentId: nextId}),
-      });
-      return userError(result, t('UpPage.profile_updated_error_msg'));
+      try {
+        return await updateUser({
+          ...form,
+          profileVersion,
+          username: changedName ? username : undefined,
+          location: changedLocation ? {...location, ...locationFix} : undefined,
+          dob: validBirthday(birthday),
+          ...(changedId && {governmentId: nextId}),
+        });
+      } catch (error) {
+        if (error?.status === 409) {
+          setConflict(true);
+        }
+        throw error;
+      }
     });
     if (success) {
       back();
+    }
+  };
+
+  const reloadForm = async () => {
+    const fresh = await reload.run(refreshProfile);
+    if (fresh) {
+      setValues(initialProfile(fresh));
+      setProfileVersion(fresh.profileVersion);
+      setLocationFix(null);
+      setRemoveId(false);
+      setConflict(false);
+      action.reset();
     }
   };
 
@@ -668,13 +717,8 @@ function ProfileEdit({go, back, user, portrait, params}) {
             />
             <View style={styles.pair}>
               <View style={styles.flex}>
-                <Select
-                  label="Role"
-                  options={roles}
-                  value={values.role}
-                  onChange={change('role')}
-                  placeholder="Select role"
-                />
+                <Text variant="label">Account role</Text>
+                <Text>{user?.role}</Text>
               </View>
               <View style={styles.flex}>
                 <Select
@@ -823,10 +867,24 @@ function ProfileEdit({go, back, user, portrait, params}) {
           )}
         </Stack>
         <InlineError error={action.error} />
+        {conflict ? (
+          <Stack gap={8}>
+            <Text>
+              Reloading replaces the changes you have entered on this screen.
+            </Text>
+            <Button
+              label="Reload saved profile"
+              variant="secondary"
+              onPress={reloadForm}
+              disabled={reload.pending}
+            />
+            <InlineError error={reload.error} />
+          </Stack>
+        ) : null}
         <Button
           label={action.pending ? 'Saving…' : 'Save changes'}
           onPress={save}
-          disabled={action.pending}
+          disabled={action.pending || conflict}
         />
       </Stack>
     </Screen>
@@ -1020,15 +1078,9 @@ function ChoosePicture({back, user, portrait}) {
             'This image could not be read. Choose another photo.',
           );
         }
-        const formats = [
-          'image/jpeg',
-          'image/png',
-          'image/webp',
-          'image/heic',
-          'image/heif',
-        ];
+        const formats = ['image/jpeg', 'image/png', 'image/webp'];
         if (selected.type && !formats.includes(selected.type.toLowerCase())) {
-          throw new Error('Choose a JPEG, PNG, WebP, or HEIC photo.');
+          throw new Error('Choose a JPEG, PNG, or WebP photo.');
         }
         if (selected.base64.length > 2_500_000) {
           throw new Error('Choose a smaller photo.');

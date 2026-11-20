@@ -1,154 +1,171 @@
-import {createContext, useEffect, useState} from 'react';
+import {createContext, useCallback, useEffect, useRef, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {accountFetch, setUnauthorizedHandler} from '../utils/api';
+import {
+  getAccessToken,
+  restoreAccessToken,
+  setAccessToken,
+  setUnauthorizedHandler,
+} from '../utils/api';
+import {request} from '../refined/data';
 
 export const UserContext = createContext();
 
-const persistSession = async nextUser => {
-  const values = [['user', JSON.stringify(nextUser)]];
-  if (nextUser?.accessToken) {
-    values.push(['accessToken', nextUser.accessToken]);
+function readProfile(data) {
+  if (typeof data?.user?._id !== 'string' || !data.user._id) {
+    throw new Error('The server did not return a valid account.');
   }
-  await AsyncStorage.multiSet(values);
-};
+  const {accessToken, ...profile} = data.user;
+  return {accessToken, profile};
+}
+
+async function migrateSession() {
+  let token = getAccessToken() || (await restoreAccessToken());
+  const legacy = await AsyncStorage.multiGet(['accessToken', 'user']);
+  if (!token) {
+    const [[, stored], [, savedProfile]] = legacy;
+    if (stored) {
+      token = stored;
+    } else if (savedProfile) {
+      try {
+        token = JSON.parse(savedProfile)?.accessToken;
+      } catch {
+        // A damaged legacy profile cannot restore a session.
+      }
+    }
+    if (typeof token === 'string' && token) {
+      await setAccessToken(token);
+    }
+  }
+  if (legacy.some(([, value]) => value !== null)) {
+    await AsyncStorage.multiRemove(['accessToken', 'user']);
+  }
+  return getAccessToken();
+}
 
 export const UserProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [booting, setBooting] = useState(true);
+  const [restoreError, setRestoreError] = useState(null);
+  const migration = useRef(null);
+  const profileRevision = useRef(0);
 
-  useEffect(() => {
-    setUnauthorizedHandler(async () => {
+  const clearSession = useCallback(async token => {
+    if (getAccessToken() === token) {
+      profileRevision.current += 1;
       setUser(null);
-      await AsyncStorage.multiRemove(['user', 'accessToken']);
-    });
-    return () => setUnauthorizedHandler(null);
+      await setAccessToken(null);
+    }
   }, []);
 
-  const signup = async userData => {
-    try {
-      setLoading(true);
-      const res = await accountFetch('/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
+  const refreshProfile = useCallback(async signal => {
+    const token = getAccessToken();
+    const revision = ++profileRevision.current;
+    const data = await request('account', '/auth/me', {signal});
+    const {profile} = readProfile(data);
+    if (!token || token !== getAccessToken()) {
+      throw new Error('Sign in again to access your account.');
+    }
+    if (revision === profileRevision.current) {
+      setUser(profile);
+    }
+    return profile;
+  }, []);
 
-      const data = await res.json();
-      if (data.success) {
-        await persistSession(data.user);
-        setUser(data.user);
-        return {success: true, message: 'Signup Successful!'};
-      } else {
-        return {success: false, message: data.error || data.message};
+  const restoreSession = useCallback(async () => {
+    setBooting(true);
+    setRestoreError(null);
+    try {
+      if (!migration.current) {
+        migration.current = migrateSession().catch(error => {
+          migration.current = null;
+          throw error;
+        });
       }
-    } catch (err) {
-      return {success: false, message: 'Error occurred while signing up.'};
+      await migration.current;
+      if (getAccessToken()) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        try {
+          await refreshProfile(controller.signal);
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+    } catch (error) {
+      if (error?.status !== 401) {
+        setRestoreError(error);
+      }
     } finally {
-      setLoading(false);
+      setBooting(false);
+    }
+  }, [refreshProfile]);
+
+  useEffect(() => {
+    setUnauthorizedHandler(clearSession);
+    restoreSession();
+    return () => setUnauthorizedHandler(null);
+  }, [clearSession, restoreSession]);
+
+  const forgetSession = async () => {
+    setRestoreError(null);
+    try {
+      await clearSession(getAccessToken());
+    } catch (error) {
+      setRestoreError(error);
     }
   };
 
-  const loginWithEmailPassword = async loginData => {
+  const authenticate = async (path, body) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await accountFetch('/auth/login-email', {
+      const data = await request('account', path, {
         method: 'POST',
-        body: JSON.stringify(loginData),
+        publicRequest: true,
+        body,
       });
-      const data = await res.json();
-      if (data.success) {
-        await persistSession(data.user);
-        setUser(data.user);
-        return {success: true, message: 'Login Successful!'};
-      } else {
-        return {success: false, message: data.message};
+      const {accessToken, profile} = readProfile(data);
+      if (typeof accessToken !== 'string' || !accessToken) {
+        throw new Error('The server did not issue a sign-in token.');
       }
-    } catch (err) {
-      return {
-        success: false,
-        message: 'Error logging in with email and password',
-      };
+      try {
+        await setAccessToken(accessToken);
+      } catch (error) {
+        await clearSession(accessToken);
+        throw error;
+      }
+      setUser(profile);
+      return {success: true, user: profile};
     } finally {
       setLoading(false);
     }
   };
 
   const logout = async () => {
-    setLoading(true);
+    const token = getAccessToken();
     try {
-      await accountFetch('/auth/logout', {
-        method: 'POST',
-      });
-    } catch (err) {
-      if (err) {
-        // Network may be down. Local sign-out still proceeds.
+      const data = await request('account', '/auth/logout', {method: 'POST'});
+      await clearSession(token);
+      return data;
+    } catch (error) {
+      if (error?.status === 401 && !getAccessToken()) {
+        return {success: true};
       }
-    }
-    setUser(null);
-    await AsyncStorage.removeItem('user');
-    await AsyncStorage.removeItem('accessToken');
-    setLoading(false);
-    return {success: true, message: 'Logout Successful!'};
-  };
-
-  const updateUser = async userData => {
-    try {
-      setLoading(true);
-
-      if (userData) {
-        const res = await accountFetch('/auth/update-profile', {
-          method: 'PUT',
-          body: JSON.stringify(userData),
-        });
-        const data = await res.json();
-        if (data.success) {
-          setUser(data.user);
-          await persistSession(data.user);
-          return {success: true, message: 'Profile updated successfully!'};
-        } else {
-          return {
-            success: false,
-            message: data.message || 'Failed to update profile.',
-          };
-        }
-      }
-
-      return {success: false, message: 'No data provided to update.'};
-    } catch (err) {
-      return {success: false, message: `${err}`};
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
-  const updateProfilePic = async profilePic => {
-    try {
-      const response = await accountFetch('/auth/update-profile-pic', {
-        method: 'PUT',
-        body: JSON.stringify({
-          profilePic: profilePic,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        await persistSession(data.user);
-        setUser(data.user);
-        return {
-          success: true,
-          message: 'Profile picture updated successfully',
-        };
-      } else {
-        return {
-          success: false,
-          message: data.message || 'Failed to update profile picture',
-        };
-      }
-    } catch (err) {
-      return {
-        success: false,
-        message: 'An error occurred during the image upload.',
-      };
+  const update = async (path, body) => {
+    const token = getAccessToken();
+    // A GET started before this write cannot replace the saved profile.
+    ++profileRevision.current;
+    const data = await request('account', path, {method: 'PUT', body});
+    const {profile} = readProfile(data);
+    if (token && token === getAccessToken()) {
+      ++profileRevision.current;
+      setUser(profile);
     }
+    return {success: true, user: profile};
   };
 
   return (
@@ -156,12 +173,17 @@ export const UserProvider = ({children}) => {
       value={{
         user,
         loading,
-        signup,
-        loginWithEmailPassword,
+        booting,
+        restoreError,
+        restoreSession,
+        forgetSession,
+        refreshProfile,
+        signup: body => authenticate('/auth/signup', body),
+        loginWithEmailPassword: body => authenticate('/auth/login-email', body),
         logout,
-        updateUser,
-        updateProfilePic,
-        setUser,
+        updateUser: body => update('/auth/update-profile', body),
+        updateProfilePic: profilePic =>
+          update('/auth/update-profile-pic', {profilePic}),
       }}>
       {children}
     </UserContext.Provider>

@@ -122,3 +122,41 @@ test('shows daily data independently when current conditions and the mandi feed 
     'No mandi records were returned for this search.',
   );
 });
+
+test('maps catalog IDs to Refined 2 destinations and ignores unknown IDs', async () => {
+  jest.useFakeTimers();
+  const go = jest.fn();
+  try {
+    request.mockImplementation(async (_client, path) =>
+      path.startsWith('/search')
+        ? {
+            results: [
+              {id: 'compare', title: 'Price compare', route: 'Compare'},
+              {id: 'unrecognized', title: 'Unknown tool', route: 'Unknown'},
+            ],
+          }
+        : {records: []},
+    );
+    await act(async () => {
+      app = ReactTestRenderer.create(<HomeScreen user={user} go={go} />);
+    });
+    const search = app.root
+      .findAllByType('Field')
+      .find(node => node.props.placeholder === 'Find a farm tool');
+    await act(async () => search.props.onChangeText('compare'));
+    await act(async () => jest.advanceTimersByTime(300));
+    expect(request).toHaveBeenCalledWith(
+      'advice',
+      '/search?q=compare',
+      expect.any(Object),
+    );
+    const rows = app.root.findAllByType('Row');
+    expect(rows.some(row => row.props.title === 'Unknown tool')).toBe(false);
+    await act(async () =>
+      rows.find(row => row.props.title === 'Price compare').props.onPress(),
+    );
+    expect(go).toHaveBeenCalledWith('Market', {tab: 'Compare'});
+  } finally {
+    jest.useRealTimers();
+  }
+});

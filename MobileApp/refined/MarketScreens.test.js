@@ -126,3 +126,35 @@ test('keeps the outlook unavailable and labels returned rows as current state ar
   expect(tree).toContain('Current arrivals across Maharashtra');
   expect(tree).toContain('2300 Rs/quintal');
 });
+
+test('submits displayed price records for analysis and shows the returned source', async () => {
+  const record = {
+    commodity: 'Wheat',
+    market: 'Pune',
+    modal_price: 2400,
+    unit: 'Rs/quintal',
+    arrival_date: '20/11/2026',
+  };
+  adviceFetch
+    .mockResolvedValueOnce(ok({records: [record], source: 'AGMARKNET'}))
+    .mockResolvedValueOnce(
+      ok({
+        analysis: 'One submitted observation.',
+        source: 'Submitted market records',
+        asOf: '2026-11-20 to 2026-11-20',
+      }),
+    );
+  const root = await render();
+  await press(root, 'Button', 'label', 'Show prices');
+  await press(root, 'Button', 'label', 'Analyze prices on this page');
+  expect(adviceFetch).toHaveBeenLastCalledWith(
+    '/api/market-analysis',
+    expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({records: [record]}),
+    }),
+  );
+  const display = JSON.stringify(renderer.toJSON());
+  expect(display).toContain('Submitted market records');
+  expect(display).toContain('One submitted observation.');
+});

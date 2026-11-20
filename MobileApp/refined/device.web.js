@@ -193,6 +193,26 @@ export async function chooseDocument() {
     : null;
 }
 
+export async function openRemoteDocument(loadUrl) {
+  // Open from the click before refreshing the link to preserve user activation.
+  const tab = window.open('about:blank', '_blank');
+  if (!tab) {
+    throw new Error('Allow pop-ups for this app to open a PDF.');
+  }
+  tab.opener = null;
+  try {
+    const url = await loadUrl();
+    const link = tab.document.createElement('a');
+    link.href = url;
+    link.rel = 'noreferrer';
+    tab.document.body.appendChild(link);
+    link.click();
+  } catch (error) {
+    tab.close();
+    throw error;
+  }
+}
+
 export async function readRemoteDocument(url, name = 'document.pdf') {
   if (typeof url !== 'string' || !url.startsWith('https://')) {
     throw new Error(
