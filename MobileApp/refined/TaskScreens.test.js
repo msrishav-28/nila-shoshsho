@@ -150,3 +150,75 @@ test('shows the posted pickup returned by the account service', async () => {
   );
   expect(named(root, 'Button', 'Cancel pickup')).toBeDefined();
 });
+
+test('reuses a pickup request key after a lost response and replaces it after success', async () => {
+  const pickup = {id: 42, crop: 'Wheat', quantityKg: 80, status: 'OPEN'};
+  accountFetch
+    .mockImplementationOnce(() => apiResponse({jobs: []}))
+    .mockRejectedValueOnce(new TypeError('Connection lost'))
+    .mockImplementation(() => apiResponse({job: pickup}));
+  const root = await render('TransportJobs', {farm});
+  await change(root, 'Field', 'Quantity', '80');
+  await tap(root, 'Post pickup');
+  await tap(root, 'Post pickup');
+  await change(root, 'Field', 'Quantity', '80');
+  await tap(root, 'Post pickup');
+
+  const posts = accountFetch.mock.calls.filter(
+    ([, options]) => options.method === 'POST',
+  );
+  const keys = posts.map(([, options]) => options.headers['Idempotency-Key']);
+  expect(keys).toHaveLength(3);
+  expect(keys[0]).toMatch(/^[A-Za-z0-9_-]{8,100}$/);
+  expect(keys[1]).toBe(keys[0]);
+  expect(keys[2]).not.toBe(keys[0]);
+  expect(posts[1][1].body).toBe(posts[0][1].body);
+});
+
+test('shows the approval requirement until the server permits a carrier to see pickups', async () => {
+  accountFetch
+    .mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({
+        success: false,
+        message: 'Carrier approval required',
+      }),
+    })
+    .mockImplementationOnce(() =>
+      apiResponse({jobs: [{id: 42, status: 'OPEN'}]}),
+    );
+  const root = await render('TransportJobs', {
+    user: {...user, role: 'Logistics', carrierApproved: false},
+  });
+  expect(named(root, 'Notice', undefined)?.props.title).toBe(
+    'Carrier approval required',
+  );
+  expect(named(root, 'Button', 'Accept pickup')).toBeUndefined();
+  await tap(root, 'Check approval');
+  expect(named(root, 'Button', 'Accept pickup')).toBeDefined();
+});
+
+test('honors the server retry delay for posting pickups', async () => {
+  accountFetch
+    .mockImplementationOnce(() => apiResponse({jobs: []}))
+    .mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+      json: async () => ({code: 'rate_limited', message: 'Too many requests'}),
+      headers: new Map([
+        ['Retry-After', '30'],
+        ['X-Request-ID', 'synthetic-id'],
+      ]),
+    });
+  const root = await render('TransportJobs', {farm});
+  await change(root, 'Field', 'Quantity', '80');
+  await tap(root, 'Post pickup');
+  const error = root.findAllByType('Result').find(node => node.props.error)
+    .props.error;
+  expect(error.code).toBe('rate_limited');
+  expect(error.requestId).toBe('synthetic-id');
+  expect(error.retryAt).toBeGreaterThan(Date.now());
+  await tap(root, 'Post pickup');
+  expect(accountFetch).toHaveBeenCalledTimes(2);
+});

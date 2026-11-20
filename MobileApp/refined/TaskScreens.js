@@ -860,6 +860,8 @@ function JobsPanel({partner, user, farm}) {
   const [quantity, setQuantity] = useState('');
   const [city, setCity] = useState(farm?.place || placeName(user));
   const [state, setState] = useState(user?.location?.state || '');
+  const postAttempt = useRef(null);
+  const posting = useRef(false);
   const write = useAction();
 
   const loadJobs = useCallback(async signal => {
@@ -875,6 +877,9 @@ function JobsPanel({partner, user, farm}) {
       }
     } catch (error) {
       if (!signal?.aborted) {
+        if (error?.status === 403) {
+          setJobs(null);
+        }
         setLoadError(error);
       }
     } finally {
@@ -897,26 +902,50 @@ function JobsPanel({partner, user, farm}) {
     ]);
   }, []);
 
-  const postJob = () =>
-    write.run(async () => {
-      const data = await request('account', '/logistics/jobs', {
-        method: 'POST',
-        body: {
+  const postJob = async () => {
+    if (
+      posting.current ||
+      (write.error?.status === 429 && write.error.retryAt > Date.now())
+    ) {
+      return;
+    }
+    posting.current = true;
+    try {
+      await write.run(async () => {
+        const body = {
           crop: requireValue(crop, 'a crop'),
           quantityKg: requirePositive(quantity, 'quantity in kilograms'),
           pickupCity: requireValue(city, 'a pickup city'),
           pickupState: requireValue(state, 'a pickup state'),
-        },
+        };
+        const payload = JSON.stringify(body);
+        if (postAttempt.current?.payload !== payload) {
+          const key =
+            global.crypto?.randomUUID?.() ||
+            [Date.now(), Math.random(), Math.random()]
+              .map(value => value.toString(36).replace('.', ''))
+              .join('-');
+          postAttempt.current = {payload, key};
+        }
+        const data = await request('account', '/logistics/jobs', {
+          method: 'POST',
+          headers: {'Idempotency-Key': postAttempt.current.key},
+          body: payload,
+        });
+        if (data?.job?.id == null) {
+          throw new Error(
+            'Could not confirm the pickup. Retry this submission or refresh your jobs before starting a new one.',
+          );
+        }
+        postAttempt.current = null;
+        update(data.job);
+        setQuantity('');
+        return data.job;
       });
-      if (data?.job?.id == null) {
-        throw new Error(
-          'Could not confirm the pickup. Refresh your jobs before posting again.',
-        );
-      }
-      update(data.job);
-      setQuantity('');
-      return data.job;
-    });
+    } finally {
+      posting.current = false;
+    }
+  };
 
   const changeJob = (id, change) =>
     write.run(async () => {
@@ -934,7 +963,7 @@ function JobsPanel({partner, user, farm}) {
         update(data.job);
         return data.job;
       } catch (error) {
-        if (error?.status === 404) {
+        if ([403, 404, 409].includes(error?.status)) {
           await loadJobs();
         }
         throw error;
@@ -968,6 +997,30 @@ function JobsPanel({partner, user, farm}) {
       : 'Keep track of the jobs you take here.'
     : 'Your posted jobs and their status will appear here.';
   const busy = write.pending || loading;
+  const approvalRequired =
+    partner &&
+    (loadError?.status === 403 || (user?.carrierApproved === false && !jobs));
+
+  if (approvalRequired) {
+    return (
+      <Stack>
+        <Notice title="Carrier approval required">
+          Your account needs staff approval before you can view or accept
+          pickups.
+        </Notice>
+        <Result
+          error={loadError?.status === 403 ? null : loadError}
+          pending={loading}
+        />
+        <Button
+          label="Check approval"
+          variant="secondary"
+          onPress={() => loadJobs()}
+          disabled={busy}
+        />
+      </Stack>
+    );
+  }
 
   return (
     <Stack>
