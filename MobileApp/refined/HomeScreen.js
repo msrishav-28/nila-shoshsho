@@ -5,6 +5,8 @@ import NetInfo from '@react-native-community/netinfo';
 import {useTranslation} from 'react-i18next';
 import {hasMapPoint} from '../utils/place';
 import {request} from './data';
+import {httpUrl} from './marketData';
+import {openLink} from './marketUi';
 import {
   Button,
   Card,
@@ -155,8 +157,15 @@ function useLocalPicture(user, farm, offline) {
         marketSource: market.value?.source,
         fetchedAt: new Date().toISOString(),
       };
+      setPicture({
+        key,
+        ...next,
+        daily: weather.value?.open_meteo?.daily,
+        warningsUnavailable: weather.value?.warnings === null,
+        marketEmpty:
+          Array.isArray(market.value?.records) && !market.value.records.length,
+      });
       if (current || record) {
-        setPicture({key, ...next});
         AsyncStorage.setItem(key, JSON.stringify(next)).catch(() => {});
       }
     }
@@ -168,16 +177,30 @@ function useLocalPicture(user, farm, offline) {
   }, [key, hasWeatherLocation, lat, lon, state, farm?.crop, offline]);
 
   return {
-    hasLocation: Boolean(key),
+    hasWeatherLocation,
+    hasMarketLocation: Boolean(state),
     picture: key && picture?.key === key ? picture : null,
   };
 }
 
-function LocalPicture({data, hasLocation, offline, go}) {
+function LocalPicture({
+  data,
+  hasWeatherLocation,
+  hasMarketLocation,
+  offline,
+  go,
+}) {
   const weather = data?.weather;
+  const daily = data?.daily;
+  const forecast = weather?.kind === 'forecast';
+  const sourceUrl = httpUrl(weather?.sourceUrl);
+  const licenseUrl = httpUrl(weather?.licenseUrl);
   const market = data?.market;
   const price = market?.modal_price ?? market?.modalPrice;
-  const arrival = market?.arrival_date ?? market?.arrivalDate;
+  const arrival = market?.arrival_date || market?.asOf;
+  const marketSource = market?.source || data?.marketSource;
+  const hasPrice =
+    price != null && price !== '' && arrival && market?.unit && marketSource;
   return (
     <Card>
       <Text variant="section">
@@ -191,28 +214,82 @@ function LocalPicture({data, hasLocation, offline, go}) {
         </Text>
       ) : null}
       {weather?.temperature != null ? (
-        <Row
-          title={`${Math.round(weather.temperature)}°C`}
-          description={weather.source || 'Open-Meteo'}
-          icon="cloud"
-        />
+        <>
+          <Row
+            title={`${
+              forecast ? 'Near-term forecast' : 'Current weather'
+            } · ${Math.round(weather.temperature)}°C`}
+            description={[
+              weather.source,
+              weather.asOf &&
+                (forecast
+                  ? `Valid ${weather.asOf}`
+                  : `As of ${weather.asOf} UTC`),
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+            icon="cloud"
+            onPress={sourceUrl ? () => openLink(sourceUrl) : undefined}
+          />
+          {forecast && licenseUrl ? (
+            <Button
+              label="Weather data license"
+              variant="ghost"
+              onPress={() => openLink(licenseUrl)}
+            />
+          ) : null}
+        </>
+      ) : hasWeatherLocation && !offline && data && !data.cached ? (
+        <Text tone="muted">Current weather is unavailable right now.</Text>
       ) : null}
-      {price != null && arrival && data.marketSource ? (
+      {daily?.dates?.length ? (
         <Row
-          title={`${market.commodity}: ₹${price} per quintal`}
-          description={`${data.marketSource} · ${arrival}`}
+          title="Daily weather outlook"
+          description={[
+            daily.source,
+            daily.dates[0],
+            daily.temp_min?.[0] != null && daily.temp_max?.[0] != null
+              ? `${daily.temp_min[0]}–${daily.temp_max[0]} °C`
+              : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+          icon="calendar"
+        />
+      ) : hasWeatherLocation && !offline && data && !data.cached ? (
+        <Text tone="muted">
+          Daily weather outlook is unavailable right now.
+        </Text>
+      ) : null}
+      {data?.warningsUnavailable && !offline ? (
+        <Text variant="caption" tone="muted">
+          Official weather warnings are unavailable.
+        </Text>
+      ) : null}
+      {hasPrice ? (
+        <Row
+          title={`${market.commodity}: ${price} ${market.unit}`}
+          description={`${marketSource} · ${arrival}`}
           icon="trending-up"
           onPress={() => go('Market')}
         />
-      ) : null}
-      {!weather && !(price != null && arrival && data?.marketSource) ? (
+      ) : hasMarketLocation && !offline && data && !data.cached ? (
         <Text tone="muted">
-          {offline
-            ? 'Connect to load local weather, market information and farm updates.'
-            : hasLocation
-            ? 'Local weather and mandi information are unavailable right now.'
-            : 'Weather and mandi information will appear after you add a location.'}
+          {data?.marketEmpty
+            ? 'No mandi records were returned for this search.'
+            : 'Mandi price data is unavailable right now.'}
         </Text>
+      ) : null}
+      {offline && !weather && !hasPrice ? (
+        <Text tone="muted">
+          Connect to load local weather and market information.
+        </Text>
+      ) : !offline && !hasWeatherLocation && !hasMarketLocation ? (
+        <Text tone="muted">
+          Add a location to see weather and mandi information.
+        </Text>
+      ) : !offline && !data ? (
+        <Text tone="muted">Loading local updates…</Text>
       ) : null}
       {offline ? (
         <Button
@@ -233,7 +310,11 @@ export function HomeScreen({user, farm, go, offline}) {
       .toLowerCase()
       .includes(query.trim().toLowerCase()),
   );
-  const {hasLocation, picture} = useLocalPicture(user, farm, offline);
+  const {hasWeatherLocation, hasMarketLocation, picture} = useLocalPicture(
+    user,
+    farm,
+    offline,
+  );
   function toolRows(items) {
     return items.map(item => (
       <Row
@@ -320,7 +401,8 @@ export function HomeScreen({user, farm, go, offline}) {
           </Stack>
           <LocalPicture
             data={picture}
-            hasLocation={hasLocation}
+            hasWeatherLocation={hasWeatherLocation}
+            hasMarketLocation={hasMarketLocation}
             offline={offline}
             go={go}
           />

@@ -50,6 +50,7 @@ const prompts = [
     'layers',
   ],
 ];
+const liveFeedLabels = {market_prices: 'mandi prices', weather: 'weather'};
 
 function Answer({entry, lang}) {
   const stopPlayback = useRef(null);
@@ -169,6 +170,7 @@ export function AskNilaScreen({
   const recorder = useRef(null);
   const work = useRef(0);
   const sending = useRef(null);
+  const retryAt = useRef(0);
   const [seed, setSeed] = useState(params?.question || '');
   const draft = voiceDraft || seed;
   function editDraft(value) {
@@ -309,6 +311,11 @@ export function AskNilaScreen({
     if (!question || busy || sending.current) {
       return;
     }
+    if (retryAt.current > Date.now()) {
+      const seconds = Math.ceil((retryAt.current - Date.now()) / 1000);
+      setError(`Try again in ${seconds} seconds.`);
+      return;
+    }
     editDraft(question);
     if (offline) {
       setStage('connection');
@@ -342,6 +349,24 @@ export function AskNilaScreen({
       setStage('compose');
     } catch (failure) {
       if (!controller.signal.aborted) {
+        if (failure?.status === 429 && Number.isFinite(failure.retryAt)) {
+          retryAt.current = failure.retryAt;
+        }
+        if (failure?.code === 'live_data_unavailable') {
+          const unavailable = failure.body?.unavailable;
+          const labels = Array.isArray(unavailable)
+            ? Object.keys(liveFeedLabels)
+                .filter(feed => unavailable.includes(feed))
+                .map(feed => liveFeedLabels[feed])
+            : [];
+          setError(
+            labels.length
+              ? `Unavailable feeds: ${labels.join(', ')}. ${message(failure)}`
+              : message(failure),
+          );
+          setStage('unavailable');
+          return;
+        }
         setError(message(failure));
         setStage('connection');
       }
@@ -410,25 +435,29 @@ export function AskNilaScreen({
     );
   }
 
-  if (stage === 'review' || stage === 'connection') {
+  if (['review', 'connection', 'unavailable'].includes(stage)) {
     const connection = stage === 'connection';
+    const unavailable = stage === 'unavailable';
+    const retry = connection || unavailable;
     return (
       <Screen
-        title={connection ? 'Ask Nila' : 'Review your question'}
+        title={retry ? 'Ask Nila' : 'Review your question'}
         back={() => setStage('compose')}>
         <Text variant="title">
-          {connection
+          {unavailable
+            ? 'Live data is unavailable'
+            : connection
             ? 'Your question is safe here'
             : 'Is this what you meant?'}
         </Text>
         <Text tone="muted">
-          {connection
-            ? 'We could not connect. Try again when you have a connection, or edit your question.'
+          {unavailable
+            ? 'Your question is saved here. You can try again later or edit it.'
+            : connection
+            ? 'We could not get an answer. You can try again or edit your question.'
             : 'Correct any words before you send.'}
         </Text>
-        <Notice
-          title={connection ? 'Unsent question' : 'Your words'}
-          tone="default">
+        <Notice title={retry ? 'Your question' : 'Your words'} tone="default">
           {draft}
         </Notice>
         {error ? (
@@ -437,19 +466,19 @@ export function AskNilaScreen({
           </Text>
         ) : null}
         <Button
-          label={connection ? 'Try again' : 'Send question'}
-          icon={connection ? 'refresh-cw' : 'send'}
+          label={retry ? 'Try again' : 'Send question'}
+          icon={retry ? 'refresh-cw' : 'send'}
           onPress={send}
           disabled={Boolean(busy)}
         />
         <Button
-          label={connection ? 'Edit question' : 'Edit words'}
+          label={retry ? 'Edit question' : 'Edit words'}
           icon="edit-3"
           variant="secondary"
           onPress={() => setStage('compose')}
           disabled={Boolean(busy)}
         />
-        {!connection ? (
+        {!retry ? (
           <Row
             title="Record again"
             description="Replace this recording"
@@ -457,7 +486,7 @@ export function AskNilaScreen({
             onPress={startRecording}
           />
         ) : null}
-        {!connection ? (
+        {!retry ? (
           <Text variant="caption" tone="muted">
             You can change the crop or market in your question.
           </Text>
