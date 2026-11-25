@@ -20,6 +20,10 @@ Set the public HTTPS service addresses for native release builds through `EXPO_P
 
 Use the [release checklist](../backend/RELEASE.md) before promotion or submission.
 
+## Production backend verification
+
+Use [render.production.yaml](../render.production.yaml) for separate account and advice services. The free compute configuration is for protected verification and shares Render's workspace usage limits. Render generates the access gate on the account service and shares it with the advice service. Enter the provider settings through Render's private environment configuration. Verify both service URLs and authenticated journeys before changing Vercel production routing.
+
 ## Release paths
 
 ```mermaid

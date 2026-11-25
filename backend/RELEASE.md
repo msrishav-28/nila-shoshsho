@@ -14,6 +14,8 @@ A read-only Neon check confirmed that the app's serving role can read all ten ex
 
 The Render workspace listed the account and advice staging services. Both health endpoints responded with HTTP 200. A request to the account profile endpoint without staging access returned HTTP 404. The account and advice test suites passed again with 26 and 58 tests, respectively. Hosted sign-in and authenticated advice remain unverified. Run the provider smoke tests only in an approved environment.
 
+Live provider checks through the advice handlers confirmed that Sarvam synthesized a valid waveform and transcribed the synthetic audio sample. The checks used an isolated profile and did not exercise hosted sign-in. OpenAI generation returned HTTP 429 with an exhausted credit balance. Gemini returned HTTP 503 for text and crop-photo requests. A model lookup succeeded for both providers. Verify actual generation before opening public traffic.
+
 Earlier records report synthetic Neon account and restore checks dated 20 November 2026. Use Git history for the original evidence and environment-specific details. Rehearse hosted restoration before release.
 
 ## Acceptance checklist
