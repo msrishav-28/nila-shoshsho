@@ -219,6 +219,13 @@ def test_all_advice_routes_with_verified_identity_and_controlled_providers(
         assert client.get("/search").status_code == 404
         client.environ_base["HTTP_X_STAGING_KEY"] = "advice-fixture-stage-key" * 2
         client.environ_base["HTTP_AUTHORIZATION"] = "Bearer " + token
+        assert client.post("/govscheme", json=["farmer"]).status_code == 400
+        assert client.post("/govscheme", json={"query": 123}).status_code == 400
+        with monkeypatch.context() as unconfigured:
+            unconfigured.setenv("MYSCHEME_API_KEY", "")
+            response = client.post("/govscheme", json={"query": "farmer"})
+            assert response.status_code == 503
+            assert response.get_json()["link"] == "https://www.myscheme.gov.in"
         assert client.get("/weather?lat=21").status_code == 400
         assert client.get("/weather?lat=&lon=76").status_code == 400
         forecast = client.get("/weather?lat=21&lon=76").get_json()

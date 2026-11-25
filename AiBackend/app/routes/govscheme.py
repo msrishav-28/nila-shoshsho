@@ -11,8 +11,11 @@ MYSCHEME_SEARCH = "https://api.myscheme.gov.in/search/v4/schemes"
 
 @govscheme_bp.route("/govscheme", methods=["POST"])
 def get_gov_scheme_info():
-    data = request.get_json(silent=True) or {}
-    user_query = (data.get("query") or "").strip()
+    data = request.get_json(silent=True)
+    query = data.get("query") if isinstance(data, dict) else None
+    if not isinstance(query, str):
+        return jsonify(error="Query must be a string"), 400
+    user_query = query.strip()[:120]
     if not user_query:
         return jsonify({"error": "Query not provided"}), 400
 
@@ -29,7 +32,7 @@ def get_gov_scheme_info():
     try:
         response = requests.get(
             MYSCHEME_SEARCH,
-            params={"lang": "en", "q": user_query[:120]},
+            params={"lang": "en", "q": user_query},
             headers={"x-api-key": api_key},
             timeout=provider_timeout(20),
         )
