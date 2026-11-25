@@ -15,7 +15,10 @@ const worker = readFileSync(
 function createWorker() {
   const listeners = {};
   const response = {body: 'app shell'};
-  const cache = {match: jest.fn().mockResolvedValue(response)};
+  const cache = {
+    addAll: jest.fn().mockResolvedValue(undefined),
+    match: jest.fn().mockResolvedValue(response),
+  };
   const caches = {
     open: jest.fn().mockResolvedValue(cache),
     keys: jest.fn().mockResolvedValue([old, 'another-app', current]),
@@ -27,6 +30,7 @@ function createWorker() {
     SHELL_CACHE: current,
     STATIC_ASSETS: [entry, staticFile],
     URL,
+    Request: jest.fn((url, options) => ({url, ...options})),
     fetch,
     caches,
     self: {
@@ -54,6 +58,22 @@ function createWorker() {
 
   return {cache, caches, claim, fetch, listeners, request, response};
 }
+
+test('preloads only static files using same-origin preview access', async () => {
+  const {cache, listeners} = createWorker();
+  const waitUntil = jest.fn();
+  listeners.install({waitUntil});
+  await waitUntil.mock.calls[0][0];
+
+  expect(cache.addAll).toHaveBeenCalledWith(
+    [entry, staticFile].map(url => ({
+      url,
+      cache: 'reload',
+      credentials: 'same-origin',
+      redirect: 'error',
+    })),
+  );
+});
 
 test('serves the cached entry when an offline launch cannot reach the host', async () => {
   const {request, response, cache} = createWorker();

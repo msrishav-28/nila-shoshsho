@@ -10,7 +10,12 @@ self.addEventListener('install', event => {
       .then(cache =>
         cache.addAll(
           STATIC_ASSETS.map(
-            url => new Request(url, {cache: 'reload', credentials: 'omit'}),
+            url =>
+              new Request(url, {
+                cache: 'reload',
+                credentials: 'same-origin',
+                redirect: 'error',
+              }),
           ),
         ),
       ),
