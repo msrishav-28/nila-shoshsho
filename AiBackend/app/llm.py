@@ -171,7 +171,7 @@ def route_models(question, lang, prefer_gemini=False):
     if not any(configured.values()):
         raise AdvisorUnavailable(503)
     lowered = question.lower()
-    if prefer_gemini:
+    if prefer_gemini or os.getenv("ADVICE_PRIMARY_PROVIDER") == "gemini":
         order = [ask_gemini, ask_openai, ask_perplexity]
     elif any(hint in lowered for hint in FRESH_HINTS):
         order = [ask_perplexity, ask_openai, ask_gemini]

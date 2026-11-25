@@ -18,6 +18,8 @@ Live provider checks through the advice handlers confirmed that Sarvam synthesiz
 
 The separate Render account and advice services deployed from commit `a6a4047`. Both health endpoints returned HTTP 200. The profile and search routes returned HTTP 404 without the generated access key. This verifies availability and the access gate. A signed-in hosted journey and Vercel production cutover are still open.
 
+Gemini 3.5 Flash-Lite returned a live Ask Nila answer and correctly declined to identify a crop in a blank synthetic image. These were handler checks with an isolated profile. Validate real crop cases with agricultural review and test the signed-in hosted journey before release.
+
 Earlier records report synthetic Neon account and restore checks dated 20 November 2026. Use Git history for the original evidence and environment-specific details. Rehearse hosted restoration before release.
 
 ## Acceptance checklist

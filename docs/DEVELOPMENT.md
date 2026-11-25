@@ -14,6 +14,8 @@ Test real handlers with controlled provider responses and isolated records. Incl
 | `backend` | `npm ci` | `npm start` | `npm test`, `npm run lint`, `npm run format:check` |
 | `AiBackend` | `python -m pip install -r requirements-test.txt` | `python run.py` | `python -m pytest -q app` |
 
-Start both servers for signed-in journeys. For local web development, set `EXPO_PUBLIC_ACCOUNT_API_URL` to `http://localhost:5001/api` and `EXPO_PUBLIC_ADVICE_API_URL` to `http://localhost:5002` before starting Expo. Allow the Expo web origin in the server configuration. The Vercel build uses same-origin routes. The Android emulator reaches the host at `10.0.2.2` by default.
+Start both servers for signed-in journeys. Browser development uses the local account and advice ports by default. The Android emulator reaches the host at `10.0.2.2` and the iPhone simulator uses `localhost`. Physical test devices require server addresses they can reach. Set the two `EXPO_PUBLIC_*` API URLs only for builds that need a different endpoint. The Vercel build uses same-origin routes.
+
+The root environment file supplies private credentials to the servers. Set `GEMINI_MODEL=gemini-3.5-flash-lite` and `ADVICE_PRIMARY_PROVIDER=gemini`. Optional OpenAI credentials remain available as a fallback when its account can serve requests.
 
 See the [deployment guide](DEPLOYMENT.md) for release configuration and the [release record](../backend/RELEASE.md) for evidence standards.

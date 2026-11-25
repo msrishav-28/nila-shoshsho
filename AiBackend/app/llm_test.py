@@ -34,6 +34,7 @@ def test_missing_credentials_remain_unavailable(monkeypatch):
 
 
 def test_failing_configured_provider_uses_available_fallback(monkeypatch):
+    monkeypatch.delenv("ADVICE_PRIMARY_PROVIDER", raising=False)
     monkeypatch.setenv("OPENAI_API_KEY", "fixture")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "")
     monkeypatch.setenv("GEMINI_API_KEY", "fixture")
@@ -56,3 +57,17 @@ def test_failing_configured_provider_uses_available_fallback(monkeypatch):
     monkeypatch.setattr(llm, "ask_gemini", gemini)
     assert llm.route_models("Explain crop rotation", "English")[1] == "gemini"
     assert calls == ["openai", "gemini"]
+
+
+def test_gemini_can_be_primary_without_removing_openai_credentials(monkeypatch):
+    monkeypatch.setenv("ADVICE_PRIMARY_PROVIDER", "gemini")
+    monkeypatch.setenv("OPENAI_API_KEY", "fixture")
+    monkeypatch.setenv("GEMINI_API_KEY", "fixture")
+    monkeypatch.setenv("GEMINI_MODEL", "fixture-model")
+
+    def unexpected_openai(*args):
+        pytest.fail("OpenAI should not be called while Gemini is responding")
+
+    monkeypatch.setattr(llm, "ask_openai", unexpected_openai)
+    monkeypatch.setattr(llm, "ask_gemini", lambda *args: ("Fixture advice", "gemini"))
+    assert llm.route_models("Explain crop rotation", "English")[1] == "gemini"
