@@ -16,6 +16,8 @@ The Render workspace listed the account and advice staging services. Both health
 
 Live provider checks through the advice handlers confirmed that Sarvam synthesized a valid waveform and transcribed the synthetic audio sample. The checks used an isolated profile and did not exercise hosted sign-in. OpenAI generation returned HTTP 429 with an exhausted credit balance. Gemini returned HTTP 503 for text and crop-photo requests. A model lookup succeeded for both providers. Verify actual generation before opening public traffic.
 
+The separate Render account and advice services deployed from commit `a6a4047`. Both health endpoints returned HTTP 200. The profile and search routes returned HTTP 404 without the generated access key. This verifies availability and the access gate. A signed-in hosted journey and Vercel production cutover are still open.
+
 Earlier records report synthetic Neon account and restore checks dated 20 November 2026. Use Git history for the original evidence and environment-specific details. Rehearse hosted restoration before release.
 
 ## Acceptance checklist
