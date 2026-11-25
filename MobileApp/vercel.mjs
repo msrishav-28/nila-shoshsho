@@ -22,10 +22,6 @@ function apiBase(name) {
 
 const account = apiBase('ACCOUNT_API_BASE_URL');
 const advice = apiBase('ADVICE_API_BASE_URL');
-const cacheHeader = (source, value) => ({
-  source,
-  headers: [{key: 'Cache-Control', value}],
-});
 
 export const config = {
   framework: null,
@@ -34,13 +30,25 @@ export const config = {
     'EXPO_PUBLIC_ACCOUNT_API_URL=/api EXPO_PUBLIC_ADVICE_API_URL=/advice npm run build:web',
   outputDirectory: 'dist',
   headers: [
-    cacheHeader('/', 'no-cache'),
-    cacheHeader('/index.html', 'no-cache'),
-    cacheHeader('/manifest.webmanifest', 'no-cache'),
-    cacheHeader('/offline-startup.js', 'no-cache'),
-    cacheHeader('/sw.js', 'no-cache'),
-    cacheHeader('/api/:path*', 'private, no-store'),
-    cacheHeader('/advice/:path*', 'private, no-store'),
+    {source: '/', headers: [{key: 'Cache-Control', value: 'no-cache'}]},
+    {source: '/index.html', headers: [{key: 'Cache-Control', value: 'no-cache'}]},
+    {
+      source: '/manifest.webmanifest',
+      headers: [{key: 'Cache-Control', value: 'no-cache'}],
+    },
+    {
+      source: '/offline-startup.js',
+      headers: [{key: 'Cache-Control', value: 'no-cache'}],
+    },
+    {source: '/sw.js', headers: [{key: 'Cache-Control', value: 'no-cache'}]},
+    {
+      source: '/api/:path*',
+      headers: [{key: 'Cache-Control', value: 'private, no-store'}],
+    },
+    {
+      source: '/advice/:path*',
+      headers: [{key: 'Cache-Control', value: 'private, no-store'}],
+    },
   ],
   rewrites: [
     {source: '/api/:path*', destination: `${account}/:path*`},
