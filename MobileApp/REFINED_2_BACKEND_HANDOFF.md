@@ -1,17 +1,3 @@
-# Refined 2 backend integration
+# Refined 2 integration
 
-The Refined 2 Expo app shares the account and advice contracts across Android, iOS, and the PWA. Use [the backend contract](../backend/BACKEND_CONTRACT.md), [OpenAPI](../backend/openapi.json), and [the route inventory](../backend/api-contract.json) to verify new calls.
-
-| Frontend | Backend behavior and configuration |
-| --- | --- |
-| Sign-in and profile | Email sign-in and signup obtain the bearer token. The app checks it with `/auth/me` at startup. Native builds store the token in Expo SecureStore. The PWA uses tab-scoped session storage, which is accessible to app JavaScript. Profiles and signed asset URLs are held in memory. A failed server sign-out leaves the session active and displays the error. Profile edits send the loaded profile version. Profile completion and review status come from the server. |
-| Your farm and Farm Setup | Farmer accounts list, create, edit and delete private plots using `/api/plots`. Explicitly choose to copy any legacy device-only details into a form. A plot contains an approximate center, crop, acres and sowing date. Selecting a plot supplies its coordinates to location-based tools. Satellite monitoring is unavailable. |
-| Documents and pictures | The app renews signed links with `/auth/me` before each document open or saved PDF explanation. Opening a saved file uses the external viewer. Explaining a saved PDF also needs the browser to be allowed to read its signed bytes. If that fails, choose the PDF from the device. Server extraction limits apply to partial explanations. |
-| Home and Market | Tool search uses `/search`, mapped to Refined 2 destinations. Home shows attributed weather and mandi data. Market prices, comparisons, insights, and nearby stores use their existing endpoints. An explicit analysis action submits the displayed price records to `/api/market-analysis`. The analysis uses the submitted records. |
-| Planning, crop care, documents, schemes, news, notifications, and in-app voice | Existing screens use the matching endpoints in the inventory. Offline shell startup stays available. Opening account screens after a fresh launch requires a verified session. |
-| Transport | The account service owns carrier approval and job state. Retrying an unchanged pickup from the form reuses the request key. The board refreshes after competing claims. |
-| Staff review | Settings includes a form for operators with an account UUID from their review process. The app sends the decision and reason to the staff-only endpoint. The server allowlist authorizes the action. |
-| Telephone callback pilot | Set `EXPO_PUBLIC_VOICE_CALLBACK_PILOT=true` only in an operator pilot build. Backend enablement and recipient enrollment are still required. The app asks for consent, reuses the request key after an interrupted response, polls at intervals of at least ten seconds, and stops at a terminal status. An unknown result requires the operator to check before requesting another call. |
-| Service health | The two public `/health` routes are for deployment checks. |
-
-Native development uses the configured account base ending in `/api` and the advice origin with no path suffix. Vercel uses same-origin `/api` and `/advice` paths. Keep the protected staging key in the gateway or trusted test runner. See the [full-stack handoff](../backend/FULL_STACK_HANDOFF.md) for hosted acceptance and [the release record](../backend/RELEASE.md) for dependent provider checks.
+The design source is Wonder, Tarpon, Page 1, the 37 Refined 2 screens. The shared app implements routes and nested states under [App.js](App.js). The [frontend API handoff](../backend/FRONTEND_HANDOFF.md) describes service boundaries and error handling. The [release checklist](../backend/RELEASE.md) records device and provider verification.

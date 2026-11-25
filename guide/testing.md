@@ -107,3 +107,5 @@ Report PASS / FAIL / NOT RUN for every gate; evidence location; residual risk an
 OWASP ASVS: https://owasp.org/www-project-application-security-verification-standard/
 Google layered testing guidance: https://testing.googleblog.com/2015/04/just-say-no-to-more-end-to-end-tests.html
 References are reading pointers, not evidence that this application meets them.
+
+Find runnable commands in [Development](../docs/DEVELOPMENT.md). Record actual release results in the [release checklist](../backend/RELEASE.md).

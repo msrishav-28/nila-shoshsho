@@ -10,3 +10,5 @@ These instructions apply to backend/ and AiBackend/. Frontend implementation rem
 - Reuse existing logic. Keep code readable and changes scoped to complete behaviours. Do not add speculative frameworks or placeholder integrations.
 - Verify through real handlers and database operations. Keep deterministic tests independent of paid providers. Run npm test in backend/ and python -m pytest -q app in AiBackend/ when their related code changes.
 - Keep the API handoff and release status accurate. A passing helper suite does not establish production readiness. Record any incomplete provider, database, deployment, restore, privacy or agricultural-review gate.
+
+For developer setup, see [Development](docs/DEVELOPMENT.md). For release evidence, see [Release checklist](backend/RELEASE.md).

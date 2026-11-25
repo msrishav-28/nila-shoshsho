@@ -1,79 +1,35 @@
-# Backend release execution
+# Release checklist and evidence
 
-The backend is ready for the protected hackathon demo and frontend integration. The account and advice services run on Render with synthetic staging data. The private Vercel gateway is configured and tested. Use [the frontend handoff](FRONTEND_HANDOFF.md) and [the end-to-end handoff](FULL_STACK_HANDOFF.md) for integration. The public-release acceptance checks below remain open.
+## Verification record
 
-## Local verification
+The local baseline on 26 November 2026 passed 37 frontend, 26 account, and 58 advice tests. The frontend lint and type checks passed. The built website opened in a browser after its temporary web server stopped. This check covered offline startup and navigation to the sign-in form.
 
-In backend/, use Node 22, run npm ci, npm run lint, npm run format:check and npm test. Tests use signed fixture identities, disposable PostgreSQL and controlled providers. npm audit --omit=dev checks the production lockfile.
+The advice suite was rerun after the scheme request validation fix. All 58 tests passed, including malformed input and missing-key checks. The configured provider path used a simulated response. The compatible Android Gradle settings and iPhone icon were prepared locally.
 
-In AiBackend/, use a Python 3.11 virtual environment, install requirements-test.txt, run python -m ruff check app run.py readiness.py sarvam_check.py --select F, python -m ruff format --check app run.py readiness.py sarvam_check.py, python -m pytest -q app and python -m pip check. python -m pip_audit -r requirements.txt checks the production dependency set. Constraints record the locally resolved versions.
+After the Android PDF picker upgrade and website offline fix, the app passed 38 tests, lint and type checking. The Android x86_64 debug build completed from a short Windows path. On the Android 17 emulator, a synthetic local account opened Documents, canceled the native picker, then selected a sample PDF. The app displayed the file and offered to upload it. This check ended before upload.
 
-GitHub Actions ran these checks and built both Linux containers successfully for the deployed `main` commit `63fdb7f`. [Backend verification run](https://github.com/msrishav-28/nila-shoshsho/actions/runs/44612601376)
+The [protected Vercel preview](https://nila-shoshsho-2r819zh5k-m-s-rishav-subhins-projects.vercel.app/) displayed Welcome and reopened offline after caching its 23 static files. The configured advice health route responded. The staging account service returned 404 on its protected profile route, so hosted sign-in remains open. The runtime dependency audit reported two high-severity entries in the Markdown rendering chain. Review those before public promotion.
 
-## Verification record — 20 November 2026
+A read-only Neon check confirmed that the app's serving role can read all ten expected tables and cannot create tables in the public schema. Neon Auth returned a signing key. Upstash responded to a connectivity check. The Windows DNS lookup for Neon required a temporary per-process resolver. Vercel's production routes currently point at staging account and advice services. Confirm production upstreams before public promotion.
 
-| Gate | Evidence |
-| --- | --- |
-| Local tests and quality checks | PASS. 26 Node and 58 Python tests, configured lint and formatting, OpenAPI validation, and Python dependency consistency. Both production dependency audits found zero known vulnerabilities at the time of the run. |
-| Signed fixture load | PASS. 220 health requests per service and 12 signed reads per service at up to 12 in flight. Of 220 unsigned advice requests, 48 were rejected with 401 and 172 were throttled with 429. No paid endpoints were used. |
-| Live provider checks | PASS for Neon synthetic sign-in and logout across both APIs, one Sarvam synthesis, and one Gemini synthetic-image schema check. Other enabled provider journeys still need a staging smoke test. |
-| Neon data recovery | PASS for restoring a snapshot to an isolated branch and reading synthetic records with restricted runtime permissions. |
-| Shared Redis | PASS from the local services. A scoped Upstash token handled atomic counters and cache reads and writes. Direct and scripted access outside the application prefix was denied. |
-| Cloudinary upload and delivery | PASS against Cloudinary via the real account handlers with synthetic users. Signed files downloaded, expired links were rejected, another account received no file links, and unsigned originals and image variants were blocked. Synthetic provider assets were removed. |
-| Bolna pilot | PASS for account access and dedicated agent provisioning. The provider reported the agent processed. A call to a consenting enrolled recipient is still pending. |
-| Saved farm plots | PASS through the account routes on the Neon demo database using the restricted runtime role. Concurrent requests with one idempotency key returned the same plot. The synthetic plot was updated and removed. |
-| Clean Linux verification | PASS. GitHub Actions installed dependencies, ran both complete suites and built both Docker images from the deployed commit. |
-| Render staging | PASS. Workspace Blueprint validation and container startup completed. Both APIs returned health status 200, gated calls without the staging key returned 404, and gated calls without identity returned 401. |
-| Hosted identity and plots | PASS. Synthetic signup, sign-in, signed cross-service advice search, concurrent plot replay, update and deletion, and sign-out with revocation in both APIs. |
-| Hosted private media | PASS. The hosting account API uploaded a synthetic PDF and photo. Signed delivery returned both assets, a second account received no links, and unsigned originals and image variants returned 401. Both assets were removed. |
-| Hosted staff and transport | PASS. Staff approval and revocation controlled carrier access. A job retry kept the same record and conflicting content returned 409. Exactly one of two approved carriers claimed the job. The other carrier was denied completion. The winner's completion replay succeeded. The original staff environment setting was restored and verified live. |
-| Hosted Redis enforcement | PASS. From a clean staging window, 60 requests without a bearer token returned 401 and the next five returned 429 with Retry-After. No paid endpoint was called. |
-| Render advice rollback | PASS. Render returned advice to `37ae3a7`, where liveness, the staging gate and signed search passed. Subsequent deploys restored the latest behavior. Both services now use protected staging on `main`. |
-| Hosted dashboard weather | PASS with partial coverage. Render directly observed Open-Meteo HTTP 429 for current and daily requests. With the MET Norway fallback enabled, two authenticated checks returned 200, reported the near-term forecast source and timestamps, and left daily data null. Daily weather and advice that requires it still need verified hosted supply. |
-| Protected Render demo | PASS. `AiBackend/demo_smoke.py` verified both staging gates, account signup, advice access, dashboard weather, crop calendar, plot retry and removal, and revocation on both services. |
-| Vercel PWA gateway | PASS with a protected cloud-built verification deployment. Browser-origin signup, signed calls to both APIs, logout and revocation passed via `/api` and `/advice`. A cross-origin signup was denied. A five MiB multipart request reached Render's PDF validation and was rejected without storage. Preview and Production variables are configured for the private demo. The new frontend can use this project once its repository is linked. |
-| Public release | OPEN. Requires reliable hosted daily weather for the released routes, broader hosted provider journeys, production proxy and capacity verification, alert delivery, deployed-data recovery and agricultural review for the enabled scope. |
+The Render workspace listed the account and advice staging services. Both health endpoints responded with HTTP 200. A request to the account profile endpoint without staging access returned HTTP 404. The account and advice test suites passed again with 26 and 58 tests, respectively. Hosted sign-in and authenticated advice remain unverified. Run the provider smoke tests only in an approved environment.
 
-## Configure a working demo
+Earlier records report synthetic Neon account and restore checks dated 20 November 2026. Use Git history for the original evidence and environment-specific details. Rehearse hosted restoration before release.
 
-From the repository root, run `python AiBackend/demo_smoke.py` using the advice virtual environment and the existing ignored `.env.local`. The command creates a synthetic account in protected staging, removes its test plot, and revokes its session. Start it before the demo so the free Render services have time to wake up.
+## Acceptance checklist
 
-1. The project's Neon database is initialized and .env.local contains the serving role and Auth configuration. Use the owner credential DATABASE_MIGRATION_URL only for an explicit schema setup. On a new environment, apply the schema before starting services and grant the runtime role the required table and sequence privileges.
-2. Supply GOV_ID_KEY as a securely generated encryption key and configure Cloudinary. Apply the schema before hosting so it accepts authenticated image cleanup reservations. The live demo database already has that constraint. Add actual staff account UUIDs to STAFF_USER_IDS. Use the review endpoint to approve synthetic carriers. Keep all credentials out of source, screenshots and logs.
-3. Set ACCOUNT_URL in advice to the reachable account origin. Configure the enabled provider keys from the root .env.example. Set GEMINI_MODEL to a supported model evaluated for this demo. A missing configuration returns an explicit unavailable response.
-4. For exactly one Sarvam request, enter SARVAM_API_KEY locally, then run python sarvam_check.py from AiBackend using its virtual environment. The command has zero automatic retries. It writes a successful Hindi WAV to a temporary path for playback.
-5. Run the real profile, document, transport and advice journeys. Confirm the emitted source dates and the expiry of private viewing links. A provider fixture passing in tests does not establish live integration success.
+1. Identify the exact build, environment, test account scope and person responsible.
+2. In the website and each device build, sign in, save a plot, reopen it and verify a second synthetic account cannot read it.
+3. Check allowed and denied staff decisions, private documents, and competing carrier acceptances.
+4. Exercise provider failures, offline restart and stale data notices. Verify real providers with a separately agreed budget and account.
+5. Check logs for reporting failures without private details. Restore database and private files into an isolated environment.
+6. Record checks, results, outstanding risks, owner and rollback instructions. Confirm agricultural review for advice used to make farming decisions.
 
-## Operating controls
+Use the [deployment guide](../docs/DEPLOYMENT.md) for build and hosting settings.
 
-Production account uses NODE_ENV=production. Advice uses FLASK_ENV=production and FLASK_DEBUG=0. Configure HTTPS, CORS_ORIGINS and verified proxy addresses for the actual host. Account trusts only TRUSTED_PROXY_CIDRS. Advice pre-auth limits currently apply to the immediate peer, so a shared proxy must have its ingress limiting and forwarding design tested before public traffic.
+## Provider work still open
 
-Both production services require UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN. Counter failures reject guarded requests. Cache failure may fall back to a normal bounded provider request. Weather caches expire after five or fifteen minutes, price caches after one hour and news after four hours. Source dates remain separate from cache lifetime.
-
-The Open-Meteo free endpoint is for qualifying noncommercial usage. Keep the attribution visible and verify usage and capacity before expanding the deployment. Official IMD warnings remain unavailable until access, district mapping and alert samples have passed verification. [Open-Meteo terms](https://open-meteo.com/en/terms) · [IMD API reference](https://api.imd.gov.in/public/api_reference.html)
-
-Set PAID_REQUESTS_PER_DAY to the approved request allowance. It covers all users per UTC day and is consumed on admission, including failed attempts. Model fallback can issue several provider requests. Set monetary ceilings in provider accounts. Use exact comma-separated DISABLED_ADVICE_PATHS to pause paid features, and restart workers after changing their environment.
-
-Schedule node scripts/cleanup-uploads.mjs --confirm from the account container on a controlled maintenance schedule. It handles up to twenty unlinked uploads older than an hour and removes up to two thousand expired revocation records and two thousand expired session records per run. Failed upload cleanup leaves pending records for retry.
-
-Run npm run ready and python readiness.py privately on their respective hosts to check core dependencies. Keep /health for process liveness. Configure monitoring from the structured request and provider-failure events. Alert delivery and on-call ownership must be exercised on the selected host.
-
-The advice container uses two workers with two threads each. Size memory and concurrency from load measurements, including large valid photos and PDFs. Give account shutdown at least forty seconds to finish in-flight work. Persistent upload reservations allow recovery after an interrupted request.
-
-## Hosted staging
-
-The root render.yaml describes two Singapore Docker web services on a free staging plan with automatic deploys off. Provision against an isolated Neon environment. Set the same random STAGING_ACCESS_KEY of at least 32 bytes on both services, and set ACCOUNT_URL on advice to the account service's HTTPS origin. Send the key as X-Staging-Key from a trusted test runner for every request other than /health. Keep ordinary user authentication enabled. A configured key also separates Redis keys into the `nila:staging:` namespace. Verify that requests without the key receive 404 and use only synthetic users. [Render Blueprint reference](https://render.com/docs/blueprint-spec)
-
-The staging deployment uses a separate Neon Auth and PostgreSQL branch, its own restricted application role, and a separate encryption key. Keep the staging key in local or server-side tooling. [Account liveness](https://nila-shoshsho-account-staging.onrender.com/health) · [Advice liveness](https://nila-shoshsho-advice-staging.onrender.com/health)
-
-For a Vercel-hosted web/PWA, use the Preview settings and routing instructions in [FULL_STACK_HANDOFF.md](FULL_STACK_HANDOFF.md). When using either API directly from the browser, allow the actual Vercel origin. The existing file sizes can exceed Vercel Functions' 4.5 MB payload limit. Verify ingress limits for the chosen upload path. [Vercel Functions limits](https://vercel.com/docs/functions/limitations#request-body-size)
-
-## Public-release acceptance
-
-Use synthetic accounts and an isolated hosted environment to prove actual identity sign-in/sign-out and token expiry, private storage delivery and expiry, approved/revoked carrier permissions, simultaneous job claims, retry safety, owner isolation, provider outage behavior and every enabled advice route.
-
-Run authenticated load against controlled providers before directing traffic to paid/government APIs. npm run loadtest is restricted to local fixtures. Start with fresh counters. LOAD_TEST_TOKEN enables account notifications and advice search. High-volume runs verify the transition from anonymous 401 responses to rate-limited 429 responses. Separately test expensive routes with valid uploads and controlled latency.
-
-Restore a database backup into a separate environment and verify private records and permissions through the application. A Neon snapshot rehearsal recovered four synthetic profiles and four notifications into a separate branch and verified the restricted role. Rehearse recovery of the hosted APIs and private files before approving public traffic.
-
-Record the release build, target states/crops/languages, acceptable latency/error rate, spending ceiling, recovery time and operational owner. Exercise an alert, feature pause, rollback and independent restore. Review consequential agricultural outputs for the stated coverage. Handoff the two HTTPS origins to the frontend team and verify a physical-phone journey before inviting public users.
+- Verify myScheme and government market provider access when the corresponding keys are available.
+- DigiLocker and AgriStack require approved partner contracts, consent, and privacy and retention decisions.
+- Official severe-weather notices need approved access and tested district mapping.
+- Future forecasts require licensed historical data and evaluation against baselines. Satellite advice requires plot boundaries, dated observations, cloud handling and human review.

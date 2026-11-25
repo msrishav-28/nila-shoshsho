@@ -117,3 +117,5 @@ Stop and ask when scope is ambiguous, records might be lost, secrets appear, aut
 - Remaining risk, owner and recovery procedure recorded.
 
 Closeout headings: Done; What I inspected; What changed; What did not change; How to check; What was not verified; Risks; Approval references. Use plain language, with technical evidence in an optional appendix.
+
+Use the [current architecture](../ARCHITECTURE.md) and [API contract](../backend/BACKEND_CONTRACT.md) as the entry points for evidence.
