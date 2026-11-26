@@ -1,0 +1,4 @@
+# Local datasets and search index data
+/app/data/
+/app/chroma_db/
+/app/chromadb/

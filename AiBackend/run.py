@@ -1,0 +1,10 @@
+from app import create_app
+
+app = create_app()
+
+if __name__ == "__main__":
+    import os
+
+    debug = os.getenv("FLASK_DEBUG", "0") == "1"
+    port = int(os.getenv("ADVICE_PORT") or os.getenv("PORT", "5002"))
+    app.run(host="0.0.0.0", port=port, debug=debug)
