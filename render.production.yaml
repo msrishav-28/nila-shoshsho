@@ -1,6 +1,7 @@
 services:
   - type: web
     name: nila-shoshsho-account-production
+    branch: main
     runtime: docker
     plan: free
     region: singapore
@@ -38,6 +39,7 @@ services:
 
   - type: web
     name: nila-shoshsho-advice-production
+    branch: main
     runtime: docker
     plan: free
     region: singapore

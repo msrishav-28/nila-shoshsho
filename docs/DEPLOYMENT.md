@@ -4,6 +4,8 @@
 
 The [public beta](https://nila-shoshsho-pwa.vercel.app/) deploys from GitHub `main`. Record the previous live deployment before publishing a new build. If the sign-in or private-route checks fail after a change, restore the last verified deployment from the Vercel dashboard.
 
+Use `main` for the Render Blueprint source and every service branch. Both checked-in Render configurations explicitly select `main`. Configure production branch tracking as `main` in Vercel’s Production environment settings.
+
 Set the project root to `MobileApp` and use Node 24. [vercel.mjs](../MobileApp/vercel.mjs) sets the web build command, output directory and the two public Render addresses. If you replace a Render service, update its address there and verify the route on a protected Vercel preview.
 
 The canonical Vercel project is `nila-shoshsho-pwa`. Its canonical backends are `nila-shoshsho-account-production` and `nila-shoshsho-advice-production` on Render. Keep the database, identity, voice and model credentials in Render's private settings. Use Vercel Standard Protection to keep preview URLs private while serving the production domain to customers.

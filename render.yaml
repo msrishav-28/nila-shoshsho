@@ -1,6 +1,7 @@
 services:
   - type: web
     name: nila-account
+    branch: main
     runtime: docker
     plan: free
     region: singapore
@@ -42,6 +43,7 @@ services:
 
   - type: web
     name: nila-advice
+    branch: main
     runtime: docker
     plan: free
     region: singapore
