@@ -1,0 +1,738 @@
+{
+    "settings": "Settings",
+    "profile_complete": "Your profile is {{progress}}% complete. Let’s finish planting the details for a better experience.",
+    "update_profile": "Update Profile",
+    "document": "Documents",
+    "change_language": "Change Language",
+    "change_password": "Change Password",
+    "logout": "Logout",
+  
+    "langPage": {
+      "title": "Change Language",
+      "desc": "Choose your app language. Your spoken languages are shown below.",
+      "select": "Select Language",
+      "current": "Current: {{lang}}",
+      "btn": "Change Language",
+      "no_select_title": "No Language selected",
+      "no_select_msg": "Please select a language",
+      "success_title": "Language Changed",
+      "success_msg": "App Language set to {{lang}}",
+      "success" : "Success",
+      "err_title": "Error",
+      "err_lang" : "Error loading language",
+      "err_msg": "Could not change language",
+      "spoken_title": "Spoken Languages",
+      "no_spoken": "No spoken languages added in your profile",
+      "fail" : "Failed to change language"
+    },
+
+    "lang" :{
+        "english" : "English",
+        "hindi" : "Hindi",
+        "marathi" : "Marathi",
+        "tamil" : "Tamil",
+        "bengali" : "Bengali",
+        "kannada" : "Kannada",
+        "telugu" : "Telugu",
+        "malayalam" : "Malayalam"
+    },
+
+        "UpPage": {
+          "title": "Update Profile",
+          "desc": "Update your profile details to keep your information current.",
+          "username_placeholder": "Username*",
+          "bio_placeholder": "Bio",
+          "languages_spoken_label": "Languages Spoken",
+          "language_picker_placeholder": "Select Language",
+          "no_languages_added": "No languages added",
+          "address_placeholder": "Address",
+          "city_placeholder": "City",
+          "state_placeholder": "State",
+          "country_placeholder": "Country",
+          "pincode_placeholder": "Pincode",
+          "facebook_placeholder": "Facebook URL",
+          "instagram_placeholder": "Instagram URL",
+          "gov_id_name_placeholder": "Government ID Name (e.g., Aadhaar)",
+          "gov_id_value_placeholder": "Government ID Value",
+          "change_picture_text": "Change Picture",
+          "edit_profile_pic_error": "Image Picker Error",
+          "image_picker_error_msg": "Something went wrong while selecting the image.",
+          "profile_pic_updated": "Profile picture updated!",
+          "update_failed": "Update Failed",
+          "update_profile_button": "Update Profile",
+          "loading_text": "Updating...",
+          "profile_updated_success_msg": "Profile updated successfully",
+          "profile_updated_error_msg": "An error occurred during profile update",
+          "language_added_msg": "Language added to your profile.",
+          "language_remove_msg": "Remove Language",
+          "add" : "Add"
+        },
+    "HomePage": {
+    "greetings": {
+      "morning": "Good Morning",
+      "afternoon": "Good Afternoon",
+      "evening": "Good Evening",
+      "night" : "Good Night"
+    },
+    "searchBar": {
+      "placeholder": "Check out you Harvest Stock 🌾",
+      "caption": "Jumps to a tool in this app. This is not a web search."
+    },
+    "weather": {
+      "fetching": "Fetching weather...",
+      "location": "Location",
+      "windSpeed": "km/h",
+      "openMeteo": "Open-Meteo",
+      "imdChip": "IMD",
+      "forecast": {
+        "title": "Weather Forecast"
+      },
+      "codes": {
+        "0": "Clear",
+        "1": "Mainly Clear",
+        "2": "Partly Cloudy",
+        "3": "Overcast",
+        "45": "Fog",
+        "48": "Depositing Rime Fog",
+        "51": "Drizzle: Light",
+        "53": "Drizzle: Moderate",
+        "55": "Drizzle: Dense",
+        "56": "Freezing Drizzle: Light",
+        "57": "Freezing Drizzle: Dense",
+        "61": "Rain: Slight",
+        "63": "Rain: Moderate",
+        "65": "Rain: Heavy",
+        "66": "Freezing Rain: Light",
+        "67": "Freezing Rain: Heavy",
+        "71": "Snow fall: Slight",
+        "73": "Snow fall: Moderate",
+        "75": "Snow fall: Heavy",
+        "77": "Snow grains",
+        "80": "Rain showers: Slight",
+        "81": "Rain showers: Moderate",
+        "82": "Rain showers: Violent",
+        "85": "Snow showers: Slight",
+        "86": "Snow showers: Heavy",
+        "95": "Thunderstorm: Slight/Moderate",
+        "96": "Thunderstorm: Hail",
+        "99": "Thunderstorm: Heavy Hail"
+      }
+    },
+    "sections": {
+      "farmServices": "Farm Services",
+      "govSchemes": "Government Schemes",
+      "learnMore": "Learn More"
+    },
+    "features": {
+      "cropCare": "Crop Care",
+      "postHarvest": "Post Harvest",
+      "market": "Market",
+      "schemes": "Schemes",
+      "fertilize": "Fertilize",
+      "news": "News",
+      "sprinkler" : "Manage Water",
+      "cropSuggestion": "Crop calendar"
+    },
+    "suggestion" :{
+      "title" : "Want suggestions on which crops to grow?",
+      "btn" : "Suggest"
+    },
+    "chatbot": {
+      "needHelp": "Ask Nila about weather, schemes, crops, or prices.",
+      "chatButton": "Ask Nila"
+    },
+    "branding": {
+      "nilaName": "Nila",
+      "shoshshoName": "Shoshsho",
+      "tagline": "Crafted with ❤️ in Bengaluru, India"
+    },
+    "loading": {
+      "userInfo": "Loading user information..."
+    },
+    "errors": {
+      "weatherPermission": "Permission to access location was denied",
+      "weatherFetch": "Could not fetch weather data.",
+      "locationError": "Location error: ",
+      "weatherLocationFetch": "Could not fetch weather/location.",
+      "addVillage": "Add your village in Update Profile.",
+      "openProfile": "Open Update Profile"
+    },
+    "forecast": {
+      "rain": "Rain",
+      "sky": "Sky"
+    }
+  },
+    "chatbot": {
+      "headerTitle": "Ask Nila",
+      "initialMessage": "Ask about weather, schemes, crops, or mandi prices.",
+      "loadingMessage": "Hold on, we're taking you there...",
+      "prompts": {
+        "schemes": "Which government schemes can help a smallholder farmer?",
+        "cropCare": "How do I check a diseased leaf?",
+        "market": "How do I read mandi prices?"
+      },
+      "options": {
+        "governmentSchemes": "Check Government Schemes",
+        "cropCare": "Crop Care & Disease Detection",
+        "accessMarket": "Access Market",
+        "settings": "Go to Settings",
+        "viewProfile": "View My Profile",
+        "updateProfile": "Update My Profile"
+      }
+    },
+    "profile": {
+    "title": "Profile",
+    "description": "Your profile details are displayed below.",
+    "fields": {
+      "username": "Username",
+      "role": "Role",
+      "gender": "Gender",
+      "bio": "Bio",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "country": "Country",
+      "pincode": "Pincode",
+      "facebookUrl": "Facebook URL",
+      "instagramUrl": "Instagram URL",
+      "governmentIdName": "Government ID Name",
+      "governmentIdValue": "Government ID Value",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "verificationStatus": "Verification Status",
+      "languagesSpoken": "Languages Spoken",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "status": {
+      "verified": "Verified",
+      "notVerified": "Not Verified",
+      "notAvailable": "N/A"
+    }
+  }  ,
+  "postHarvest": {
+    "title": "Post Harvest",
+    "description": "Enter crop details to get post-harvest instructions for your region.",
+    "disclaimer": "Weather plus advice, not a sensor.",
+    "fields": {
+      "crop": "Crop (e.g., Wheat)",
+      "harvestDate": "Harvest Date (YYYY-MM-DD)",
+      "region": "Region (e.g., Maharashtra)",
+      "dob" : "Date of Birth (YYYY-MM-DD)"
+    },
+    "buttons": {
+      "getInstructions": "Get Instructions",
+      "loading": "Loading..."
+    },
+    "results": {
+      "success": "Success",
+      "successMessage": "Instructions retrieved successfully",
+      "error": "Error",
+      "noInstructions": "No instructions received",
+      "errorOccurred": "An error occurred"
+    },
+    "sections": {
+      "postHarvestPlan": "Post-Harvest Plan",
+      "weatherForecast": "Weather Forecast"
+    },
+    "weather": {
+      "temperature": "°C",
+      "humidity": "%",
+      "precipitation": "mm",
+      "windSpeed": "km/h"
+    }
+  },
+  "schemes": {
+    "header": "Schemes",
+    "botGreeting": "Hello! Ask me about government schemes for farmers.",
+    "inputPlaceholder": "Ask about a scheme...",
+    "send": "Send",
+    "openMyscheme": "Open myScheme.gov.in",
+    "sourceLabel": "Source",
+    "noSchemes": "No matching schemes. You can search on myScheme.",
+    "error": {
+      "network": "Network error. Please try again.",
+      "noData": "Sorry, I could not find any information."
+    }
+  },
+  "cropCare": {
+    "header": "Crop Care",
+    "uploadImage": "Upload Image",
+    "changeImage": "Change Image",
+    "takePhoto": "Take Photo",
+    "analyzing": "Analyzing plant image...",
+    "unknownPlant": "Unknown Plant",
+    "noDisease": "No Disease Detected",
+    "treatment": {
+      "required": "Treatment Required",
+      "type": "Disease Type: {{type}}",
+      "procedure": "Treatment Procedure"
+    },
+    "health": {
+      "plantHealth": "Plant Health:",
+      "leafHealth": "Leaf Health:",
+      "statuses": {
+        "healthy": "Healthy",
+        "mildlyAffected": "Mildly Affected",
+        "severelyAffected": "Severely Affected",
+        "dead": "Dead"
+      }
+    },
+    "symptoms": "Symptoms",
+    "errors": {
+      "imagePicker": "Image picker error: {{message}}",
+      "failedImagePicker": "Failed to open image picker",
+      "camera": "Camera error: {{message}}",
+      "failedCamera": "Failed to open camera",
+      "invalidResponse": "Invalid response from server",
+      "serverError": "Server error: {{status}}. {{message}}",
+      "noResponse": "No response from server. Please check your connection.",
+      "requestError": "Request error: {{message}}"
+    }
+  },
+  "news": {
+    "header": "Agriculture News",
+    "search": "Search news...",
+    "category": "Category",
+    "selectCategory": "Select category",
+    "state": "State",
+    "selectState": "Select state",
+    "searchState": "Search state",
+    "retry": "Try Again",
+    "noResults": "No news found",
+    "errors": {
+      "fetchError": "Failed to load news",
+      "noResults": "No news matching your criteria"
+    },
+    "categories": {
+      "all": "All Categories",
+      "crops": "Crops",
+      "weather": "Weather",
+      "market": "Market",
+      "technology": "Technology",
+      "government": "Government"
+    },
+    "states": {
+      "all": "All States",
+      "andhraPradesh": "Andhra Pradesh",
+      "punjab": "Punjab",
+      "haryana": "Haryana",
+      "maharashtra": "Maharashtra",
+      "karnataka": "Karnataka",
+      "madhyaPradesh": "Madhya Pradesh",
+      "gujarat": "Gujarat",
+      "rajasthan": "Rajasthan",
+      "uttarPradesh": "Uttar Pradesh",
+      "tamilNadu": "Tamil Nadu",
+      "westBengal": "West Bengal",
+      "bihar": "Bihar",
+      "telangana": "Telangana"
+    }
+  },
+  "navigation": {
+    "home": "Home",
+    "scheme": "Schemes",
+    "cropCare": "Crop Care",
+    "market": "Market",
+    "news" : "News"
+  },
+  "offlineBanner": {
+    "text": "You're offline"
+  },
+  "notifications": {
+    "header": "Notifications",
+    "unavailableTitle": "Alerts are not available yet",
+    "unavailableBody": "This screen is not connected yet. Weather, schemes, and market tools still work from Home.",
+    "emptyTitle": "No alerts yet",
+    "emptyBody": "Weather warnings will land here once your village is on the profile."
+  },
+  "fertilizer": {
+    "header": "Fertilizer Recommendation",
+    "description": "Enter crop and soil details to get tailored fertilizer recommendations.",
+    "soilSource": "Soil source",
+    "soilCardHelp": "Optional. Copy numbers from your Soil Health Card.",
+    "soilCardLink": "Open soilhealth.dac.gov.in",
+    "inputs": {
+      "cropName": "Crop Name (e.g., Jwari)",
+      "soilPh": "Soil pH (e.g., 6.5)",
+      "soilNitrogen": "Soil Nitrogen (%)",
+      "carbon": "Carbon (%)",
+      "carbonStock": "Carbon Stock (Mg/ha)",
+      "soilClay": "Soil Clay (%)"
+    },
+    "button": {
+      "getRecommendations": "Get Recommendations",
+      "loading": "Loading..."
+    },
+    "results": {
+      "fertilizerRecommendations": "Fertilizer Recommendations",
+      "weatherConditions": "Weather Conditions",
+      "currentWeather": "Current Weather",
+      "summaryTable": "Summary Table"
+    },
+    "errors": {
+      "fillAllFields": "Please fill all fields",
+      "invalidInput": "Invalid Input",
+      "mustBeValidNumber": "must be a valid positive number",
+      "noRecommendations": "No fertilizer recommendations available",
+      "anErrorOccurred": "An error occurred"
+    },
+    "success": {
+      "recommendationsGenerated": "Fertilizer recommendations generated successfully"
+    },
+    "sections": {
+      "soilAnalysis": "Soil Analysis Interpretation",
+      "recommendedFertilizer": "Recommended Fertilizer Types & Ratios",
+      "applicationRates": "Application Rates & Units",
+      "timingMethod": "Timing & Method",
+      "localContext": "Local Context",
+      "environmentalSafety": "Environmental & Safety Precautions",
+      "additionalAmendments": "Additional Soil Amendments",
+      "expectedOutcomes": "Expected Outcomes"
+    }
+  },
+  "cropSuggestion": {
+    "header": "Crop Suggestion",
+    "description": "Enter your location and land size to see official season windows for now. Land size is shown as size only.",
+    "calendarDescription": "Enter a crop name to see the official sowing and harvest months, plus a 7-day weather overlay.",
+    "inputs": {
+      "city": "City",
+      "state": "State",
+      "landAcres": "Land Size (Acres)",
+      "cropName": "Crop Name"
+    },
+    "button": {
+      "getRecommendations": "Get Crop Recommendations",
+      "generateCalendar": "Generate Crop Calendar",
+      "loading": "Loading..."
+    },
+    "errors": {
+      "invalidInput": "Invalid Input",
+      "fillAllFields": "Please fill all fields.",
+      "landAcresInvalid": "Land acres must be a valid positive number.",
+      "noRecommendations": "No crop recommendations available.",
+      "noCalendarData": "No calendar data available for the selected crop.",
+      "enterCropName": "Please enter a crop name.",
+      "anErrorOccurred": "An error occurred. Please try again."
+    },
+    "success": {
+      "recommendationsGenerated": "Fertilizer recommendations generated successfully",
+      "calendarGenerated": "Crop calendar generated successfully"
+    },
+    "results": {
+      "cropRecommendations": "Crop Recommendations",
+      "seasonWindows": "Season windows",
+      "nationalTypical": "National typical, local KVK may differ",
+      "landSize": "Land size",
+      "acres": "acres",
+      "sowMonths": "Sow",
+      "harvestMonths": "Harvest",
+      "reason": "Reason for Recommendations",
+      "recommendations": "Recommended Crops",
+      "regionSeason": "Region and Season",
+      "region": "Region",
+      "season": "Season",
+      "weatherConditions": "Weather Conditions",
+      "weatherPlaceholder": "Weather Information",
+      "noWeatherData": "Weather data not available.",
+      "calendarFor": "Crop Calendar for {{crop}}",
+      "duration": "Duration",
+      "weeks": "Weeks",
+      "weatherSummary": "Weather Summary",
+      "week": "Week",
+      "table": {
+        "crop": "Crop",
+        "totalYield": "Total Yield",
+        "yieldPerAcre": "Yield per Acre",
+        "risk": "Risk",
+        "action": "Action"
+      }
+    },
+    "tabs": {
+      "suggest": "Suggest Crops",
+      "calendar": "Crop Calendar"
+    }
+  },
+  "documents": {
+    "header": "Documents",
+    "tabs": {
+      "myDocs": "MyDocs",
+      "translate": "Translate"
+    },
+    "upload": {
+      "description": "Upload your documents here.",
+      "noFileSelected": "No file selected",
+      "uploadButton": "Upload",
+      "loading": "Loading.."
+    },
+    "previousDocs": {
+      "title": "'s Previous Documents"
+    },
+    "translate": {
+      "title": "Translate Document",
+      "description": "Choose a document to translate.",
+      "button": "Translate",
+      "translating": "Translating..",
+      "noFileSelected": "No file selected",
+      "translatedDocument": "Translated Document"
+    },
+    "alerts": {
+      "invalidFile": {
+        "title": "Invalid File",
+        "message": "Only PDF files are allowed."
+      },
+      "docNotSelected": {
+        "title": "Document not selected",
+        "message": "Please select a document first"
+      },
+      "uploadSuccess": {
+        "title": "Document uploaded",
+        "message": "Document has been uploaded successfully"
+      },
+      "uploadFailed": {
+        "title": "Document uploading failed",
+        "message": "Failed to upload document"
+      },
+      "viewFailed": {
+        "title": "View Failed",
+        "message": "Unable to open document"
+      },
+      "fileFormatFailed": {
+        "title": "File format failed",
+        "message": "Only PDF document is allowed"
+      },
+      "translateNotSelected": {
+        "title": "Document not selected",
+        "message": "Please select a document to translate"
+      },
+      "translateSuccess": {
+        "title": "Translation Successful",
+        "message": "Document has been translated"
+      },
+      "translateFailed": {
+        "title": "Translation Failed",
+        "message": "Unable to translate document"
+      }
+    }
+  },
+  "voice" : "Tap here to listen to the information.",
+  "waterManagement": {
+    "title": "Water Management",
+    "description": "Plan your irrigation schedule based on crop type, field size, and irrigation method for efficient water use.",
+    "disclaimer": "Weather plus advice, not a sensor.",
+    "fields": {
+      "crop": "Crop Name",
+      "fieldSize": "Field Size (Acres)",
+      "irrigationMethod": "Select Irrigation Method"
+    },
+    "buttons": {
+      "loading": "Loading...",
+      "getPlan": "Get Irrigation Plan"
+    },
+    "results": {
+      "error": "Error",
+      "noInstructions": "Please fill all fields to get the irrigation plan.",
+      "success": "Success",
+      "successMessage": "Irrigation plan generated successfully.",
+      "errorOccurred": "An error occurred while fetching the plan.",
+      "totalWater": "Total Water"
+    },
+    "sections": {
+      "irrigationSchedule": "Irrigation Schedule",
+      "waterSavingTips": "Water-Saving Tips"
+    }
+  },
+  "marketPrices": {
+            "title": "Market Prices",
+            "description": "View the latest market prices for agricultural commodities across India.",
+            "filters": {
+                "allStates": "All States",
+                "allDistricts": "All Districts",
+                "allCommodities": "All Commodities",
+                "state": "State",
+                "district": "District",
+                "commodity": "Commodity",
+                "selectState": "Select state",
+                "selectDistrict": "Select district",
+                "selectCommodity": "Select commodity",
+                "search": "Search..."
+            },
+            "fields": {
+                "commodity": "Commodity",
+                "lastUpdated": "Last Updated",
+                "currentPrice": "Current Price",
+                "minPrice": "Min Price",
+                "modalPrice": "Modal Price",
+                "maxPrice": "Max Price",
+                "priceTrend": "Price Trend",
+                "aiAnalysis": "AI Market Analysis",
+                "liveComment": "Comment on these live rows only",
+                "tips": "Tips"
+            },
+            "status": {
+                "notAvailable": "N/A",
+                "noData": "No data available",
+                "updatedOn": "Updated on",
+                "commodity": "Commodity",
+                "loading": "Loading market data...",
+                "aiLoading": "Generating AI analysis...",
+                "noChartData": "No price trend data available"
+            },
+            "errors": {
+                "title": "Error",
+                "message": "Failed to fetch market data. Please try again later.",
+                "fetchFailed": "Failed to fetch data",
+                "noData": "No data available for the selected filters.",
+                "tryChangingFilters": "Try changing your filter options.",
+                "aiNotAvailable": "AI analysis not available at this moment.",
+                "aiFailed": "Unable to generate AI analysis"
+            },
+            "actions": {
+                "retry": "Retry",
+                "previous": "Prev",
+                "next": "Next"
+            },
+            "pagination": {
+                "page": "Page",
+                "of": "of"
+            },
+            "tips": {
+                "comparePrices": "Compare prices across different markets for better deals",
+                "transportCosts": "Check transportation costs before deciding where to sell",
+                "storageOptions": "Consider storage options if current prices are unfavorable",
+                "weatherForecasts": "Stay updated with weather forecasts as they affect prices"
+            }
+        },
+  "logistics": {
+    "header": "Jobs",
+    "create": "Post a pickup",
+    "partnerCopy": "Open jobs and the ones you accepted.",
+    "crop": "Crop",
+    "quantity": "Quantity (kg)",
+    "city": "Pickup city",
+    "state": "Pickup state",
+    "post": "Post job",
+    "cancel": "Cancel",
+    "accept": "Accept",
+    "done": "Mark done",
+    "emptyTitle": "No jobs yet",
+    "emptyFarmer": "Post a pickup when you have crop ready to move.",
+    "emptyPartner": "No open pickups right now. Pull to refresh later.",
+    "invalid": "Enter a crop and a positive weight in kg.",
+    "error": "Could not update jobs.",
+    "forbidden": "This action is for logistics partners."
+  },
+  "welcome": {
+    "name": "Nila Shoshsho",
+    "desc": "Join a growing community of farmers, buyers, and agri-experts working together to improve productivity, connect directly, and access real-time insights for better crop management and trade.",
+    "createAccount": "Create account",
+    "haveAccount": "I already have an account",
+    "madeInIndia": "Made in India with love"
+  },
+  "login": {
+    "title": "Login",
+    "desc": "Log in with your email and password.",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Log in",
+    "noAccount": "Don't have an account?",
+    "goSignup": "Sign up",
+    "emailRequiredTitle": "Email needed",
+    "emailRequiredMsg": "Please enter the email you used to sign up.",
+    "passwordTitle": "Password too short",
+    "passwordMsg": "Password cannot be less than 8 characters",
+    "successMsg": "You are signed in",
+    "failedTitle": "Login failed",
+    "failedMsg": "Could not sign in. Please try again."
+  },
+  "signup": {
+    "title": "Sign up",
+    "desc": "Create an account to manage crops and access trade insights.",
+    "usernamePlaceholder": "Username",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "rolePlaceholder": "Select role",
+    "genderPlaceholder": "Select gender",
+    "roleFarmer": "Farmer",
+    "roleLogistics": "Logistics",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
+    "submit": "Sign up",
+    "hasAccount": "Already have an account?",
+    "goLogin": "Log in",
+    "requiredTitle": "Missing details",
+    "requiredMsg": "Please fill username, email, password, role, and gender.",
+    "passwordTitle": "Password too short",
+    "passwordMsg": "Password cannot be less than 8 characters",
+    "successMsg": "Your account is ready",
+    "failedTitle": "Sign up failed",
+    "failedMsg": "Could not create the account. Please try again."
+  },
+  "password": {
+    "title": "Change password",
+    "copy": "Enter your current password, then a new one.",
+    "current": "Current password",
+    "next": "New password",
+    "confirm": "Confirm new password",
+    "submit": "Update password",
+    "needBoth": "Enter current and new password",
+    "tooShort": "New password must be 8 characters",
+    "mismatch": "Passwords do not match",
+    "success": "Password updated",
+    "failed": "Could not update password"
+  },
+  "searchMic": {
+    "listening": "Listening… tap to stop",
+    "unavailable": "Voice listen is unavailable",
+    "noSpeech": "Could not hear speech"
+  },
+  "marketTabs": {
+    "prices": "Current prices",
+    "stores": "Nearby stores",
+    "compare": "Compare",
+    "insights": "Insight"
+  },
+  "marketCompare": {
+    "title": "Compare mandi prices",
+    "crop": "Crop",
+    "stateA": "First state",
+    "stateB": "Second state",
+    "submit": "Compare",
+    "needFields": "Enter a crop and two states.",
+    "unavailable": "Compare is unavailable",
+    "emptyPair": "No rows for that pair.",
+    "emptyTitle": "Two states, one crop",
+    "emptyBody": "Live market rows only. Empty means no arrivals, not a guessed price."
+  },
+  "marketInsights": {
+    "title": "Mandi insight",
+    "crop": "Crop",
+    "state": "State",
+    "submit": "Load insight",
+    "needFields": "Enter a crop and a state.",
+    "unavailable": "Insights are unavailable",
+    "emptyTitle": "Live rows only",
+    "emptyBody": "Insight is written from market arrivals for that crop and state. If none exist, the server says so.",
+    "liveComment": "Comment on these live rows only"
+  },
+  "header": {
+    "back": "Go back"
+  },
+  "settingsToasts": {
+    "profileFetchTitle": "Could not load profile completion",
+    "logoutTitle": "Logged out",
+    "logoutErrorTitle": "Could not log out"
+  },
+  "cropCareSpeak": {
+    "disease": "Disease",
+    "plant": "Plant",
+    "leafHealth": "Leaf health",
+    "treatment": "Treatment"
+  }
+}
+  

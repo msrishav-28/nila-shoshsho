@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Nila Shoshsho",
+    "slug": "nila-shoshsho",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./public/icon-512.png",
+    "userInterfaceStyle": "light",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./public/icon-192.png",
+      "themeColor": "#1f6b3a",
+      "description": "Crop care, market information and practical help for farmers across India."
+    }
+  }
+}
